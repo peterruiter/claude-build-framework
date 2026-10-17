@@ -1,7 +1,7 @@
 {
   "id": "capgemini-zodiak",
   "name": "Capgemini Zodiak",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Capgemini's 2025 identity on the Zodiak token layer: one blue, Ubuntu, the spade. For Capgemini work only.",
   "source": {
     "claudeArtifact": "https://claude.ai/artifact/VhG4aP8Nz3SSSa7YbgUP5x",
@@ -30,7 +30,9 @@
       "requires": "React 18 as the global React (and ReactDOM to render)",
       "docs": "components/<Name>/README.md and preview.html"
     },
-    "reference": ["assets/Reference/capgemini-colour-palette.pdf"]
+    "reference": [
+      "assets/Reference/capgemini-colour-palette.pdf"
+    ]
   },
   "logos": {
     "files": {
@@ -47,7 +49,10 @@
       "clearSpace": "The height of the spade in the lockup, on all four sides.",
       "minWidthLockupPx": 120,
       "minWidthMarkPx": 32,
-      "aspect": { "lockup": "358 x 117", "mark": "150 x 139" },
+      "aspect": {
+        "lockup": "358 x 117",
+        "mark": "150 x 139"
+      },
       "recolour": false,
       "markAlone": "The spade alone only where the full name already appears: favicons, app icons, avatars.",
       "grounds": "Blue lockup on page-background, surface-always-white and light photography; white lockup on the heavy surfaces and dark photography. Never the blue lockup on a blue ground."
@@ -85,71 +90,324 @@
   },
   "contrast": {
     "pairs": [
-      { "fg": "text-primary", "bg": "page-background", "min": 4.5 },
-      { "fg": "text-primary", "bg": "surface-fog-lite", "min": 4.5 },
-      { "fg": "text-primary", "bg": "surface-smoke-lite", "min": 4.5 },
-      { "fg": "text-primary", "bg": "surface-primary-neutral-lite", "min": 4.5 },
-      { "fg": "text-primary", "bg": "surface-cloud-lite", "min": 4.5 },
-      { "fg": "text-primary", "bg": "surface-positive", "min": 4.5 },
-      { "fg": "text-primary", "bg": "surface-negative", "min": 4.5 },
-      { "fg": "text-secondary", "bg": "page-background", "min": 4.5 },
-      { "fg": "text-secondary", "bg": "surface-fog-lite", "min": 4.5 },
-      { "fg": "text-secondary", "bg": "surface-smoke-lite", "min": 4.5 },
-      { "fg": "text-secondary", "bg": "surface-primary-neutral-lite", "min": 4.5 },
-      { "fg": "text-secondary", "bg": "surface-cloud-lite", "min": 4.5 },
-      { "fg": "text-link", "bg": "page-background", "min": 4.5 },
-      { "fg": "text-link", "bg": "surface-primary-neutral-lite", "min": 4.5 },
-      { "fg": "text-link", "bg": "surface-cloud-lite", "min": 4.5 },
-      { "fg": "text-link-hover", "bg": "page-background", "min": 4.5 },
-      { "fg": "text-link-pressed", "bg": "page-background", "min": 4.5 },
-      { "fg": "negative-on-lite", "bg": "page-background", "min": 4.5 },
-      { "fg": "negative-on-lite", "bg": "surface-primary-neutral-lite", "min": 4.5 },
-      { "fg": "negative-on-lite", "bg": "surface-negative", "min": 4.5 },
-      { "fg": "text-always-white", "bg": "surface-ink-heavy", "min": 4.5 },
-      { "fg": "text-always-white", "bg": "surface-marine-heavy", "min": 4.5 },
-      { "fg": "text-always-white", "bg": "surface-azur-heavy", "min": 4.5 },
-      { "fg": "text-always-white", "bg": "surface-always-black", "min": 4.5 },
-      { "fg": "text-always-black", "bg": "surface-always-white", "min": 4.5 },
-      { "fg": "text-always-black", "bg": "surface-caribbean-lite", "min": 4.5, "themes": ["light"] },
-      { "fg": "text-always-white", "bg": "surface-caribbean-lite", "min": 4.5, "themes": ["dark"] },
-      { "fg": "negative-on-heavy", "bg": "surface-ink-heavy", "min": 4.5 },
-      { "fg": "negative-on-heavy", "bg": "surface-marine-heavy", "min": 4.5 },
-      { "fg": "negative-on-heavy", "bg": "surface-azur-heavy", "min": 4.5, "themes": ["dark"] },
-      { "fg": "action-primary-default-on-lite", "bg": "page-background", "min": 4.5 },
-      { "fg": "action-primary-default-on-lite", "bg": "surface-primary-neutral-lite", "min": 4.5 },
-      { "fg": "text-inverse", "bg": "action-primary-default-on-lite", "min": 4.5 },
-      { "fg": "text-inverse", "bg": "action-primary-hover-on-lite", "min": 4.5 },
-      { "fg": "text-inverse", "bg": "action-primary-pressed-on-lite", "min": 4.5 },
-      { "fg": "action-primary-default-on-heavy", "bg": "surface-ink-heavy", "min": 4.5 },
-      { "fg": "action-primary-default-on-heavy", "bg": "surface-marine-heavy", "min": 4.5 },
-      { "fg": "action-primary-default-on-heavy", "bg": "surface-azur-heavy", "min": 4.5 },
-      { "fg": "text-always-black", "bg": "action-primary-hover-on-heavy", "min": 4.5 },
-      { "fg": "text-always-black", "bg": "action-primary-pressed-on-heavy", "min": 4.5 },
-      { "fg": "text-link-inverse", "bg": "surface-ink-heavy", "min": 4.5, "themes": ["light"] },
-      { "fg": "text-link-inverse", "bg": "surface-azur-heavy", "min": 4.5, "themes": ["light"] },
-      { "fg": "action-focus-on-lite", "bg": "page-background", "min": 3 },
-      { "fg": "action-focus-on-lite", "bg": "surface-primary-neutral-lite", "min": 3 },
-      { "fg": "action-focus-on-lite", "bg": "surface-cloud-lite", "min": 3 },
-      { "fg": "action-focus-on-heavy", "bg": "surface-ink-heavy", "min": 3 },
-      { "fg": "action-focus-on-heavy", "bg": "surface-marine-heavy", "min": 3 },
-      { "fg": "action-focus-on-heavy", "bg": "surface-azur-heavy", "min": 3 },
-      { "fg": "action-active", "bg": "page-background", "min": 3 },
-      { "fg": "action-active", "bg": "surface-primary-neutral-lite", "min": 3 }
+      {
+        "fg": "text-primary",
+        "bg": "page-background",
+        "min": 4.5
+      },
+      {
+        "fg": "text-primary",
+        "bg": "surface-fog-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-primary",
+        "bg": "surface-smoke-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-primary",
+        "bg": "surface-primary-neutral-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-primary",
+        "bg": "surface-cloud-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-primary",
+        "bg": "surface-positive",
+        "min": 4.5
+      },
+      {
+        "fg": "text-primary",
+        "bg": "surface-negative",
+        "min": 4.5
+      },
+      {
+        "fg": "text-secondary",
+        "bg": "page-background",
+        "min": 4.5
+      },
+      {
+        "fg": "text-secondary",
+        "bg": "surface-fog-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-secondary",
+        "bg": "surface-smoke-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-secondary",
+        "bg": "surface-primary-neutral-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-secondary",
+        "bg": "surface-cloud-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-link",
+        "bg": "page-background",
+        "min": 4.5
+      },
+      {
+        "fg": "text-link",
+        "bg": "surface-primary-neutral-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-link",
+        "bg": "surface-cloud-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-link-hover",
+        "bg": "page-background",
+        "min": 4.5
+      },
+      {
+        "fg": "text-link-pressed",
+        "bg": "page-background",
+        "min": 4.5
+      },
+      {
+        "fg": "negative-on-lite",
+        "bg": "page-background",
+        "min": 4.5
+      },
+      {
+        "fg": "negative-on-lite",
+        "bg": "surface-primary-neutral-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "negative-on-lite",
+        "bg": "surface-negative",
+        "min": 4.5
+      },
+      {
+        "fg": "text-always-white",
+        "bg": "surface-ink-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "text-always-white",
+        "bg": "surface-marine-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "text-always-white",
+        "bg": "surface-azur-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "text-always-white",
+        "bg": "surface-always-black",
+        "min": 4.5
+      },
+      {
+        "fg": "text-always-black",
+        "bg": "surface-always-white",
+        "min": 4.5
+      },
+      {
+        "fg": "text-always-black",
+        "bg": "surface-caribbean-lite",
+        "min": 4.5,
+        "themes": [
+          "light"
+        ]
+      },
+      {
+        "fg": "text-always-white",
+        "bg": "surface-caribbean-lite",
+        "min": 4.5,
+        "themes": [
+          "dark"
+        ]
+      },
+      {
+        "fg": "negative-on-heavy",
+        "bg": "surface-ink-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "negative-on-heavy",
+        "bg": "surface-marine-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "negative-on-heavy",
+        "bg": "surface-azur-heavy",
+        "min": 4.5,
+        "themes": [
+          "dark"
+        ]
+      },
+      {
+        "fg": "action-primary-default-on-lite",
+        "bg": "page-background",
+        "min": 4.5
+      },
+      {
+        "fg": "action-primary-default-on-lite",
+        "bg": "surface-primary-neutral-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-inverse",
+        "bg": "action-primary-default-on-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-inverse",
+        "bg": "action-primary-hover-on-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "text-inverse",
+        "bg": "action-primary-pressed-on-lite",
+        "min": 4.5
+      },
+      {
+        "fg": "action-primary-default-on-heavy",
+        "bg": "surface-ink-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "action-primary-default-on-heavy",
+        "bg": "surface-marine-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "action-primary-default-on-heavy",
+        "bg": "surface-azur-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "text-always-black",
+        "bg": "action-primary-hover-on-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "text-always-black",
+        "bg": "action-primary-pressed-on-heavy",
+        "min": 4.5
+      },
+      {
+        "fg": "text-link-inverse",
+        "bg": "surface-ink-heavy",
+        "min": 4.5,
+        "themes": [
+          "light"
+        ]
+      },
+      {
+        "fg": "text-link-inverse",
+        "bg": "surface-azur-heavy",
+        "min": 4.5,
+        "themes": [
+          "light"
+        ]
+      },
+      {
+        "fg": "action-focus-on-lite",
+        "bg": "page-background",
+        "min": 3
+      },
+      {
+        "fg": "action-focus-on-lite",
+        "bg": "surface-primary-neutral-lite",
+        "min": 3
+      },
+      {
+        "fg": "action-focus-on-lite",
+        "bg": "surface-cloud-lite",
+        "min": 3
+      },
+      {
+        "fg": "action-focus-on-heavy",
+        "bg": "surface-ink-heavy",
+        "min": 3
+      },
+      {
+        "fg": "action-focus-on-heavy",
+        "bg": "surface-marine-heavy",
+        "min": 3
+      },
+      {
+        "fg": "action-focus-on-heavy",
+        "bg": "surface-azur-heavy",
+        "min": 3
+      },
+      {
+        "fg": "action-active",
+        "bg": "page-background",
+        "min": 3
+      },
+      {
+        "fg": "action-active",
+        "bg": "surface-primary-neutral-lite",
+        "min": 3
+      }
     ],
     "known": [
-      { "fg": "border-primary", "bg": "page-background", "min": 3, "reason": "Zodiak's own border value, kept exact; a border never carries state alone (pair it with a label, an icon or a fill)." },
-      { "fg": "text-disabled", "bg": "page-background", "min": 4.5, "reason": "Under 4.5:1 on purpose; always ship the real disabled attribute." },
-      { "fg": "action-disabled-content", "bg": "page-background", "min": 4.5, "reason": "Under 4.5:1 on purpose; always ship the real disabled attribute." },
-      { "fg": "action-active", "bg": "page-background", "min": 4.5, "reason": "Clears 3:1 as an indicator (tab underline, selected border, progress fill) but is not for small text; never use it for labels." },
-      { "fg": "negative-on-heavy", "bg": "surface-azur-heavy", "min": 4.5, "themes": ["light"], "documented": false, "reason": "Not an exception the brand book names: the source tokens give 3.8:1 here. Put error text on surface-ink-heavy or surface-marine-heavy, not surface-azur-heavy, until the source changes." },
-      { "fg": "text-link-inverse", "bg": "surface-ink-heavy", "min": 4.5, "themes": ["dark"], "documented": false, "reason": "Not an exception the brand book names: in the dark theme text-link-inverse resolves to capgemini-blue-800, the same blue as the heavy surfaces. On heavy surfaces in dark, use text-always-white with an underline for links until the source changes." },
-      { "fg": "text-link-inverse", "bg": "surface-azur-heavy", "min": 4.5, "themes": ["dark"], "documented": false, "reason": "As above: the same value as the surface in the dark theme." }
+      {
+        "fg": "border-primary",
+        "bg": "page-background",
+        "min": 3,
+        "reason": "Zodiak's own border value, kept exact; a border never carries state alone (pair it with a label, an icon or a fill)."
+      },
+      {
+        "fg": "text-disabled",
+        "bg": "page-background",
+        "min": 4.5,
+        "reason": "Under 4.5:1 on purpose; always ship the real disabled attribute."
+      },
+      {
+        "fg": "action-disabled-content",
+        "bg": "page-background",
+        "min": 4.5,
+        "reason": "Under 4.5:1 on purpose; always ship the real disabled attribute."
+      },
+      {
+        "fg": "action-active",
+        "bg": "page-background",
+        "min": 4.5,
+        "reason": "Clears 3:1 as an indicator (tab underline, selected border, progress fill) but is not for small text; never use it for labels."
+      }
     ]
   },
   "charts": {
     "source": "word-template.md, 'Charts inside a document': accent2, accent3, accent4, accent5, accent6, accent1; then the remaining secondaries in the brand book's palette order. Dark: the same colours, minus the ones that disappear on the dark page, lightest first.",
-    "light": ["brand-capgemini-blue", "brand-light-blue", "brand-turquoise", "brand-yellow", "brand-orange", "brand-dark-blue", "brand-teal", "brand-terracotta", "brand-deep-red", "brand-purple"],
-    "dark": ["brand-light-blue", "brand-turquoise", "brand-yellow", "brand-orange", "brand-lilac", "capgemini-blue-300", "brand-teal", "brand-terracotta", "brand-purple"]
+    "light": [
+      "brand-capgemini-blue",
+      "brand-light-blue",
+      "brand-turquoise",
+      "brand-yellow",
+      "brand-orange",
+      "brand-dark-blue",
+      "brand-teal",
+      "brand-terracotta",
+      "brand-deep-red",
+      "brand-purple"
+    ],
+    "dark": [
+      "brand-light-blue",
+      "brand-turquoise",
+      "brand-yellow",
+      "brand-orange",
+      "brand-lilac",
+      "capgemini-blue-300",
+      "brand-teal",
+      "brand-terracotta",
+      "brand-purple"
+    ]
   },
   "video": {
     "background": "brand-dark-blue",
@@ -160,7 +418,10 @@
     "textMuted": "capgemini-blue-100",
     "onAccent": "brand-dark-blue",
     "highlight": "brand-yellow",
-    "font": { "family": "Ubuntu", "file": "fonts/Ubuntu-Regular.woff2" },
+    "font": {
+      "family": "Ubuntu",
+      "file": "fonts/Ubuntu-Regular.woff2"
+    },
     "logo": "lockupOnDark"
   },
   "office": {

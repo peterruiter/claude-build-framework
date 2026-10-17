@@ -106,13 +106,14 @@ for (const id of systems) {
   });
 }
 
-test(`${branded}: the brand book's own exceptions are known, not failures, and the source's shortfalls are findings`, () => {
+test(`${branded}: the brand book's own exceptions are known, not failures, and the source has no shortfalls left`, () => {
   const result = ds.checkSystem(ds.loadSystem(branded));
   for (const token of ['border-primary', 'text-disabled', 'action-active']) assert.ok(result.known.some((line) => line.startsWith(`${token} on `)), `${token} is a known exception`);
-  assert.ok(result.findings.length >= 1, 'findings are reported');
+  // Error text and links on the heavy blue surfaces were fixed in 1.0.1 (red-100, white links).
+  assert.deepEqual(result.findings, [], 'no undocumented shortfalls');
   const cli = node(root, script, 'check', branded);
   assert.match(cli.out, /known: border-primary on page-background \(light\): 1\.61:1/);
-  assert.match(cli.out, /finding: /);
+  assert.doesNotMatch(cli.out, /finding: /);
 });
 
 test(`${branded}: the build carries the font licence, the logos and the brand use rules`, (t) => {
