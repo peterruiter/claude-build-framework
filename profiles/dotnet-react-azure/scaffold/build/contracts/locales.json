@@ -1,0 +1,12 @@
+{
+  "contract": "locales",
+  "description": "The languages this product offers, chosen when it was scaffolded (scaffold.ps1 -Languages) and extended with node src/web/scripts/add-language.mjs <code>. The source bundles are English (*.en.json); every offered language has a bundle per namespace with every key, and every counted key in the plural forms its culture needs. Listed in picker order: alphabetical by native name, accents ignored.",
+  "source": "en",
+  "default": "en",
+  "namespaces": ["ui", "email"],
+  "locales": [
+    { "code": "en", "culture": "en-GB", "englishName": "English", "nativeName": "English" },
+    { "code": "nl", "culture": "nl-NL", "englishName": "Dutch", "nativeName": "Nederlands" },
+    { "code": "pl", "culture": "pl-PL", "englishName": "Polish", "nativeName": "Polski" }
+  ]
+}

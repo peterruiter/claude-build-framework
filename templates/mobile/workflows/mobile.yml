@@ -1,0 +1,288 @@
+# ===========================================================================
+# Store builds for the Capacitor app (copy to .github/workflows/mobile.yml).
+#
+#   Android: a signed .aab (upload key from secrets) to Google Play's internal
+#            testing track.
+#   iOS:     an archive on a macOS runner, signed automatically with an App
+#            Store Connect API key, uploaded to TestFlight; the development
+#            certificate the run creates is revoked afterwards.
+#
+# Runs by hand (Actions > Mobile apps > Run workflow) or on a tag mobile-v1.2.3.
+# The build number is the run number, so every run is newer than the last.
+# Replace com.example.app, example.com and the paths. Re-check the pinned
+# action SHAs against their releases before first use (pin to a release that
+# is at least two weeks old).
+# ===========================================================================
+
+name: Mobile apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: Which apps to build
+        type: choice
+        options: [both, android, ios]
+        default: both
+      version:
+        description: The version people see (1.2.3); empty takes src/mobile/package.json's
+        type: string
+        default: ''
+      server_url:
+        description: The address the app loads (the launcher)
+        type: string
+        default: https://example.com/app/
+      upload:
+        description: Upload to Google Play internal testing and TestFlight
+        type: boolean
+        default: true
+      play_status:
+        description: Google Play release status (draft until the app's first review is done)
+        type: choice
+        options: [completed, draft]
+        default: completed
+  push:
+    tags: ['mobile-v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Inputs reach scripts as environment variables, never pasted into them.
+  SERVER_URL: ${{ inputs.server_url || 'https://example.com/app/' }}
+  REQUESTED_VERSION: ${{ inputs.version }}
+  BUILD_NUMBER: ${{ github.run_number }}
+
+jobs:
+  android:
+    name: Android (Google Play internal testing)
+    if: ${{ github.event_name == 'push' || inputs.platforms == 'both' || inputs.platforms == 'android' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: src/mobile
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: |
+            src/mobile/android/*.gradle*
+            src/mobile/android/**/gradle-wrapper.properties
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: src/mobile/package-lock.json
+
+      - name: Version
+        run: |
+          set -euo pipefail
+          version="${REQUESTED_VERSION:-}"
+          if [ -z "$version" ] && [[ "${GITHUB_REF_NAME}" == mobile-v* ]]; then version="${GITHUB_REF_NAME#mobile-v}"; fi
+          if [ -z "$version" ]; then version="$(node -p "require('./package.json').version")"; fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::Version '$version' is not 1.2.3"; exit 1; fi
+          echo "VERSION_NAME=$version" >> "$GITHUB_ENV"
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Firebase configuration
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GOOGLE_SERVICES_JSON_BASE64:-}" ]; then
+            echo "::warning::ANDROID_GOOGLE_SERVICES_JSON_BASE64 is not set: the app builds without notifications."
+            exit 0
+          fi
+          printf '%s' "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > android/app/google-services.json
+
+      - name: Copy the shell into the Android project
+        env:
+          APP_SERVER_URL: ${{ env.SERVER_URL }}
+        run: npm run sync:android
+
+      - name: Upload key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KEYSTORE_BASE64:-}" ]; then echo "::error::ANDROID_UPLOAD_KEYSTORE_BASE64 is not set"; exit 1; fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.jks"
+
+      - name: Build the signed bundle
+        working-directory: src/mobile/android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease \
+            -PversionCode="$BUILD_NUMBER" -PversionName="$VERSION_NAME" \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/upload.jks" \
+            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+
+      - name: Forget the upload key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks" android/app/google-services.json
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-${{ env.VERSION_NAME }}-${{ github.run_number }}
+          path: src/mobile/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 30
+
+      # The Play API refuses an app's very first upload: do that one by hand from the artifact.
+      - name: Upload to Google Play (internal testing)
+        if: ${{ github.event_name == 'push' || inputs.upload }}
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.example.app
+          releaseFiles: src/mobile/android/app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: ${{ inputs.play_status || 'completed' }}
+          releaseName: ${{ env.VERSION_NAME }} (${{ github.run_number }})
+
+  ios:
+    name: iOS (TestFlight)
+    if: ${{ github.event_name == 'push' || inputs.platforms == 'both' || inputs.platforms == 'ios' }}
+    runs-on: macos-15
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: src/mobile
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1.7.0
+        with:
+          xcode-version: latest-stable
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: src/mobile/package-lock.json
+
+      - name: Version
+        run: |
+          set -euo pipefail
+          version="${REQUESTED_VERSION:-}"
+          if [ -z "$version" ] && [[ "${GITHUB_REF_NAME}" == mobile-v* ]]; then version="${GITHUB_REF_NAME#mobile-v}"; fi
+          if [ -z "$version" ]; then version="$(node -p "require('./package.json').version")"; fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::Version '$version' is not 1.2.3"; exit 1; fi
+          echo "VERSION_NAME=$version" >> "$GITHUB_ENV"
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Copy the shell into the Xcode project
+        env:
+          APP_SERVER_URL: ${{ env.SERVER_URL }}
+        run: npm run sync:ios
+
+      - name: App Store Connect API key
+        env:
+          KEY_P8_BASE64: ${{ secrets.APP_STORE_CONNECT_KEY_P8_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KEY_P8_BASE64:-}" ]; then echo "::error::APP_STORE_CONNECT_KEY_P8_BASE64 is not set"; exit 1; fi
+          printf '%s' "$KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
+
+      # Xcode makes a development certificate for every archive on a fresh runner and the team
+      # may hold only a few: note the ones there are, so the one made now can be revoked.
+      - name: Development certificates before the archive
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          KEY_PATH: ${{ runner.temp }}/AuthKey.p8
+        run: node scripts/dev-certificates.mjs list "$RUNNER_TEMP/dev-certificates.json"
+
+      - name: Archive
+        working-directory: src/mobile/ios/App
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcodebuild archive \
+            -project App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Automatic \
+            MARKETING_VERSION="$VERSION_NAME" CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
+
+      # With a watch app: check it is embedded, with the phone's version and build.
+      # - name: Check the Apple Watch app is in the archive
+      #   run: /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' -c 'Print :WKCompanionAppBundleIdentifier' "$RUNNER_TEMP/App.xcarchive/Products/Applications/App.app/Watch/<WatchApp>.app/Info.plist"
+
+      - name: Export and upload to TestFlight
+        working-directory: src/mobile/ios/App
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          UPLOAD: ${{ github.event_name == 'push' || inputs.upload }}
+        run: |
+          set -euo pipefail
+          destination=export
+          if [ "$UPLOAD" = "true" ]; then destination=upload; fi
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>${destination}</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID"
+
+      - name: Revoke this build's development certificate
+        if: always()
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          KEY_PATH: ${{ runner.temp }}/AuthKey.p8
+        run: node scripts/dev-certificates.mjs prune "$RUNNER_TEMP/dev-certificates.json"
+
+      - name: Forget the API key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/AuthKey.p8"
+
+      - name: Keep the app when not uploaded
+        if: ${{ !(github.event_name == 'push' || inputs.upload) }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ios-${{ env.VERSION_NAME }}-${{ github.run_number }}
+          path: ${{ runner.temp }}/export/*.ipa
+          if-no-files-found: error
+          retention-days: 30

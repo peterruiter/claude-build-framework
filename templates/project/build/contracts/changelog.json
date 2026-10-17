@@ -1,0 +1,8 @@
+{
+  "$schema": "./changelog.schema.json",
+  "contract": "changelog",
+  "version": "1.0.0",
+  "description": "What's new: every change a user would notice, one plain sentence in every configured language (locales.json), newest first. Add entries with every release. id: one higher than the highest so far, never reused (re-read the file before choosing). date: yyyy-MM-dd, the day it was built; set to the release day when tagged. release: null until released, then the release version (scripts/release-tag.mjs). area: one of 'areas'. No internal names, ticket or migration numbers, or jargon; name things as the screens do in each language.",
+  "areas": ["app", "website", "platform"],
+  "entries": []
+}

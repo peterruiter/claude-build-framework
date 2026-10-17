@@ -1,0 +1,20 @@
+# Append to the repository's .gitignore when adding store apps.
+# Nothing that signs, and no store or push credentials, ever enters the repository.
+*.jks
+*.keystore
+keystore.properties
+*.p8
+*.p12
+*.pem
+*.mobileprovision
+*.cer
+AuthKey_*.p8
+google-services.json
+GoogleService-Info.plist
+src/mobile/node_modules/
+src/mobile/android/.gradle/
+src/mobile/android/app/build/
+src/mobile/android/build/
+src/mobile/ios/App/build/
+src/mobile/ios/DerivedData/
+src/mobile/www/server.js

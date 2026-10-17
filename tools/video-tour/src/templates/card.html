@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>card</title>
+<style>
+{{THEME_CSS}}
+/* ------------------------------------------------------------------ title card -- */
+.intro .copy { position: absolute; left: 150px; top: 0; bottom: 150px; width: 1250px; display: flex; flex-direction: column; justify-content: center; }
+.intro .logo { margin-bottom: 54px; animation: rise .8s cubic-bezier(.2,.8,.2,1) .15s both; }
+.intro .eyebrow { margin-bottom: 22px; animation: rise .8s cubic-bezier(.2,.8,.2,1) .35s both; }
+.intro h1 { margin: 0; font-size: 88px; line-height: 1.04; font-weight: 800; letter-spacing: -.025em; color: var(--text); text-wrap: balance;
+  animation: rise .9s cubic-bezier(.2,.8,.2,1) .5s both; }
+.intro .bar { margin-top: 40px; transform-origin: left; animation: grow .9s cubic-bezier(.2,.8,.2,1) .85s both; }
+.intro .sub { margin-top: 30px; font-size: 30px; line-height: 1.4; color: var(--text-muted); max-width: 1050px; animation: rise .9s cubic-bezier(.2,.8,.2,1) .95s both; }
+.intro .backdrop { animation: fade .5s ease-out both; }
+@keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+/* The product fading in over the end of the title, and out under the start of the closing card. */
+#shot { position: absolute; inset: 0; width: 1920px; height: 1080px; object-fit: cover; opacity: 0; }
+.intro #shot { animation: shot-in var(--fade, .5s) ease-in-out calc(var(--len, 3s) - var(--fade, .5s)) both; }
+.outro #shot { animation: shot-out var(--fade, .5s) ease-in-out 0s both; }
+@keyframes shot-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shot-out { from { opacity: 1; } to { opacity: 0; } }
+/* -------------------------------------------------------------------- closing -- */
+.outro .copy { position: absolute; inset: 0 0 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.outro .logo { align-self: center; height: 58px; margin-bottom: 46px; animation: rise .8s cubic-bezier(.2,.8,.2,1) .25s both; }
+.outro .cta { display: inline-flex; align-items: center; gap: 20px; padding: 26px 54px; border-radius: 22px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--on-accent);
+  font-size: 64px; font-weight: 800; letter-spacing: -.02em;
+  box-shadow: 0 24px 60px -18px rgba(var(--accent-rgb), .8), inset 0 2px 0 rgba(255,255,255,.4); animation: pop .9s cubic-bezier(.2,.8,.2,1) .45s both; }
+.outro .cta svg { width: 46px; height: 46px; }
+.outro .line { margin-top: 44px; font-size: 32px; color: var(--text-muted); max-width: 1300px; line-height: 1.4; animation: rise .9s cubic-bezier(.2,.8,.2,1) .75s both; }
+@keyframes pop { from { opacity: 0; transform: translateY(20px) scale(.94); } to { opacity: 1; transform: none; } }
+/* --------------------------------------------------------------------- poster -- */
+.poster .copy { position: absolute; left: 110px; top: 0; bottom: 60px; width: 860px; display: flex; flex-direction: column; justify-content: center; }
+.poster .logo { height: 70px; margin-bottom: 40px; }
+.poster .eyebrow { margin-bottom: 22px; font-size: 30px; }
+.poster h1 { margin: 0; font-size: 100px; line-height: 1.05; font-weight: 800; letter-spacing: -.025em; text-wrap: balance; }
+.poster .bar { margin-top: 34px; width: 150px; }
+.poster .frame { position: absolute; right: -60px; top: 170px; width: 1000px; border-radius: 18px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.18); box-shadow: 0 40px 90px -30px rgba(0,0,0,.8), 0 0 0 8px rgba(255,255,255,.04), 0 0 80px -20px rgba(var(--accent-rgb), .35); }
+.poster .frame img { display: block; width: 100%; }
+.poster .frame.phone { right: 170px; top: 70px; width: 470px; border-radius: 54px; border: 12px solid #0d1726; }
+.poster .play { position: absolute; left: 120px; bottom: 120px; display: inline-flex; align-items: center; gap: 16px; color: var(--text); font-size: 26px; font-weight: 600; }
+.poster .play i { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 10px 30px -8px rgba(var(--accent-rgb), .8); }
+.poster .play i::before { content: ""; margin-left: 6px; border-left: 20px solid var(--on-accent); border-top: 13px solid transparent; border-bottom: 13px solid transparent; }
+/* ----------------------------------------------------------------- lower third -- */
+html.transparent, html.transparent body { background: transparent; }
+.lower { position: absolute; left: 64px; bottom: 64px; display: flex; align-items: stretch; max-width: 1300px;
+  border-radius: 18px; overflow: hidden; background: color-mix(in srgb, var(--bg) 90%, transparent); box-shadow: 0 20px 50px -18px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08) inset; }
+.lower .tick { width: 10px; background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
+.lower .text { padding: 18px 30px 20px 24px; }
+.lower .small { font-size: 16px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.lower .big { font-size: 34px; font-weight: 700; color: var(--text); letter-spacing: -.01em; line-height: 1.2; }
+</style>
+</head>
+<body>
+<div id="card"></div>
+<script>
+const C = window.CARD;
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const card = document.getElementById('card');
+const backdrop = '<div class="backdrop"></div>';
+document.documentElement.style.setProperty('--len', `${C.length ?? 3}s`);
+document.documentElement.style.setProperty('--fade', `${C.fade ?? .5}s`);
+const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+if (C.kind === 'intro') {
+  document.body.className = 'intro';
+  card.innerHTML = `${backdrop}<div class="copy">${C.logo}<div class="eyebrow">${esc(C.eyebrow)}</div><h1>${esc(C.title)}</h1><div class="bar"></div>${C.sub ? `<div class="sub">${esc(C.sub)}</div>` : ''}</div>${C.shot ? `<img id="shot" src="${C.shot}">` : ''}`;
+} else if (C.kind === 'outro') {
+  document.body.className = 'outro';
+  card.innerHTML = `${backdrop}<div class="copy">${C.logo}${C.cta ? `<div class="cta">${esc(C.cta)} ${arrow}</div>` : ''}${C.line ? `<div class="line">${esc(C.line)}</div>` : ''}</div>${C.shot ? `<img id="shot" src="${C.shot}">` : ''}`;
+} else if (C.kind === 'poster') {
+  document.body.className = 'poster';
+  card.innerHTML = `${backdrop}<div class="copy">${C.logo}<div class="eyebrow">${esc(C.eyebrow)}</div><h1>${esc(C.title)}</h1><div class="bar"></div></div>${C.shot ? `<div class="frame ${C.phone ? 'phone' : ''}"><img src="${C.shot}"></div>` : ''}${C.duration ? `<div class="play"><i></i>${esc(C.duration)}</div>` : ''}`;
+} else if (C.kind === 'lower') {
+  document.documentElement.className = 'transparent';
+  card.innerHTML = `<div class="lower"><div class="tick"></div><div class="text">${C.small ? `<div class="small">${esc(C.small)}</div>` : ''}<div class="big">${esc(C.text)}</div></div></div>`;
+}
+window.CARD_READY = Promise.all([...document.images].map((img) => img.complete ? null : new Promise((r) => { img.onload = img.onerror = r; }))).then(() => document.fonts.ready);
+</script>
+</body>
+</html>

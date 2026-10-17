@@ -1,0 +1,9 @@
+{
+  "app.title": "Boekingen",
+  "common.close": "Sluiten",
+  "booking.new": "Nieuwe boeking",
+  "booking.count": "{0} boekingen",
+  "booking.count.one": "{0} boeking",
+  "booking.min-guests": "Minstens {0} gasten",
+  "booking.greeting": "Hallo <b>{name}</b>"
+}

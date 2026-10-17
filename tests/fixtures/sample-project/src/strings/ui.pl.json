@@ -1,0 +1,11 @@
+{
+  "app.title": "Rezerwacje",
+  "common.close": "Zamknij",
+  "booking.new": "Nowa rezerwacja",
+  "booking.count": "{0} rezerwacji",
+  "booking.count.one": "{0} rezerwacja",
+  "booking.count.few": "{0} rezerwacje",
+  "booking.count.many": "{0} rezerwacji",
+  "booking.min-guests": "Co najmniej {0} gości",
+  "booking.greeting": "Witaj <b>{name}</b>"
+}

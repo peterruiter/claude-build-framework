@@ -1,0 +1,41 @@
+<Project>
+  <!--
+    Shared settings for every project in this repository. Change things here rather than in
+    individual project files.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!--
+      Analyzers on, at a pinned level. "latest-recommended" means "whatever the SDK running the
+      build knows", so a newer SDK on a laptop and the older one in the container image would
+      disagree about which rules exist. 9.0 matches the image's SDK (mcr.microsoft.com/dotnet/sdk:9.0).
+      Raise it deliberately, together with global.json and the Dockerfile.
+    -->
+    <AnalysisLevel>9.0-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- The version lives in VERSION at the root, which is also what the image is tagged with. -->
+    <VersionFile>$(MSBuildThisFileDirectory)VERSION</VersionFile>
+    <Version Condition="Exists('$(VersionFile)')">$([System.IO.File]::ReadAllText('$(VersionFile)').Trim())</Version>
+
+    <Product>App</Product>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- CS1591: missing XML comment. Internal plumbing does not need a comment on every member. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    Warnings are errors in Release, which is what CI and the image build. A Debug build on a laptop
+    may carry a warning for an hour; a Release build may not carry one at all.
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+</Project>

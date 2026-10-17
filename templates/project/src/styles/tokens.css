@@ -1,0 +1,64 @@
+/* Colour tokens, light and dark. Every UI colour comes from a token; components never use raw colours.
+   Dark follows the system (prefers-color-scheme) unless the user chose a theme (data-theme on <html>).
+   Keep the two dark blocks identical: tests/contracts/theme.test.mjs checks that, and the contrast of
+   every pair listed under "theme" in build/framework.json, in both themes. Hex colours only. */
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #f5f6f8;
+  --text: #1b1f24;
+  --text-muted: #5b6577;
+  --border: #c4cad3;
+  --accent: #2456c7;
+  --accent-fg: #ffffff;
+  --danger: #b3261e;
+  --danger-fg: #ffffff;
+  --ring: #2456c7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121418;
+    --surface: #1c2027;
+    --text: #e8eaee;
+    --text-muted: #a3acba;
+    --border: #5c6573;
+    --accent: #8fb0ff;
+    --accent-fg: #0d1526;
+    --danger: #ff8a80;
+    --danger-fg: #2a0705;
+    --ring: #8fb0ff;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121418;
+  --surface: #1c2027;
+  --text: #e8eaee;
+  --text-muted: #a3acba;
+  --border: #5c6573;
+  --accent: #8fb0ff;
+  --accent-fg: #0d1526;
+  --danger: #ff8a80;
+  --danger-fg: #2a0705;
+  --ring: #8fb0ff;
+}
+
+/* A visible focus ring on every control: a gap and a ring of at least 3:1 against the page (2.4.7, 1.4.11). */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Less motion for those who ask for it (2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

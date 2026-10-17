@@ -1,0 +1,9 @@
+{
+  "app.title": "Bookings",
+  "common.close": "Close",
+  "booking.new": "New booking",
+  "booking.count": "{0} bookings",
+  "booking.count.one": "{0} booking",
+  "booking.min-guests": "At least {0} guests",
+  "booking.greeting": "Hello <b>{name}</b>"
+}

@@ -1,0 +1,109 @@
+{
+  "product": {
+    "name": "Acme Notes",
+    "url": "https://notes.example.com"
+  },
+  "brand": {
+    "logo": "video-tour/brand/logo.svg",
+    "colors": {
+      "background": "#0f172a",
+      "backgroundAlt": "#1e3a5f",
+      "accent": "#34d399",
+      "accentAlt": "#10b981",
+      "text": "#ffffff",
+      "textMuted": "#cbd5e1",
+      "onAccent": "#052e1c",
+      "highlight": "#fbbf24"
+    },
+    "font": { "family": "Segoe UI", "file": null }
+  },
+  "app": {
+    "baseUrl": "http://127.0.0.1:4173",
+    "publicUrl": "https://notes.example.com",
+    "start": {
+      "command": "node \"{tool}/src/serve.mjs\" video-tour/sample-site --port 4173",
+      "cwd": ".",
+      "readyPath": "/",
+      "timeoutSeconds": 30
+    },
+    "hostRoutes": [],
+    "replaceText": {},
+    "timezone": "Europe/Amsterdam",
+    "colorScheme": "light",
+    "ignoreProblems": []
+  },
+  "narration": {
+    "language": "en",
+    "provider": "azure",
+    "voice": "en-GB-AdaMultilingualNeural",
+    "locale": "en-GB",
+    "region": "westeurope",
+    "auth": "key",
+    "keyEnv": "AZURE_SPEECH_KEY",
+    "lexicon": "video-tour/lexicon.yaml",
+    "pricePerMillion": 15
+  },
+  "subtitles": {
+    "languages": ["en", "nl", "de"],
+    "burnIn": null
+  },
+  "text": {
+    "en": {
+      "series": "{product} tour · Part {n}",
+      "seriesShort": "Tour · Part {n}",
+      "closing": "Free for personal use.",
+      "tryIt": "Try it yourself: {url}",
+      "note": "Subtitles in {count} languages. The data in this video is made up.",
+      "playlistLine": "The whole tour: {playlist}"
+    },
+    "nl": {
+      "series": "{product}-tour · Deel {n}",
+      "seriesShort": "Tour · Deel {n}",
+      "closing": "Gratis voor persoonlijk gebruik.",
+      "tryIt": "Probeer het zelf: {url}",
+      "note": "Ondertiteling in {count} talen. De gegevens in deze video zijn verzonnen.",
+      "playlistLine": "De hele tour: {playlist}"
+    },
+    "de": {
+      "series": "{product}-Tour · Teil {n}",
+      "seriesShort": "Tour · Teil {n}",
+      "closing": "Kostenlos für den privaten Gebrauch.",
+      "tryIt": "Probier es selbst aus: {url}",
+      "note": "Untertitel in {count} Sprachen. Die Daten in diesem Video sind erfunden.",
+      "playlistLine": "Die ganze Tour: {playlist}"
+    }
+  },
+  "paths": {
+    "scripts": "video-tour/scripts",
+    "adapter": "video-tour/studio.mjs",
+    "assets": "video-tour/assets",
+    "work": "video-tour/.work",
+    "cache": "video-tour/.cache",
+    "output": "video-tour/output"
+  },
+  "library": {
+    "catalogue": "video-tour/output/library/videos.json",
+    "assets": "video-tour/output/library/assets",
+    "videoUrl": "/videos/{file}.mp4",
+    "posterWidth": 1280,
+    "groups": {
+      "basics": { "en": "The basics", "nl": "De basis", "de": "Grundlagen" }
+    }
+  },
+  "youtube": {
+    "channelId": null,
+    "playlistId": null,
+    "playlistTitle": { "en": "Acme Notes tour", "nl": "Acme Notes-tour", "de": "Acme Notes-Tour" },
+    "playlistDescription": {
+      "en": "Every part of Acme Notes in short videos.",
+      "nl": "Elk onderdeel van Acme Notes in korte video's.",
+      "de": "Jeder Teil von Acme Notes in kurzen Videos."
+    },
+    "clientEnv": "YT_CLIENT",
+    "stateFile": "video-tour/youtube-state.json",
+    "dailyQuota": 10000,
+    "tags": ["Acme Notes", "notes", "tutorial"],
+    "titleTemplate": "{title} | {product}",
+    "privacy": "public"
+  }
+}

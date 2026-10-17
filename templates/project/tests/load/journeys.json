@@ -1,0 +1,203 @@
+{
+  "description": "User journeys and scenario shapes for journeys.k6.js. Each journey is a list of requests a real user makes, with think time; {name} is filled from a record of the fixture list named in 'from' (or the fixture's top level). Scenario shapes are k6 executors. Thresholds are the success criteria agreed with the owner before the run. Replace the example paths with the product's own.",
+  "thresholds": {
+    "http_req_failed": [
+      "rate<0.005"
+    ],
+    "http_req_duration{method:GET}": [
+      "p(95)<500"
+    ],
+    "http_req_duration{method:POST}": [
+      "p(95)<1000"
+    ],
+    "journey_errors": [
+      "rate<0.01"
+    ]
+  },
+  "journeys": {
+    "browse_and_buy": {
+      "from": "visitors",
+      "headers": {
+        "x-test-run": "load"
+      },
+      "steps": [
+        {
+          "name": "home",
+          "path": "/",
+          "think": 2
+        },
+        {
+          "name": "offer",
+          "path": "/api/public/offers/{offerId}",
+          "think": 3
+        },
+        {
+          "name": "order",
+          "method": "POST",
+          "path": "/api/public/orders",
+          "body": {
+            "offerId": "{offerId}",
+            "email": "{email}"
+          },
+          "expect": [
+            200,
+            201
+          ]
+        }
+      ]
+    },
+    "open_my_page": {
+      "from": "customers",
+      "headers": {
+        "cookie": "{cookie}"
+      },
+      "steps": [
+        {
+          "name": "my page",
+          "path": "/api/me",
+          "think": 5
+        },
+        {
+          "name": "schedule",
+          "path": "/api/me/schedule",
+          "think": 10
+        }
+      ]
+    },
+    "scan_at_door": {
+      "from": "tickets",
+      "headers": {
+        "authorization": "Bearer {staffToken}"
+      },
+      "steps": [
+        {
+          "name": "scan",
+          "method": "POST",
+          "path": "/api/scan",
+          "body": {
+            "code": "{code}"
+          },
+          "expect": [
+            200,
+            409
+          ]
+        }
+      ]
+    },
+    "dashboard": {
+      "from": "admins",
+      "headers": {
+        "cookie": "{cookie}"
+      },
+      "steps": [
+        {
+          "name": "report",
+          "path": "/api/reports/summary",
+          "think": 15
+        }
+      ]
+    },
+    "api_client": {
+      "from": "apiKeys",
+      "headers": {
+        "authorization": "Bearer {key}"
+      },
+      "steps": [
+        {
+          "name": "list",
+          "path": "/api/v1/items?limit=100",
+          "think": 1
+        }
+      ]
+    },
+    "follow_live": {
+      "from": "customers",
+      "headers": {
+        "cookie": "{cookie}"
+      },
+      "steps": [
+        {
+          "name": "live (long poll)",
+          "path": "/api/live?since=0",
+          "timeout": "60s",
+          "expect": [
+            200,
+            204
+          ]
+        }
+      ]
+    }
+  },
+  "scenarios": {
+    "sales_rush": {
+      "journey": "browse_and_buy",
+      "shape": {
+        "executor": "ramping-arrival-rate",
+        "startRate": 5,
+        "timeUnit": "1s",
+        "preAllocatedVUs": 100,
+        "maxVUs": 500,
+        "stages": [
+          {
+            "target": 50,
+            "duration": "1m"
+          },
+          {
+            "target": 50,
+            "duration": "3m"
+          },
+          {
+            "target": 0,
+            "duration": "30s"
+          }
+        ]
+      }
+    },
+    "morning_peak": {
+      "journey": "open_my_page",
+      "shape": {
+        "executor": "constant-arrival-rate",
+        "rate": 30,
+        "timeUnit": "1s",
+        "duration": "5m",
+        "preAllocatedVUs": 100,
+        "maxVUs": 300
+      }
+    },
+    "checkin_burst": {
+      "journey": "scan_at_door",
+      "shape": {
+        "executor": "constant-arrival-rate",
+        "rate": 20,
+        "timeUnit": "1s",
+        "duration": "10m",
+        "preAllocatedVUs": 50,
+        "maxVUs": 150
+      }
+    },
+    "dashboards": {
+      "journey": "dashboard",
+      "shape": {
+        "executor": "constant-vus",
+        "vus": 10,
+        "duration": "10m"
+      }
+    },
+    "api_clients": {
+      "journey": "api_client",
+      "shape": {
+        "executor": "constant-vus",
+        "vus": 5,
+        "duration": "10m"
+      }
+    },
+    "live_sessions": {
+      "journey": "follow_live",
+      "shape": {
+        "executor": "constant-vus",
+        "vus": 200,
+        "duration": "10m"
+      }
+    }
+  }
+}

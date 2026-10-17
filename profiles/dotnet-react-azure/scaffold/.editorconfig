@@ -1,0 +1,32 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{json,yml,yaml,md,ts,tsx,js,mjs,jsx,css,html,bicep}]
+indent_size = 2
+
+[*.{ps1,psm1}]
+end_of_line = crlf
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+dotnet_sort_system_directives_first = true
+csharp_new_line_before_open_brace = all
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_style_var_when_type_is_apparent = true:suggestion
+# Source-generated logging and ConfigureAwait everywhere are not worth it for a web app.
+dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.CA1873.severity = none
+
+[tests/**/*.cs]
+# Test names are sentences: Every_migration_applies_twice_cleanly reads better than the PascalCase wall.
+dotnet_diagnostic.CA1707.severity = none

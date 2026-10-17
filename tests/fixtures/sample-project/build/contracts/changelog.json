@@ -1,0 +1,40 @@
+{
+  "contract": "changelog",
+  "version": "1.0.0",
+  "areas": ["app", "website"],
+  "entries": [
+    {
+      "id": 3,
+      "date": "2026-10-17",
+      "release": null,
+      "area": "app",
+      "text": {
+        "en": "You can now copy a booking to start the next one.",
+        "nl": "Je kunt nu een boeking kopiëren om de volgende te beginnen.",
+        "pl": "Możesz teraz skopiować rezerwację, aby rozpocząć następną."
+      }
+    },
+    {
+      "id": 2,
+      "date": "2026-10-16",
+      "release": null,
+      "area": "website",
+      "text": {
+        "en": "The pricing page now shows prices with VAT.",
+        "nl": "De prijspagina toont nu prijzen inclusief btw.",
+        "pl": "Strona cennika pokazuje teraz ceny z VAT."
+      }
+    },
+    {
+      "id": 1,
+      "date": "2026-10-15",
+      "release": "0.1.0",
+      "area": "app",
+      "text": {
+        "en": "Bookings with a date, a time and a note.",
+        "nl": "Boekingen met een datum, een tijd en een notitie.",
+        "pl": "Rezerwacje z datą, godziną i notatką."
+      }
+    }
+  ]
+}

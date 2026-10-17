@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["<TEAM_ID>.com.example.app"],
+        "components": [
+          { "/": "/app/*/screen/*", "exclude": true, "comment": "kiosk and room screens stay in a browser" },
+          { "/": "/app/*/files/*", "exclude": true, "comment": "downloads (wallet passes, calendars)" },
+          { "/": "/app/*", "comment": "everything else under the app path opens the app" }
+        ]
+      }
+    ]
+  }
+}

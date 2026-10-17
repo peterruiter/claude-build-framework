@@ -1,0 +1,16 @@
+{
+  "name": "pruiter-plugins",
+  "description": "Peter Ruiter's Claude Code plugins, for private use.",
+  "owner": {
+    "name": "Peter Ruiter"
+  },
+  "plugins": [
+    {
+      "name": "build-framework",
+      "source": "./",
+      "description": "Build a product with Claude as lead and parallel agents: waves, briefs, quality gate, releases, languages, What's new, polish, security and accessibility.",
+      "category": "workflow",
+      "tags": ["agents", "release", "i18n", "a11y", "security"]
+    }
+  ]
+}

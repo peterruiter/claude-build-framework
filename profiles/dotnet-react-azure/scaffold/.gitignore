@@ -1,0 +1,31 @@
+# Build output
+bin/
+obj/
+artifacts/
+*.user
+.vs/
+.vscode/*
+!.vscode/extensions.json
+TestResults/
+
+# Web
+node_modules/
+src/web/node_modules/
+# The web build writes into the API's wwwroot; it is rebuilt every time.
+src/*.Api/wwwroot/app/
+src/*.Api/wwwroot/portal/
+
+# Local settings and secrets: never committed
+appsettings.Development.local.json
+*.local.json
+.env
+.env.*
+profile.config.local.json
+
+# Load test output
+tests/load/out/
+tests/load/*.ndjson
+
+# Screenshots and scratch
+screenshots/
+scratch/

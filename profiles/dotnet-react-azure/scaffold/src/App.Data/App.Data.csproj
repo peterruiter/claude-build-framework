@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\App.Domain\App.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The schema travels with the assembly, so a container cannot be deployed against a database
+         it does not know how to build. The logical name keeps the file name intact (two dots and all). -->
+    <EmbeddedResource Include="..\..\db\migrations\*.sql"
+                      LogicalName="App.Data.Migrations.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="App.Tests" />
+  </ItemGroup>
+
+</Project>

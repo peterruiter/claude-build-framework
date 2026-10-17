@@ -1,0 +1,6 @@
+{
+  "contract": "glossary",
+  "terms": [
+    { "id": "booking", "text": { "en": "booking", "nl": "boeking", "pl": "rezerwacj" }, "stem": { "pl": "rezerwacj" }, "avoid": { "nl": ["reservering"] }, "expect": true }
+  ]
+}

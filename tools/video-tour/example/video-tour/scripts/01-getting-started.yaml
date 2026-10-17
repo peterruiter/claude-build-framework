@@ -1,0 +1,75 @@
+# One part of the tour. The narration language's text sits here; the other languages' subtitles
+# are in i18n/getting-started.yaml. See tools/video-tour/README.md, "Writing a script".
+id: getting-started
+order: 1
+group: basics
+frame: browser
+title: "Your first note"
+thumbTitle: "First note"
+subtitle: "Write, find and keep your notes in one place."
+summary: "A tour of Acme Notes: the list of notes, writing a new one, finding it again with search, and the same notes on a phone."
+thumbnail: { step: write.3, at: 0.6 }
+
+# Not filmed: demo data made by the adapter (studio.mjs), and a sign-in.
+setup:
+  - seedNotes: { count: 3 }
+cleanup:
+  - clearNotes: true
+storage:
+  acme.tipSeen: "{now}"
+hideCss: [".cookie-banner"]
+replaceText: { "pat.developer@dev.local": "sam@example.com" }
+flags: { demoBanner: false }   # read by the adapter's dressContext; the flags action changes it mid-video
+start: "/"
+
+scenes:
+  - id: overview
+    caption: "All your notes"
+    steps:
+      - say: "This is Acme Notes. Every note you write is listed here, newest first."
+        do:
+          - signIn: { user: sam }
+          - highlight: { target: { testId: notes-list }, ms: 2200 }
+      - say: "Each card shows the title, the first lines, and when you last changed it."
+        do:
+          - hover: { css: ".note", nth: 0 }
+          - wait: "50%"
+          - highlight: { target: { css: ".note time", nth: 0 }, pad: 6, ms: 1400 }
+
+  - id: write
+    caption: "Write a note"
+    steps:
+      - say: "To write a new note, press New note."
+        do:
+          - click: { role: button, name: "New note" }
+      - say: "Give it a title. [pause 300] Then write whatever you need to remember."
+        do:
+          - type: { target: { label: Title }, text: "Ideas for the team day" }
+          - type: { target: { label: Note, exact: true }, text: "Boat trip, lunch at the harbour, a quiz.", delay: 35 }
+      - say: "Save, and it sits at the top of the list."
+        hold: 400
+        do:
+          - click: { role: button, name: Save }
+          - highlight: { target: { css: ".note", nth: 0 }, ms: 1600 }
+
+  - id: search
+    caption: "Find it again"
+    steps:
+      - say: "Looking for something? Type a word in the search box and the list narrows as you type."
+        do:
+          - type: { target: { placeholder: "Search notes" }, text: "harbour", delay: 90 }
+          - highlight: { target: { css: ".note", nth: 0 }, ms: 1500 }
+      - say: "Clear the search to see everything again."
+        do:
+          - type: { target: { placeholder: "Search notes" }, text: "" }
+
+  - id: phone
+    frame: phone
+    start: "/"
+    caption: "On your phone"
+    note: "The same notes, wherever you are."
+    steps:
+      - say: "And on your phone, the same notes are right there."
+        do:
+          - scroll: { by: 300 }
+          - tap: { css: ".note", nth: 0 }

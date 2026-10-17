@@ -1,0 +1,53 @@
+# Subtitles, titles and descriptions of 01-getting-started.yaml in the project's other languages.
+# `src` is a hash of the narrated text a translation was made from (from `video-tour i18n`, quoted):
+# when the narration changes, that translation is left out and `validate` lists it as outdated.
+title:
+  src: "06577f3947"
+  nl: "Je eerste notitie"
+  de: "Deine erste Notiz"
+subtitle:
+  src: "7b3ee8eb4a"
+  nl: "Schrijf, vind en bewaar je notities op één plek."
+  de: "Notizen schreiben, finden und aufbewahren, alles an einem Ort."
+summary:
+  src: "0e0a14efb7"
+  nl: "Een rondleiding door Acme Notes: de lijst met notities, een nieuwe schrijven, hem terugvinden met zoeken, en dezelfde notities op een telefoon."
+  de: "Eine Tour durch Acme Notes: die Liste der Notizen, eine neue schreiben, sie mit der Suche wiederfinden und dieselben Notizen auf dem Handy."
+captions:
+  overview: { src: "dd668c2e0b", nl: "Al je notities", de: "Alle deine Notizen" }
+  write: { src: "ab0f84062e", nl: "Een notitie schrijven", de: "Eine Notiz schreiben" }
+  search: { src: "e465a2ad37", nl: "Terugvinden", de: "Wiederfinden" }
+  phone: { src: "8c4b9d0b17", nl: "Op je telefoon", de: "Auf dem Handy" }
+steps:
+  overview.1:
+    src: "3c33edcf8b"
+    nl: "Dit is Acme Notes. Elke notitie die je schrijft staat hier, de nieuwste bovenaan."
+    de: "Das ist Acme Notes. Jede Notiz, die du schreibst, steht hier, die neueste zuerst."
+  overview.2:
+    src: "d7cf71aec7"
+    nl: "Elke kaart toont de titel, de eerste regels en wanneer je hem voor het laatst hebt gewijzigd."
+    de: "Jede Karte zeigt den Titel, die ersten Zeilen und wann du sie zuletzt geändert hast."
+  write.1:
+    src: "5630f54e22"
+    nl: "Voor een nieuwe notitie druk je op Nieuwe notitie."
+    de: "Für eine neue Notiz drückst du auf Neue Notiz."
+  write.2:
+    src: "ebda7557be"
+    nl: "Geef hem een titel. Schrijf dan op wat je wilt onthouden."
+    de: "Gib ihr einen Titel. Dann schreib auf, was du dir merken willst."
+  write.3:
+    src: "9117ab213b"
+    nl: "Opslaan, en hij staat bovenaan de lijst."
+    de: "Speichern, und sie steht ganz oben in der Liste."
+  search.1:
+    src: "83fb619123"
+    nl: "Iets kwijt? Typ een woord in het zoekvak en de lijst wordt korter terwijl je typt."
+    de: "Du suchst etwas? Tippe ein Wort ins Suchfeld, und die Liste wird beim Tippen kürzer."
+  search.2:
+    src: "19c6683c3c"
+    nl: "Maak het zoekvak leeg om alles weer te zien."
+    de: "Leere die Suche, um wieder alles zu sehen."
+  phone.1:
+    src: "5f7f439427"
+    nl: "En op je telefoon staan dezelfde notities gewoon klaar."
+    de: "Und auf dem Handy sind dieselben Notizen gleich da."

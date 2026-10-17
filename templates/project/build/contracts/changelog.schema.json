@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "changelog.schema.json",
+  "title": "What's new (changelog contract)",
+  "description": "Shape of build/contracts/changelog.json. Language completeness and release format are checked by tests/contracts/changelog.test.mjs against locales.json and build/framework.json.",
+  "type": "object",
+  "required": ["contract", "areas", "entries"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "contract": { "const": "changelog" },
+    "version": { "type": "string" },
+    "description": { "type": "string" },
+    "areas": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "date", "release", "area", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "integer", "minimum": 1 },
+          "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "release": { "type": ["string", "null"], "minLength": 1 },
+          "area": { "type": "string" },
+          "text": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": { "type": "string", "minLength": 1, "pattern": "^[^\\n]+$" }
+          }
+        }
+      }
+    }
+  }
+}

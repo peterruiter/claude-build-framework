@@ -1,0 +1,28 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/out/
+bin/
+obj/
+coverage/
+
+# Local settings and secrets (never commit secrets)
+.env
+.env.*
+!.env.example
+*.local.json
+.claude/settings.local.json
+
+# Scratch: screenshots, agents' notes, load-test fixtures, recordings
+scratch/
+screenshots/
+.playwright-mcp/
+tests/load/out/
+tests/a11y/node_modules/
+*.log
+
+# Editors and OS
+.vs/
+.idea/
+.DS_Store
+Thumbs.db

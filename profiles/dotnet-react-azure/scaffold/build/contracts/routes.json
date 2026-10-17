@@ -1,0 +1,12 @@
+{
+  "contract": "routes",
+  "description": "Every HTTP route the API maps, with who may call it (public, signed-in, admin, probe). ApiTests fails when the code and this list disagree, so a route cannot appear without somebody deciding who may call it. The web apps' client-side fallbacks (/app/*, /portal/*) are files, not routes, and are left out.",
+  "routes": [
+    { "route": "GET /health/live", "access": "probe" },
+    { "route": "GET /health/ready", "access": "probe" },
+    { "route": "GET /api/locales", "access": "public" },
+    { "route": "GET /api/strings/{ns}/{language}", "access": "public" },
+    { "route": "GET /api/items", "access": "public" },
+    { "route": "POST /api/items", "access": "public" }
+  ]
+}

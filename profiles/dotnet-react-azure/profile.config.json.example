@@ -1,0 +1,134 @@
+{
+  "_doc": "Settings for build/*.ps1. scaffold.ps1 copies this to profile.config.json at the project root and fills in the product's names. Keys starting with _doc are explanations and are ignored. Nothing here is a secret: secrets are passed at run time (Deploy-Infrastructure.ps1 -SecretValues) or live in Key Vault. A profile.config.local.json beside it (gitignored) is merged on top, for values you do not want committed.",
+
+  "product": {
+    "_doc": "Names and paths. name is the PascalCase product name scaffold.ps1 used; imageRepository is the registry repository (lower case).",
+    "name": "MyProduct",
+    "solution": "MyProduct.slnx",
+    "apiProject": "src/MyProduct.Api",
+    "testProject": "tests/MyProduct.Tests",
+    "webFolder": "src/web",
+    "dockerfile": "Dockerfile",
+    "imageRepository": "myproduct"
+  },
+
+  "dotnet": {
+    "_doc": "releaseSdkVersion: the exact SDK Release-Worktree.ps1 pins temporarily when the repository has no global.json (the image's SDK, e.g. 9.0.3xx). Leave empty when global.json is committed (the scaffold commits one: 9.0 latestFeature).",
+    "releaseSdkVersion": ""
+  },
+
+  "azure": {
+    "_doc": "The ONE subscription this product deploys to; every az command passes it explicitly, whichever subscription az has selected. location: an EU region keeps every resource and its data in the EU (swedencentral, westeurope, germanywestcentral, francecentral, northeurope ...). sqlLocation/containerLocation: only when the main region refuses new SQL servers; keep them in the same geography. containerNameSuffix: for a side-by-side move of the app to another region.",
+    "tenantId": "00000000-0000-0000-0000-000000000000",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroup": "rg-myproduct",
+    "namePrefix": "myproduct",
+    "location": "swedencentral",
+    "sqlLocation": "",
+    "containerLocation": "",
+    "containerNameSuffix": ""
+  },
+
+  "database": {
+    "_doc": "connectionSetting: the environment variable the migrate command reads (AppSettings.cs). firewallRuleName: the one SQL firewall rule scripts move to this machine's address. Backups: PITR days (1-35), long-term retention as ISO 8601 durations (PT0S = none), backupRedundancy Local|Zone (stay in region) or Geo (paired region). autoPauseMinutes -1 = never pause. vCores: minVCores floor, maxVCores ceiling (1,2,4,...,16).",
+    "connectionSetting": "ConnectionStrings__Database",
+    "firewallRuleName": "AllowDeployingMachine",
+    "backupRetentionDays": 14,
+    "weeklyRetention": "P4W",
+    "monthlyRetention": "P6M",
+    "yearlyRetention": "PT0S",
+    "backupRedundancy": "Local",
+    "autoPauseMinutes": -1,
+    "minVCores": "0.5",
+    "maxVCores": 1,
+    "restoreDrill": {
+      "_doc": "Test-RestoreDrill.ps1: row counts of these tables and the results of these read-only queries, in the restored copy and in production, side by side. Each query returns one value.",
+      "tables": ["app.Item", "app.Tag", "ops.SchemaMigration"],
+      "queries": [
+        { "label": "latest item (CreatedUtc)", "sql": "SELECT CONVERT(NVARCHAR(40), MAX(CreatedUtc), 126) FROM app.Item" },
+        { "label": "latest migration", "sql": "SELECT TOP 1 Name FROM ops.SchemaMigration ORDER BY Name DESC" }
+      ],
+      "timeoutMinutes": 120
+    }
+  },
+
+  "app": {
+    "_doc": "The container app. settings: plain environment variables (name -> value; __ for :). secrets: name is the container app secret, env the variable that receives it; keyVaultSecret makes it a Key Vault reference (recommended: the value never passes through a deployment, and a redeploy carries the reference); without it the value comes from Deploy-Infrastructure.ps1 -SecretValues, or is carried over from the running app. Scale: minReplicas (1 = never cold), maxReplicas, httpConcurrency (concurrent requests per replica before another; long-lived connections count), cpu/memory pairs (0.5/1Gi, 1.0/2Gi ...).",
+    "publicBaseUrl": "",
+    "settings": {
+      "Site__SupportEmail": "support@example.com"
+    },
+    "secrets": [
+      { "name": "smtp-password", "env": "Email__Smtp__Password", "keyVaultSecret": "smtp-password" }
+    ],
+    "minReplicas": 1,
+    "maxReplicas": 5,
+    "httpConcurrency": 100,
+    "cpu": "0.5",
+    "memory": "1Gi"
+  },
+
+  "storage": {
+    "_doc": "Private blob containers (dataprotection holds the ASP.NET key ring), soft delete days for blobs and containers, sku Standard_LRS|Standard_ZRS (in region) or Standard_GRS|Standard_RAGRS (paired region).",
+    "containers": ["dataprotection", "media"],
+    "softDeleteDays": 14,
+    "sku": "Standard_LRS"
+  },
+
+  "keyVault": {
+    "_doc": "purgeProtection cannot be switched off once on: on for production, off for a throwaway environment.",
+    "purgeProtection": false
+  },
+
+  "openAi": {
+    "_doc": "Optional Azure OpenAI in the same region. deploymentType DataZoneStandard processes prompts within the EU data zone (for an EU region); Standard within the region only. GlobalStandard is deliberately not offered. Check the model/version is available as that type in your region.",
+    "enabled": false,
+    "deploymentName": "chat",
+    "model": "gpt-4o-mini",
+    "modelVersion": "2024-07-18",
+    "deploymentType": "DataZoneStandard",
+    "capacity": 10
+  },
+
+  "monitoring": {
+    "_doc": "alertEmail empty = no availability tests and no alerts (Deploy-Infrastructure.ps1 keeps the deployed address when you leave it empty). testTier core|extended picks which availabilityTests run; every run is billed (3 tests x 3 locations every 600 s is about 25 USD a month). testLocationCount 3-5 (the first N of testLocations: Application Insights population tags; the default is West Europe, North Europe, France Central, France South, UK South), testFrequencySeconds 300|600|900. A core test must read the database (the probes do not). disabledRules: server-errors, restarts, unhealthy, error-spike, sql-cpu, sql-workers, sql-storage, vault-throttled. logRetentionDays 30-730.",
+    "alertEmail": "",
+    "testTier": "core",
+    "testLocationCount": 3,
+    "testFrequencySeconds": 600,
+    "testLocations": ["emea-nl-ams-azr", "emea-gb-db3-azr", "emea-fr-pra-edge", "emea-ch-zrh-edge", "emea-ru-msa-edge"],
+    "availabilityTests": [
+      { "key": "app-database", "name": "App and database (/api/items)", "path": "/api/items?take=1", "status": 200, "text": "", "tier": "core" },
+      { "key": "app", "name": "Main app (/app/)", "path": "/app/", "status": 200, "text": "id=\"root\"", "tier": "core" },
+      { "key": "portal", "name": "Portal (/portal/)", "path": "/portal/", "status": 200, "text": "id=\"root\"", "tier": "extended" }
+    ],
+    "disabledRules": [],
+    "serverErrorsPer5Minutes": 20,
+    "errorLinesPer15Minutes": 10,
+    "sqlAlertPercent": 80,
+    "logRetentionDays": 30
+  },
+
+  "smokeChecks": {
+    "_doc": "Test-Deployment.ps1 runs these against -BaseUrl (default app.publicBaseUrl). Read-only, no sign-in: safe against production after every release. status: expected code (redirects are not followed and are reported as such); contains: text the body must contain; contentType: prefix the Content-Type must start with.",
+    "checks": [
+      { "name": "liveness", "path": "/health/live", "status": 200 },
+      { "name": "readiness", "path": "/health/ready", "status": 200 },
+      { "name": "app and database", "path": "/api/items?take=1", "status": 200, "contentType": "application/json" },
+      { "name": "main app", "path": "/app/", "status": 200, "contains": "/app/assets/" },
+      { "name": "portal", "path": "/portal/", "status": 200, "contains": "/portal/assets/" },
+      { "name": "unknown api route is 404", "path": "/api/no-such-route-0000", "status": 404 }
+    ]
+  },
+
+  "logs": {
+    "_doc": "Check-Logs.ps1: minutes to look back on the newest revision, and the most rows to print.",
+    "minutes": 15,
+    "top": 50
+  },
+
+  "release": {
+    "_doc": "Release-Worktree.ps1: the worktree is created beside the repository as <repo><worktreeSuffix>.",
+    "worktreeSuffix": "-release"
+  }
+}

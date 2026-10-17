@@ -1,0 +1,18 @@
+{
+  "description": "Blocks git commits, pull requests, issues and release notes that carry AI attribution (Co-Authored-By an AI assistant, 'Generated with' an AI tool, the robot emoji).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/no-ai-attribution.mjs"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+/* The brand's backdrop at 1920 x 1080, shared by the title card, the closing card, the poster and
+   the phone stage. Colours, font and logo come from video-tour.config.json (brand). */
+/*{{FONT_FACE}}*/
+:root { /*{{VARS}}*/ }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--text);
+  font-family: "{{FONT_FAMILY}}", "Segoe UI", system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+.backdrop { position: absolute; inset: 0; overflow: hidden;
+  background:
+    radial-gradient(1200px 700px at 85% -10%, var(--bg-2) 0%, transparent 70%),
+    radial-gradient(900px 600px at 0% 110%, rgba(var(--accent-rgb), .16) 0%, transparent 70%),
+    var(--bg); }
+.backdrop::before { content: ""; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(1200px 800px at 70% 40%, #000 0%, transparent 75%); }
+.backdrop::after { content: ""; position: absolute; right: -240px; top: -240px; width: 900px; height: 900px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--accent-rgb), .22), transparent 70%); }
+.logo { display: block; height: 72px; width: auto; align-self: flex-start; flex: none; }
+.logo.wordmark { height: auto; font-size: 44px; font-weight: 800; letter-spacing: -.02em; color: var(--text); }
+.eyebrow { color: var(--accent); font-size: 22px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.bar { width: 180px; height: 6px; border-radius: 6px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 22px rgba(var(--accent-rgb), .55); }

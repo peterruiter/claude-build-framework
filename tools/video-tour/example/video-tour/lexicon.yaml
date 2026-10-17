@@ -1,0 +1,12 @@
+# How the narrator says product terms and names. Applied to the spoken text only: subtitles keep
+# the written form. Keyed by language, then term; matched as whole words, case-sensitive, longest first.
+#
+#   alias: say these words instead (every voice)
+#   lang:  say the term in that language's pronunciation (multilingual and HD voices)
+#   ipa:   an IPA transcription (standard neural voices, not HD)
+#
+# Add a term when a render (or qa) shows it said wrongly; only the steps that change are synthesised again.
+
+en:
+  Acme: { alias: "Ack-mee" }
+  UI: { alias: "U I" }

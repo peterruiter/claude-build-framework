@@ -1,0 +1,26 @@
+# Stack-neutral CI: the framework's checker and contract tests. A profile's CI
+# workflow adds the stack's build and tests; keep these steps in it.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Vocabulary and translations
+        run: node scripts/check-vocabulary.mjs
+      - name: Contract tests (changelog, languages, plurals, theme contrast)
+        run: node --test "tests/contracts/*.test.mjs"
+      - name: Stand-in tests
+        run: node --test "tests/standins/*.test.mjs"

@@ -1,0 +1,13 @@
+{
+  "contract": "locales",
+  "version": "1.0.0",
+  "description": "Sample: three languages, one with few/many plural forms.",
+  "source": "en",
+  "default": "en",
+  "locales": [
+    { "code": "en", "englishName": "English", "nativeName": "English", "culture": "en-GB" },
+    { "code": "nl", "englishName": "Dutch", "nativeName": "Nederlands", "culture": "nl-NL" },
+    { "code": "pl", "englishName": "Polish", "nativeName": "Polski", "culture": "pl-PL" }
+  ],
+  "namespaces": [ { "id": "ui", "description": "The app." } ]
+}

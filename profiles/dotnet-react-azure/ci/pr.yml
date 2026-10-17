@@ -1,0 +1,137 @@
+# ===========================================================================
+# Checks for every pull request and every push to main: the same quality gate
+# as a local release, on GitHub's Ubuntu runners.
+#
+#   dotnet  Release build with the SDK global.json pins (warnings are errors in
+#           Release) and every test, the database tests included: LocalDB is
+#           Windows only, so a SQL Server service container stands in and the
+#           tests find it through TEST_SQL_CONNECTION (tests/*/TestDatabase.cs).
+#   web     npm ci, string and plural checks, type check, node tests (contrast
+#           and plurals), both Vite builds.
+#   image   the Dockerfile builds (tests skipped inside: the dotnet job ran them),
+#           so a broken image is found here and not in the registry at release.
+#
+# scaffold.ps1 copies this file to .github/workflows/pr.yml. Actions are pinned to
+# a full commit SHA (the comment says which release); update them deliberately.
+# Nothing here deploys or needs a secret.
+# ===========================================================================
+
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dotnet:
+    name: .NET build and tests (Release)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    services:
+      sql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: 'Y'
+          MSSQL_PID: Developer
+          # A throwaway password for a container that lives as long as this job and is reachable only from
+          # the runner. Not a secret; it only has to satisfy SQL Server's complexity rule.
+          MSSQL_SA_PASSWORD: Ci-${{ github.run_id }}-Sql
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P Ci-${{ github.run_id }}-Sql -Q 'SELECT 1' -b -o /dev/null"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 20
+          --health-start-period 20s
+
+    env:
+      DOTNET_NOLOGO: 'true'
+      DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      TEST_SQL_CONNECTION: Server=localhost,1433;User ID=sa;Password=Ci-${{ github.run_id }}-Sql;TrustServerCertificate=True;Encrypt=False;Connect Timeout=30
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: .NET SDK from global.json
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: NuGet cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: SDK in use
+        run: dotnet --version
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (Release, warnings are errors)
+        run: dotnet build --configuration Release --no-restore
+
+      # No --artifacts-path: some tests find the repository by walking up from their output.
+      - name: Test (database tests against the SQL Server container)
+        run: dotnet test --configuration Release --no-build --logger "console;verbosity=normal"
+
+  web:
+    name: Web checks and builds
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: src/web
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: src/web/package-lock.json
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Strings and plural rules
+        run: npm run check
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Node tests (contrast, plurals)
+        run: npm test
+
+      - name: Build both apps
+        run: npm run build
+
+  image:
+    name: Container image builds
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build the image (tests run in the dotnet job)
+        run: docker build --build-arg RUN_TESTS=false --tag app:${{ github.sha }} .

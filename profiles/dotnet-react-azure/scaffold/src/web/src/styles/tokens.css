@@ -1,0 +1,62 @@
+/* ==========================================================================
+   Colour tokens, light and dark. Components use only these variables.
+
+   Three blocks hold the same names:
+     :root                        light (the default)
+     @media (prefers-color-scheme: dark) :root:not([data-theme="light"])
+                                  dark when the system asks and the reader did not choose light
+     :root[data-theme="dark"]     dark when the reader chose it (theme toggle)
+   The two dark blocks must be identical; tests/contrast.test.mjs checks that,
+   and that every text pair reaches 4.5:1 and every UI/focus pair 3:1 (WCAG 2.2
+   AA, 1.4.3 and 1.4.11) in both themes. Change a colour, run npm test.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+  --color-bg: #ffffff;
+  --color-surface: #f4f5f7;
+  --color-text: #1a1c1f;
+  --color-text-muted: #545b66;
+  --color-link: #0a58ca;
+  --color-accent: #0a58ca;
+  --color-on-accent: #ffffff;
+  --color-danger: #b3261e;
+  --color-success: #1e6b34;
+  --color-border: #d5d9df;
+  --color-border-strong: #737a85;
+  --color-focus: #0a58ca;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg: #121417;
+    --color-surface: #1c1f24;
+    --color-text: #eceef1;
+    --color-text-muted: #a9b0bb;
+    --color-link: #8ab4f8;
+    --color-accent: #8ab4f8;
+    --color-on-accent: #0b1a33;
+    --color-danger: #f2b8b5;
+    --color-success: #8fd4a0;
+    --color-border: #2e333a;
+    --color-border-strong: #7d8590;
+    --color-focus: #8ab4f8;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #121417;
+  --color-surface: #1c1f24;
+  --color-text: #eceef1;
+  --color-text-muted: #a9b0bb;
+  --color-link: #8ab4f8;
+  --color-accent: #8ab4f8;
+  --color-on-accent: #0b1a33;
+  --color-danger: #f2b8b5;
+  --color-success: #8fd4a0;
+  --color-border: #2e333a;
+  --color-border-strong: #7d8590;
+  --color-focus: #8ab4f8;
+}

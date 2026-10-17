@@ -1,0 +1,6 @@
+{
+  "welcome.subject": "Welcome to {0}",
+  "welcome.body": "You can sign in at {0}.",
+  "reminder.items": "You have {0} open items.",
+  "reminder.items.one": "You have {0} open item."
+}

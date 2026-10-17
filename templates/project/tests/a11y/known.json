@@ -1,0 +1,6 @@
+{
+  "about": "Findings axe-pages.mjs accepts, each with its reason. id is an axe rule or a probe (skip-link, h1, lang, focus-visible, focus-obscured, target-size, reflow); page narrows it to pages whose name contains it; target to nodes whose selector contains it. Keep in step with the known limitations on the accessibility statement.",
+  "allow": [
+    { "id": "skip-link", "page": "sign-in", "reason": "Example: a page with one form and no blocks repeated across pages." }
+  ]
+}

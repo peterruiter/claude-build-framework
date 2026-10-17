@@ -1,0 +1,40 @@
+# CI for the framework itself: the self-test (manifests, skills and agents,
+# links, and the project templates against sample data) and the plugin
+# validator. No secrets are needed: `claude plugin validate` works offline
+# and without signing in.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Self-test
+        run: npm test
+
+  validate-plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the Claude Code CLI (pinned)
+        run: npm install --global @anthropic-ai/claude-code@2.1.233
+      - name: Validate the marketplace and the plugin
+        run: |
+          claude plugin validate . --strict
+          claude plugin validate .claude-plugin/plugin.json --strict
+          claude plugin validate skills --strict
+          claude plugin validate agents --strict

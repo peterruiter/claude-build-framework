@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>phone stage</title>
+<style>
+{{THEME_CSS}}
+#stage { position: absolute; inset: 0; }
+.copy { position: absolute; left: 150px; top: 0; bottom: 150px; width: 820px; display: flex; flex-direction: column; justify-content: center; }
+.copy .logo { height: 48px; margin-bottom: 64px; }
+.copy .eyebrow { margin-bottom: 26px; font-size: 21px; }
+#caption { margin: 0; font-size: 66px; line-height: 1.08; font-weight: 800; letter-spacing: -.02em; color: var(--text); text-wrap: balance; min-height: 1.1em;
+  transition: opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1); }
+#caption.out { opacity: 0; transform: translateY(18px); }
+#note { margin-top: 30px; font-size: 30px; line-height: 1.45; color: var(--text-muted); max-width: 760px; min-height: 1.4em;
+  transition: opacity .35s ease .08s, transform .45s cubic-bezier(.2,.8,.2,1) .08s; }
+#note.out { opacity: 0; transform: translateY(14px); }
+.copy .bar { margin-top: 36px; width: 150px; }
+/* The phone: a plain modern handset, not any maker's in particular. */
+.phone { position: absolute; left: {{PHONE_LEFT}}px; top: {{PHONE_TOP}}px; width: {{PHONE_W}}px; height: {{PHONE_H}}px; border-radius: 62px;
+  background: linear-gradient(145deg, #2a3646, #121a26 40%, #0b111b); padding: 14px;
+  box-shadow: 0 0 0 2px #3b4859 inset, 0 0 0 1px rgba(255,255,255,.08), 0 60px 120px -40px rgba(0,0,0,.85), 0 0 120px -30px rgba(var(--accent-rgb), .35); }
+.phone::before, .phone::after { content: ""; position: absolute; right: -4px; width: 4px; border-radius: 0 3px 3px 0; background: #253141; }
+.phone::before { top: 220px; height: 110px; }
+.phone::after { top: 160px; height: 46px; left: -4px; right: auto; border-radius: 3px 0 0 3px; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 48px; overflow: hidden; background: #fff; }
+.status { position: absolute; left: 0; right: 0; top: 0; height: {{STATUS_H}}px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 34px 0 44px; font: 600 {{STATUS_FONT}}px/1 system-ui, sans-serif; color: var(--status-ink, #0f1b2d); background: var(--status-bg, #fff); z-index: 2; }
+.status .icons { display: flex; gap: 8px; align-items: center; }
+.island { position: absolute; left: 50%; top: 12px; width: 122px; height: 36px; margin-left: -61px; border-radius: 20px; background: #05080d; z-index: 3; }
+#app { position: absolute; left: 0; top: {{STATUS_H}}px; border: 0; transform-origin: 0 0; transform: scale({{SCALE}}); width: 390px; height: {{APP_H}}px; background: #fff; }
+</style>
+</head>
+<body>
+<div id="stage" data-vs-zoom-root>
+  <div class="backdrop"></div>
+  <div class="copy">{{LOGO}}<div class="eyebrow">{{EYEBROW}}</div><h2 id="caption"></h2><div class="bar"></div><div id="note"></div></div>
+  <div class="phone"><div class="screen">
+    <div class="status"><span>9:41</span><span class="icons">
+      <svg width="20" height="13" viewBox="0 0 20 13"><g fill="currentColor"><rect x="0" y="9" width="3.4" height="4" rx="1"/><rect x="5.5" y="6" width="3.4" height="7" rx="1"/><rect x="11" y="3" width="3.4" height="10" rx="1"/><rect x="16.5" y="0" width="3.4" height="13" rx="1"/></g></svg>
+      <svg width="28" height="13" viewBox="0 0 28 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor"/><rect x="25" y="4.5" width="2" height="4" rx="1" fill="currentColor" opacity=".45"/></svg>
+    </span></div>
+    <div class="island"></div>
+    <iframe id="app" name="app" data-touch="1" src="{{APP_SRC}}" allow="clipboard-write"></iframe>
+  </div></div>
+</div>
+<script>
+  // The stage draws no cursor of its own: the fingertip is drawn inside the phone.
+  addEventListener('DOMContentLoaded', () => window.__vs?.hideCursor(true));
+  window.setCaption = (caption, note) => {
+    const c = document.getElementById('caption'), n = document.getElementById('note');
+    if (c.textContent === (caption || '') && n.textContent === (note || '')) return;
+    c.classList.add('out'); n.classList.add('out');
+    setTimeout(() => { c.textContent = caption || ''; n.textContent = note || ''; c.classList.remove('out'); n.classList.remove('out'); }, 360);
+  };
+  window.setStatus = (bg, ink) => { document.documentElement.style.setProperty('--status-bg', bg); document.documentElement.style.setProperty('--status-ink', ink); };
+</script>
+</body>
+</html>

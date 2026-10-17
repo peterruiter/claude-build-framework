@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npm run check:vocabulary && npm run test:contracts && npm run test:standins",
+    "check:vocabulary": "node scripts/check-vocabulary.mjs",
+    "test:contracts": "node --test \"tests/contracts/*.test.mjs\"",
+    "test:standins": "node --test \"tests/standins/*.test.mjs\"",
+    "release:tag": "node scripts/release-tag.mjs"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

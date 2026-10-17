@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!--
+      String bundles and contracts travel with the assembly, so a container cannot be deployed
+      without its translations or its language list.
+
+      WithCulture="false" and LogicalName are both load bearing: left to itself MSBuild reads
+      'ui.nl.json' the way it reads 'Strings.nl.resx', strips the culture from the name and puts
+      the file in a satellite assembly nothing ever looks in.
+    -->
+    <EmbeddedResource Include="Localization\Resources\*.json"
+                      WithCulture="false"
+                      LogicalName="App.Domain.Localization.Resources.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\build\contracts\locales.json;..\..\build\contracts\plurals.json"
+                      WithCulture="false"
+                      LogicalName="App.Domain.Contracts.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="App.Tests" />
+  </ItemGroup>
+
+</Project>

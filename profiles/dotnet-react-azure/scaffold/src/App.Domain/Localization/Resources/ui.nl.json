@@ -1,0 +1,19 @@
+{
+  "app.title": "App",
+  "app.tagline": "Een vertrekpunt: één API, twee webapps, één database.",
+  "nav.skip": "Naar de inhoud",
+  "nav.home": "Start",
+  "language.label": "Taal",
+  "theme.label": "Thema",
+  "theme.system": "Systeem",
+  "theme.light": "Licht",
+  "theme.dark": "Donker",
+  "status.checking": "De server wordt gecontroleerd",
+  "status.ready": "De server is klaar.",
+  "status.unreachable": "De server antwoordt niet.",
+  "items.count": "{0} items",
+  "items.count.one": "{0} item",
+  "items.empty": "Hier staat nog niets.",
+  "portal.title": "Portaal",
+  "portal.intro": "De tweede app, voor een ander publiek, met een eigen ingang."
+}

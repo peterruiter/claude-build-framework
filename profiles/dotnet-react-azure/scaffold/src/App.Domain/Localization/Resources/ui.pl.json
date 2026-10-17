@@ -1,0 +1,21 @@
+{
+  "app.title": "App",
+  "app.tagline": "Punkt wyjścia: jedno API, dwie aplikacje webowe, jedna baza danych.",
+  "nav.skip": "Przejdź do treści",
+  "nav.home": "Start",
+  "language.label": "Język",
+  "theme.label": "Motyw",
+  "theme.system": "Systemowy",
+  "theme.light": "Jasny",
+  "theme.dark": "Ciemny",
+  "status.checking": "Sprawdzanie serwera",
+  "status.ready": "Serwer jest gotowy.",
+  "status.unreachable": "Serwer nie odpowiada.",
+  "items.count": "{0} elementu",
+  "items.count.one": "{0} element",
+  "items.count.few": "{0} elementy",
+  "items.count.many": "{0} elementów",
+  "items.empty": "Nic tu jeszcze nie ma.",
+  "portal.title": "Portal",
+  "portal.intro": "Druga aplikacja, dla innych odbiorców, z własnym punktem wejścia."
+}

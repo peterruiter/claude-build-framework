@@ -1,0 +1,9 @@
+{
+  "contract": "privacy",
+  "description": "Every table in the database either holds personal data and is covered by an IErasureParticipant (src/App.Data/Erasure.cs), or is listed here with the reason it holds none. ErasureTests fails on a table that is in neither, so a new table cannot ship without that decision. Log redaction: Redact.Url and Redact.Email (src/App.Api/Redact.cs); no person's address, email or name in a log line.",
+  "tablesWithoutPersonalData": {
+    "ops.SchemaMigration": "The migration ledger: file names and hashes.",
+    "ops.RateCounter": "Hashed partitions and counts; the address is hashed, never stored, and rows expire within minutes.",
+    "app.Tag": "Tag names chosen by the product, not about a person."
+  }
+}

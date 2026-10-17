@@ -1,0 +1,23 @@
+{
+  "description": "Pages tests/a11y/axe-pages.mjs checks. path is relative to base. lang: the expected lang attribute (probe). signIn: true needs the signIn module. open: a selector to click before checking (a dialog, a drawer). skipLink: false for pages without repeated blocks. surface groups the summary. themeStorageKey: the localStorage key the app keeps a chosen theme in (so the run sets it), or null.",
+  "base": "http://127.0.0.1:5080",
+  "widths": [
+    1440,
+    390
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "channel": null,
+  "themeStorageKey": null,
+  "known": "known.json",
+  "signIn": null,
+  "pages": [
+    { "surface": "site", "name": "home", "path": "/", "lang": "en" },
+    { "surface": "site", "name": "accessibility-statement", "path": "/accessibility", "lang": "en" },
+    { "surface": "site", "name": "privacy", "path": "/privacy", "lang": "en" },
+    { "surface": "app", "name": "dashboard", "path": "/app/", "signIn": true },
+    { "surface": "app", "name": "settings-dialog", "path": "/app/#settings", "signIn": true, "open": "button[data-opens='settings']" }
+  ]
+}

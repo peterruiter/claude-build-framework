@@ -1,0 +1,19 @@
+{
+  "app.title": "App",
+  "app.tagline": "A starting point: one API, two web apps, one database.",
+  "nav.skip": "Skip to content",
+  "nav.home": "Home",
+  "language.label": "Language",
+  "theme.label": "Theme",
+  "theme.system": "System",
+  "theme.light": "Light",
+  "theme.dark": "Dark",
+  "status.checking": "Checking the server",
+  "status.ready": "The server is ready.",
+  "status.unreachable": "The server does not answer.",
+  "items.count": "{0} items",
+  "items.count.one": "{0} item",
+  "items.empty": "Nothing here yet.",
+  "portal.title": "Portal",
+  "portal.intro": "The second app, for a different audience, with its own entry point."
+}

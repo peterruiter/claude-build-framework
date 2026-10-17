@@ -1,0 +1,14 @@
+{
+  "contract": "locales",
+  "version": "1.0.0",
+  "description": "The languages this product offers. Written by the new-project skill from the owner's answer; edit to add or remove a language, then run the checker. 'source' is the language strings are written in first (the checker's reference); 'default' is the fallback for readers whose language is not offered (not the first entry). The list is in the order every language picker shows: alphabetical by each language's own name (nativeName), accents ignored. 'culture' drives plural rules (CLDR, via Intl.PluralRules) and number and date formats. Counted strings take a key per plural category the language needs besides 'other' (key.one; key.one, key.few and key.many in Polish), with the key itself as 'other'.",
+  "source": "en",
+  "default": "en",
+  "locales": [
+    { "code": "en", "englishName": "English", "nativeName": "English", "culture": "en-GB" },
+    { "code": "nl", "englishName": "Dutch", "nativeName": "Nederlands", "culture": "nl-NL" }
+  ],
+  "namespaces": [
+    { "id": "ui", "description": "Every string in the app's screens, including accessible names." }
+  ]
+}

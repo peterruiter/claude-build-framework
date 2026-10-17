@@ -1,0 +1,13 @@
+# Build and test output from validating the scaffold in place: never committed.
+bin/
+obj/
+artifacts/
+TestResults/
+node_modules/
+scaffold/src/*.Api/wwwroot/app/
+scaffold/src/*.Api/wwwroot/portal/
+load/out/
+*.user
+.vs/
+profile.config.json
+profile.config.local.json

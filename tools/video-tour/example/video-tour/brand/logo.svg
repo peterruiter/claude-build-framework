@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Acme Notes">
+  <rect x="8" y="6" width="44" height="52" rx="8" fill="#34d399"/>
+  <path d="M44 6v12a4 4 0 0 0 4 4h4" fill="none" stroke="#052e1c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M18 30h24M18 39h24M18 48h14" stroke="#052e1c" stroke-width="4" stroke-linecap="round"/>
+</svg>

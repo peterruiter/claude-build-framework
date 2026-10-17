@@ -1,0 +1,8 @@
+{
+  "welcome.subject": "Witamy w {0}",
+  "welcome.body": "Możesz się zalogować pod adresem {0}.",
+  "reminder.items": "Masz {0} otwartego elementu.",
+  "reminder.items.one": "Masz {0} otwarty element.",
+  "reminder.items.few": "Masz {0} otwarte elementy.",
+  "reminder.items.many": "Masz {0} otwartych elementów."
+}

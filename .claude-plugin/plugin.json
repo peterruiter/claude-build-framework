@@ -1,0 +1,11 @@
+{
+  "name": "build-framework",
+  "displayName": "Build Framework",
+  "version": "0.1.0",
+  "description": "A way of building a product with Claude as lead and parallel agents: waves, agent briefs, a quality gate, releases with owner approvals, contracts, every string in every language, What's new per release, polish, security and accessibility passes, honest status docs.",
+  "author": {
+    "name": "Peter Ruiter"
+  },
+  "license": "LicenseRef-Private",
+  "keywords": ["workflow", "agents", "release", "i18n", "accessibility", "security", "changelog"]
+}

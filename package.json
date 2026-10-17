@@ -1,0 +1,14 @@
+{
+  "name": "claude-build-framework",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-test for the build-framework Claude Code plugin: manifests, skills and agents, links, and the project templates against sample data.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\""
+  }
+}

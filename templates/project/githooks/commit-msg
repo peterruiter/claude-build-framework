@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+// Git commit-msg hook: refuses a commit message that carries AI attribution (a Co-Authored-By
+// trailer naming an AI assistant, a "Generated with/by <AI tool>" line, the robot emoji).
+// Standing rule: no AI attribution anywhere. Installed by new-project:
+//   copy to .githooks/commit-msg, then: git config core.hooksPath .githooks
+//   (and on macOS/Linux: chmod +x .githooks/commit-msg; git update-index --chmod=+x .githooks/commit-msg)
+// Node's own modules only (22+: ES module syntax is detected without an extension).
+import { readFileSync } from 'node:fs';
+
+const assistants = String.raw`claude|anthropic|copilot|chatgpt|openai|gpt-?\d|gemini|codeium|cursor|tabnine|amazon q|codewhisperer|an? ai\b|ai assistant`;
+const patterns = [
+  ['a Co-Authored-By trailer naming an AI assistant', new RegExp(String.raw`^.*co-authored-by:.*\b(?:${assistants}).*$`, 'im')],
+  ['a Co-Authored-By trailer with an AI vendor address', /^.*co-authored-by:.*@(?:anthropic|openai)\.com.*$/im],
+  ['a "Generated with/by" line naming an AI tool', new RegExp(String.raw`^.*\b(?:generated|written|created|made)\s+(?:with|by|using)\s*\[?\s*(?:${assistants}).*$`, 'im')],
+  ['the robot emoji attribution', /^.*\u{1F916}.*$/mu],
+];
+
+const file = process.argv[2];
+if (!file) process.exit(0);
+// Lines git strips (comments) do not count.
+const message = readFileSync(file, 'utf8').split(/\r?\n/).filter((line) => !line.startsWith('#')).join('\n');
+for (const [name, pattern] of patterns) {
+  const match = pattern.exec(message);
+  if (match) {
+    console.error(`commit-msg: this message contains ${name}: "${match[0].trim().slice(0, 160)}".`);
+    console.error('The project rule is no AI attribution anywhere. Remove that line and commit again.');
+    process.exit(1);
+  }
+}
+process.exit(0);

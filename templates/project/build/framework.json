@@ -1,0 +1,32 @@
+{
+  "description": "Paths and options for the framework's checker (scripts/check-vocabulary.mjs), contract tests (tests/contracts) and release script (scripts/release-tag.mjs). Paths are relative to the repository root.",
+  "locales": "build/contracts/locales.json",
+  "changelog": "build/contracts/changelog.json",
+  "glossary": "build/contracts/glossary.json",
+  "strings": [
+    { "name": "app", "folder": "src/strings", "file": "{ns}.{code}.json" }
+  ],
+  "identicalLimit": 0.1,
+  "identicalAllowed": [],
+  "pluralNounCheck": true,
+  "neverOne": {},
+  "keyUsage": [],
+  "changelogAreaKey": null,
+  "releasePattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$",
+  "pluralModule": "src/i18n/plural.ts",
+  "theme": {
+    "css": "src/styles/tokens.css",
+    "pairs": [
+      { "fg": "--text", "bg": "--bg", "min": 4.5 },
+      { "fg": "--text", "bg": "--surface", "min": 4.5 },
+      { "fg": "--text-muted", "bg": "--bg", "min": 4.5 },
+      { "fg": "--text-muted", "bg": "--surface", "min": 4.5 },
+      { "fg": "--accent-fg", "bg": "--accent", "min": 4.5 },
+      { "fg": "--accent", "bg": "--bg", "min": 4.5 },
+      { "fg": "--danger-fg", "bg": "--danger", "min": 4.5 },
+      { "fg": "--danger", "bg": "--bg", "min": 4.5 },
+      { "fg": "--ring", "bg": "--bg", "min": 3 },
+      { "fg": "--border", "bg": "--bg", "min": 1.5 }
+    ]
+  }
+}

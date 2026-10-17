@@ -1,0 +1,13 @@
+**/bin
+**/obj
+**/node_modules
+**/TestResults
+.git
+.github
+.vs
+.vscode
+tests/load
+screenshots
+scratch
+infra
+*.md

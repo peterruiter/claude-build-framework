@@ -1,0 +1,16 @@
+{
+  "contract": "glossary",
+  "version": "1.0.0",
+  "description": "One vocabulary per language. Each term fixes the product word in every configured language ('text'); 'avoid' lists variants that must not appear in that language's strings or What's new entries; with 'expect': true a translation must contain the term (or its 'stem', for inflected languages) whenever the source string contains the source term. Add a term the moment two translations disagree. 'notes' records decisions such as the form of address.",
+  "notes": {
+    "nl": "Address the reader with 'je', not 'u'."
+  },
+  "terms": [
+    {
+      "id": "workspace",
+      "text": { "en": "workspace", "nl": "werkruimte" },
+      "avoid": { "nl": ["werkplek"] },
+      "expect": false
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "welcome.subject": "Welkom bij {0}",
+  "welcome.body": "Je kunt je aanmelden op {0}.",
+  "reminder.items": "Je hebt {0} openstaande items.",
+  "reminder.items.one": "Je hebt {0} openstaand item."
+}
