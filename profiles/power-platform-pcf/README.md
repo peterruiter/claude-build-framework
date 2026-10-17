@@ -398,3 +398,15 @@ and a screen reader pass.
 - [GitHub Actions for Power Platform](https://learn.microsoft.com/power-platform/alm/devops-github-available-actions)
 - [Install the Power Platform CLI](https://learn.microsoft.com/power-platform/developer/cli/introduction)
 - [Dataverse languages (LCIDs)](https://learn.microsoft.com/power-platform/admin/language-collations)
+
+## Design system
+
+The project's design system ([docs/design-systems.md](../../docs/design-systems.md)) is generated with the
+`fluent` and `ts` targets into the control's source (for example `<Control>/design-system/`):
+`fluent-theme.ts` exports `brand` (a `BrandVariants` ramp with the brand colour at 80), `lightTheme` and
+`darkTheme`. In a model-driven app the controls keep the host's `tokenTheme` (the app's own theme, branded by
+the solution's `dataverse-theme.xml`); where the host passes none, they use the generated `darkTheme` or
+`lightTheme` by `isDarkTheme` instead of `webDarkTheme`/`webLightTheme`; add the generated themes to
+`tests/theme.test.ts` so their pairs are held to the same ratios (the scaffold does not do this yet). Colours
+outside Fluent controls come from `tokens.ts`, never as literals. Details:
+[PCF code components](../../docs/design-systems.md#pcf-code-components).

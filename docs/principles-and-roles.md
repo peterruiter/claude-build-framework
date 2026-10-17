@@ -29,7 +29,7 @@ commit, push, deploy, or touch cloud resources.
 5. **Every release says what changed** (What's new), in every language.
 6. **Accessible, light and dark, private, sovereign by default**: WCAG 2.2 AA, both themes,
    privacy by design and data in the chosen region are part of every feature's definition of
-   done, not late passes ([accessibility.md](accessibility.md), [theming.md](theming.md),
+   done, not late passes ([accessibility.md](accessibility.md), [design-systems.md](design-systems.md),
    [privacy-and-sovereignty.md](privacy-and-sovereignty.md)).
 7. **Fix flakiness at the root**: no retries to hide an ordering or precision bug.
 8. **Never weaken a real rule to make a demo work.** Make the demo data coherent instead.

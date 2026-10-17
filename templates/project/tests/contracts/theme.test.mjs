@@ -1,7 +1,9 @@
-// Light and dark themes (src/styles/tokens.css): both themes define the same tokens, the system dark
-// block and the explicit data-theme="dark" block agree, and every colour pair listed under "theme"
-// in build/framework.json meets its WCAG contrast ratio in both themes (text 4.5:1, large text and
-// UI parts such as the focus ring 3:1).
+// Light and dark themes, from the design system's generated files (build/framework.json: theme.css is
+// the generated tokens.css, theme.tokens the generated tokens.json). Both themes define the same
+// tokens, the system dark block and the explicit data-theme="dark" block agree, and every colour pair
+// meets its WCAG contrast in both themes (text 4.5:1, large text and UI parts such as the focus ring
+// 3:1): the design system's own pairs (tokens.json contrast.pairs) plus the project's (theme.pairs).
+// The design system's documented exceptions (contrast.known) are reported, not failed.
 // Run: node --test "tests/contracts/*.test.mjs"   (Node's own modules only)
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
@@ -24,7 +26,9 @@ const config = JSON.parse(readFileSync(configPath, 'utf8'));
 const root = resolve(dirname(configPath), config.root ?? '..');
 const theme = config.theme;
 const cssPath = theme?.css ? resolve(root, theme.css) : null;
+const tokensPath = theme?.tokens ? resolve(root, theme.tokens) : null;
 const skip = !cssPath || !existsSync(cssPath) ? 'no theme.css configured in build/framework.json' : false;
+const generated = tokensPath && existsSync(tokensPath) ? JSON.parse(readFileSync(tokensPath, 'utf8')) : null;
 
 /** The custom properties declared in the first rule whose selector matches. */
 function block(css, selector) {
@@ -46,6 +50,7 @@ function luminance(hex) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 const contrast = (a, b) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+const cssName = (name) => (name.startsWith('--') ? name : `--${name}`);
 
 test('both themes define the same tokens, and the two dark blocks agree', { skip }, () => {
   const css = readFileSync(cssPath, 'utf8');
@@ -59,17 +64,29 @@ test('both themes define the same tokens, and the two dark blocks agree', { skip
   assert.deepEqual(chosen, system, 'the system dark block and the data-theme="dark" block are the same');
 });
 
-test('every listed colour pair meets its contrast in light and dark', { skip }, () => {
+test('the generated files come from the design system named in build/framework.json', { skip: skip || (!config.designSystem && 'no designSystem in build/framework.json') }, () => {
+  const { id, out } = config.designSystem;
+  assert.ok(generated, `${theme.tokens} exists (regenerate: scripts/design-system.mjs build ${id} --out ${out})`);
+  assert.equal(generated.designSystem?.id, id, `${theme.tokens} was generated from '${generated.designSystem?.id}', but build/framework.json says '${id}'; regenerate`);
+  assert.ok(readFileSync(cssPath, 'utf8').includes(`design-systems/${id} `), `${theme.css} was generated from another design system than '${id}'; regenerate`);
+});
+
+test('every listed colour pair meets its contrast in light and dark', { skip }, (t) => {
   const css = readFileSync(cssPath, 'utf8');
   const themes = { light: block(css, ':root {') ?? block(css, ':root{'), dark: block(css, ':root[data-theme="dark"]') };
-  assert.ok((theme.pairs ?? []).length > 0, 'build/framework.json lists theme.pairs');
+  const pairs = [...(generated?.contrast?.pairs ?? []), ...(theme.pairs ?? [])];
+  assert.ok(pairs.length > 0, 'pairs to check: the design system\'s (theme.tokens) or the project\'s own (theme.pairs)');
   for (const [name, tokens] of Object.entries(themes)) {
-    for (const pair of theme.pairs) {
-      const fg = tokens[pair.fg];
-      const bg = tokens[pair.bg];
-      assert.ok(fg && bg, `${name}: ${pair.fg} and ${pair.bg} are defined`);
+    for (const pair of pairs) {
+      if (pair.themes && !pair.themes.includes(name)) continue;
+      const fg = tokens[cssName(pair.fg)];
+      const bg = tokens[cssName(pair.bg)];
+      assert.ok(fg && bg, `${name}: ${cssName(pair.fg)} and ${cssName(pair.bg)} are defined`);
       const ratio = contrast(fg, bg);
       assert.ok(ratio >= pair.min, `${name}: ${pair.fg} on ${pair.bg} is ${ratio.toFixed(2)}:1, needs ${pair.min}:1`);
     }
+  }
+  for (const pair of generated?.contrast?.known ?? []) {
+    t.diagnostic(`known exception: ${pair.fg} on ${pair.bg} below ${pair.min}:1 (${pair.reason})`);
   }
 });

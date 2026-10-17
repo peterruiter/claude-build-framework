@@ -385,6 +385,15 @@ deployment: registration and imports are human-approved steps.
 - **Do not fake success in tests with a lenient fake**: the fake organization service refuses all-columns reads
   and records every call so tests can assert "wrote only this column".
 
+## Design system
+
+Plug-ins have no UI, so they use no generated target. What they show (error messages,
+`InvalidPluginExecutionException` texts) is plain text in every configured language and takes its look from
+the app. A plug-in or custom API that builds HTML (an email body, a document) takes its colours from the
+project's generated `email-palette.json` or `office-theme.json`
+([docs/design-systems.md](../../docs/design-systems.md)), copied into the plug-in's resources at build time,
+never typed in.
+
 ## Related guidance elsewhere in the framework
 
 - [docs/integrations-dynamics.md](../../docs/integrations-dynamics.md): calling Dataverse from a product (sign-in,

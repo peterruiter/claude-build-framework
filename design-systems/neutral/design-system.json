@@ -1,0 +1,87 @@
+{
+  "id": "neutral",
+  "name": "Neutral",
+  "version": "1.0.0",
+  "description": "The framework's own default: no brand, system fonts, one blue accent, light and dark. For projects without a brand of their own.",
+  "source": {
+    "note": "Made for the build framework; there is no Claude Design System artifact behind it. A project with a brand of its own adds that brand as a new design system (skills/design-system).",
+    "origin": "templates/project/src/styles/tokens.css as it was before design systems existed"
+  },
+  "licence": {
+    "brand": "No brand. Free to use in any project.",
+    "fonts": "No fonts shipped; the system's own fonts are used."
+  },
+  "files": {
+    "tokens": "tokens.json",
+    "readme": "README.md"
+  },
+  "brandColor": "accent@light",
+  "roles": {
+    "background": "bg",
+    "surface": "surface",
+    "text": "text",
+    "textMuted": "text-muted",
+    "textInverse": "accent-fg",
+    "border": "border",
+    "accent": "accent",
+    "link": "accent",
+    "focus": "ring",
+    "danger": "danger",
+    "heavy": "accent",
+    "textOnHeavy": "accent-fg",
+    "heavyHover": "#1d47a8",
+    "heavyPressed": "#173a8a",
+    "heavySelected": "#173a8a"
+  },
+  "contrast": {
+    "pairs": [
+      { "fg": "text", "bg": "bg", "min": 4.5 },
+      { "fg": "text", "bg": "surface", "min": 4.5 },
+      { "fg": "text-muted", "bg": "bg", "min": 4.5 },
+      { "fg": "text-muted", "bg": "surface", "min": 4.5 },
+      { "fg": "accent-fg", "bg": "accent", "min": 4.5 },
+      { "fg": "accent", "bg": "bg", "min": 4.5 },
+      { "fg": "accent", "bg": "surface", "min": 4.5 },
+      { "fg": "danger-fg", "bg": "danger", "min": 4.5 },
+      { "fg": "danger", "bg": "bg", "min": 4.5 },
+      { "fg": "danger", "bg": "surface", "min": 4.5 },
+      { "fg": "ring", "bg": "bg", "min": 3 },
+      { "fg": "ring", "bg": "surface", "min": 3 },
+      { "fg": "border", "bg": "bg", "min": 1.5 }
+    ],
+    "known": []
+  },
+  "charts": {
+    "source": "Chosen for this system: the accent first, then hues far apart for colour-blind readers. Dark: lighter versions of the same hues.",
+    "light": ["accent", "#c2410c", "#0f766e", "#a21caf", "#4d7c0f", "#b45309", "#6d28d9", "#be123c"],
+    "dark": ["accent", "#fdba74", "#5eead4", "#f0abfc", "#bef264", "#fcd34d", "#c4b5fd", "#fda4af"]
+  },
+  "video": {
+    "background": "bg@dark",
+    "backgroundAlt": "surface@dark",
+    "accent": "accent@dark",
+    "accentAlt": "#5f8dff",
+    "text": "text@dark",
+    "textMuted": "text-muted@dark",
+    "onAccent": "accent-fg@dark",
+    "highlight": "#fbbf24",
+    "font": { "family": "Segoe UI", "file": null }
+  },
+  "office": {
+    "fonts": { "major": "Aptos Display", "minor": "Aptos" },
+    "colors": {
+      "dk1": "text@light",
+      "lt1": "bg@light",
+      "dk2": "accent-fg@dark",
+      "lt2": "surface@light",
+      "accent1": "accent@light",
+      "accent2": "#c2410c",
+      "accent3": "#0f766e",
+      "accent4": "#a21caf",
+      "accent5": "#4d7c0f",
+      "accent6": "#b45309",
+      "hlink": "accent@light",
+      "folHlink": "#6d28d9"
+    }
+  }
+}

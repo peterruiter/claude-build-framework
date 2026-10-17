@@ -12,6 +12,7 @@ agreed). This file holds the standing rules; they apply to the lead session and 
 | Owner | {{OWNER_NAME}} |
 | Repository | {{GITHUB_URL}} ({{VISIBILITY}}) |
 | Profile | {{PROFILE}} |
+| Design system | {{DESIGN_SYSTEM}}; generated files in the `designSystem.out` folder of `build/framework.json` |
 | Languages | See `build/contracts/locales.json` (source: {{SOURCE_LANGUAGE}}) |
 | Data residency | {{DATA_RESIDENCY}} (hosting, database, storage, backups, logs, vault, AI endpoints) |
 | Cloud account | {{CLOUD_ACCOUNT_PLACEHOLDER}}; always pass it explicitly |
@@ -40,6 +41,10 @@ agreed). This file holds the standing rules; they apply to the lead session and 
   1440.
 - **Light and dark**: colour tokens only; `prefers-color-scheme` plus `data-theme` override; the
   theme contrast test passes.
+- **One design system for every output**: colours, fonts, logos, chart series, email and document
+  styles come from the project's design system's generated files, never typed in by hand. Never
+  edit generated files; regenerate. Follow the design system's brand book and, where it has one,
+  its brand use rules (`BRAND-USE.md` next to the generated files).
 - **Privacy by design**: minimal data, purpose per field, consent where needed, no personal data in
   logs, erasure covers every new table, retention set, small groups suppressed.
 - **Data stays in {{DATA_RESIDENCY}}**: before adding a service that moves personal data
@@ -59,6 +64,8 @@ agreed). This file holds the standing rules; they apply to the lead session and 
 
 - `node scripts/check-vocabulary.mjs`
 - `node --test "tests/contracts/*.test.mjs"`
+- The design system's own check (`scripts/design-system.mjs check <id>` from the build-framework
+  plugin; the quality-gate skill runs it).
 - `node tests/a11y/axe-pages.mjs --probes` (UI changes, against a local run)
 - Screenshots: languages × 390/1440 × light/dark, looked at.
 

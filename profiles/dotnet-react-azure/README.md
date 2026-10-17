@@ -185,6 +185,27 @@ owner's go per run, never production.
 - `npm run axe` runs axe-core (WCAG 2.2 AA tags) over the apps in both themes and two widths, and flags
   sideways scrolling. Not in CI by default (it needs a browser and a running API).
 
+## Design system
+
+The project's design system ([docs/design-systems.md](../../docs/design-systems.md)) is generated with the
+targets `css`, `ts`, `email` and `charts` (plus `video` with video tours, `office` for documents) into
+`src/web/src/styles/design-system/` (`designSystem.out` in `build/framework.json`):
+
+- `tokens.css` is imported first in `src/main.tsx` and `portal/src/main.tsx`, before `styles/tokens.css` and
+  `base.css`; with it come the fonts (served from the app, never a font CDN) and the logos.
+- The scaffold's own names (`--color-bg`, `--color-text`, ...) in `styles/tokens.css` point at the roles:
+  `--color-bg: var(--ds-background)`, `--color-surface: var(--ds-surface)`, `--color-text: var(--ds-text)`,
+  `--color-text-muted: var(--ds-text-muted)`, `--color-link: var(--ds-link)`, `--color-accent: var(--ds-accent)`,
+  `--color-on-accent: var(--ds-text-inverse)`, `--color-danger: var(--ds-danger)`,
+  `--color-border: var(--ds-divider)`, `--color-focus: var(--ds-focus)`. `tests/contrast.test.mjs` then
+  checks the generated `tokens.json` (`roles` per theme) instead of hex values in `styles/tokens.css`,
+  and the framework's theme contract test checks the design system's own pairs. Not wired in the scaffold
+  yet: the first project that uses a design system other than `neutral` makes this change.
+- Emails (`Resources/email.*`): the colours of `email-palette.json`, light inline and dark in the
+  `prefers-color-scheme` block; the PNG logo from the generated `logos/`, served by the app.
+- Charts: series from `chart-palette.json` (or `role()`/`color()` from `tokens.ts`), each chart with a table.
+- Favicons and app icons from the design system's mark, per its logo rules.
+
 ## Privacy
 
 - Logs carry why, never who: `Redact.Url` (scheme and host only), `Redact.Email` (domain only),

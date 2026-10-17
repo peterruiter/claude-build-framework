@@ -1,0 +1,72 @@
+<!-- @dsCard height=288 -->
+<div id="cover">
+  <!--
+    Blocks: brand-capgemini-blue 152x240 slab, brand-turquoise 112x112, brand-light-blue 136x112,
+            brand-purple 264x112 — all rx radius-pill (24px), gaps space-2 (8px) and space-4 (16px).
+    Arrangement: one tall slab at x=504 with three satellites stacked to its right, the whole group
+            inside the 480-960 box, name zone left of it untouched.
+    Pattern: arcs — the Capgemini mark is a single swooping stroke, so three concentric quarter
+            arcs cut in page-background sweep out of the purple block's lower-left corner.
+    Scales: x/y steps 8px and 24px (space-2, space-6), arc radii 64/104/144 = 8px multiples,
+            stroke space-2 (8px), every corner radius-pill (24px).
+  -->
+  <svg viewBox="0 0 960 288" width="960" height="288" role="img" aria-label="Capgemini design system">
+    <defs>
+      <clipPath id="cv-purple"><rect x="672" y="152" width="264" height="112" rx="24"/></clipPath>
+    </defs>
+    <rect class="tile azur"   x="504" y="24"  width="152" height="240"/>
+    <rect class="tile aqua"   x="672" y="24"  width="112" height="112"/>
+    <rect class="tile sky"    x="800" y="24"  width="136" height="112"/>
+    <rect class="tile violet" x="672" y="152" width="264" height="112"/>
+    <g clip-path="url(#cv-purple)" fill="none" class="cut">
+      <path d="M672 200 A 64 64 0 0 1 736 264"/>
+      <path d="M672 160 A 104 104 0 0 1 776 264"/>
+      <path d="M672 120 A 144 144 0 0 1 816 264"/>
+    </g>
+    <circle class="dot" cx="580" cy="96"  r="24"/>
+    <circle class="dot" cx="580" cy="168" r="24"/>
+  </svg>
+  <div class="plate">
+    <div class="name">Capgemini<br>Zodiak</div>
+    <div class="tag">Get the future you want</div>
+  </div>
+</div>
+<style>
+  html, body { margin: 0; padding: 0; }
+  #cover {
+    position: relative;
+    width: 960px;
+    height: 288px;
+    background: var(--page-background);
+    font-family: var(--font-sans, Ubuntu, sans-serif);
+    overflow: hidden;
+  }
+  #cover svg { position: absolute; inset: 0; display: block; }
+  .tile { rx: var(--radius-pill); }
+  .azur   { fill: var(--brand-capgemini-blue); }
+  .aqua   { fill: var(--brand-turquoise); }
+  .sky    { fill: var(--brand-light-blue); }
+  .violet { fill: var(--brand-purple); }
+  .dot    { fill: var(--brand-light-blue); }
+  .cut    { stroke: var(--page-background); stroke-width: 8; }
+  .plate {
+    position: absolute;
+    left: 48px;
+    bottom: 40px;
+    width: 440px;
+  }
+  .name {
+    font-size: 80px;
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.4px;
+    color: var(--text-primary);
+  }
+  .tag {
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.196px;
+    color: var(--text-secondary);
+  }
+</style>

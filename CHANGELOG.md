@@ -4,6 +4,20 @@ All notable changes to the `build-framework` plugin. Users receive a new copy on
 `version` in `.claude-plugin/plugin.json` changes, so bump it with every change worth shipping and
 add a section here.
 
+## 0.2.0 (2026-10-17)
+
+- Profiles for Power Apps component framework (PCF) controls, Dataverse plug-ins and large Dataverse
+  solutions, next to .NET + React + Azure; a CI workflow generates a project from every profile and
+  runs its own gate on GitHub runners.
+- Tools check: every profile lists its tools with minimum versions and install commands per OS;
+  new-project and quality-gate check them first; skill check-tools.
+- Design systems: design-systems/ with a corporate design system and a neutral default; one generator
+  (scripts/design-system.mjs) turns the tokens into CSS (light and dark), TypeScript, a Fluent UI
+  theme, a model-driven app theme, email and chart palettes, the video tour brand and an Office
+  theme mapping; new-project asks which design system; the quality gate checks contrast in both
+  themes; skill design-system.
+- A commit guard (plugin hook and a project commit-msg hook) refuses AI attribution lines.
+
 ## 0.1.0 (2026-10-17)
 
 First version.

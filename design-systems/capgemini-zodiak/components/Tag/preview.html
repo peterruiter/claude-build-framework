@@ -1,0 +1,31 @@
+<!-- @dsCard group="Content" height=144 -->
+<div id="root"></div>
+<style>
+  body { margin: 0; padding: 24px; background: var(--page-background); font-family: var(--font-sans); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+  .stack { display: flex; flex-direction: column; gap: 24px; }
+  .heavy { background: var(--surface-azur-heavy); padding: 24px; border-radius: var(--radius-sm); }
+  .cap { color: var(--text-secondary); font-size: 12px; margin-bottom: 8px; }
+</style>
+<script>
+  var C = window.CapgeminiZodiak;
+  var h = React.createElement;
+
+  function Demo() {
+    var s = React.useState(['Cloud','Data & AI','Sustainability']);
+    var tags = s[0], set = s[1];
+    return h('div', {className:'stack'},
+      h('div', {className:'row', style:{gap:0}},
+        tags.map(function(t){
+          return h(C.Tag, {key:t, onRemove:function(){ set(tags.filter(function(x){return x!==t;})); }}, t);
+        })
+      ),
+      h('div', {className:'row', style:{gap:0}},
+        h(C.Tag, {quiet:true}, 'Report'),
+        h(C.Tag, {quiet:true}, '12 min read')
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>

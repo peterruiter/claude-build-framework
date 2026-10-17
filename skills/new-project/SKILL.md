@@ -1,6 +1,6 @@
 ---
 name: new-project
-description: Start a new project with the build framework in the current folder or repository. Asks the owner for the languages (and source language), data residency, stack profile and GitHub repository visibility/description, then scaffolds CLAUDE.md, STATE.md, ROADMAP.md (with the Operations readiness wave), build/contracts (languages, glossary, changelog), the vocabulary checker, release script, contract and stand-in tests, light/dark tokens, accessibility and load-test templates, creates the GitHub repo with gh, pushes and watches CI until green. Use when the user says "new project", "start a project", "scaffold", "set up the framework here" or "bootstrap".
+description: Start a new project with the build framework in the current folder or repository. Asks the owner for the languages (and source language), data residency, stack profile, design system (the look of every output, from design-systems/) and GitHub repository visibility/description, then scaffolds CLAUDE.md, STATE.md, ROADMAP.md (with the Operations readiness wave), build/contracts (languages, glossary, changelog), the vocabulary checker, release script, contract and stand-in tests, light/dark tokens generated from the design system, accessibility and load-test templates, creates the GitHub repo with gh, pushes and watches CI until green. Use when the user says "new project", "start a project", "scaffold", "set up the framework here" or "bootstrap".
 argument-hint: "[project name]"
 ---
 
@@ -33,8 +33,20 @@ Ask with the AskUserQuestion tool if available, otherwise as a numbered list:
    code components), `dataverse-plugins` (plug-ins and custom APIs). A Dataverse product usually
    combines `dataverse-solution` with the PCF and plug-in profiles (and `dotnet-react-azure` for
    side services): offer the combination.
-5. **GitHub repository**: name (default: folder name), **private (recommended) or public**,
-   topics (suggest 3–5).
+5. **Design system**: the look of everything the project makes (web UI, code components,
+   model-driven apps, emails, charts, documents, slides, videos, icons). List the systems with
+   `node "${CLAUDE_PLUGIN_ROOT}/scripts/design-system.mjs" list` (each folder's README.md is its
+   brand book). **Recommend the owner's org default** when their Claude account has one that
+   matches a folder: if the Artifact tool is available, its quickstart (`intent: "design"`) lists
+   the account's design systems and marks the default; match it on the name or on
+   `source.claudeArtifact` in `design-system.json` (an owner whose org default is Capgemini
+   Zodiak gets `capgemini-zodiak` recommended). Otherwise recommend `neutral`. A branded system
+   comes with its `README-USE.md`: say in one line who may use it (Capgemini Zodiak is for
+   Capgemini work only, and its repositories stay private) and offer `neutral` when the project is
+   not that brand's work. "The client's own brand" is an answer too: scaffold with `neutral` and
+   add the brand later with `/build-framework:design-system`.
+6. **GitHub repository**: name (default: folder name), **private (recommended) or public**,
+   topics (suggest 3–5). A branded design system whose use rules say private: private only.
 
 Do not continue until these are answered. Record the answers.
 
@@ -79,6 +91,16 @@ Then:
   the form of address (`notes`).
 - **What's new areas**: ask or propose 3–5 areas for `changelog.json`; leave `entries` empty.
 - Add the data residency to CLAUDE.md, STATE.md (data flows) and ROADMAP.md (Decisions).
+- **Design system**: set `designSystem` in `build/framework.json` (`id`, `out`: where the app keeps
+  its styles, default `src/styles/design-system`; `targets`: always `css` and `ts`, plus per
+  profile: `dotnet-react-azure` adds `email` and `charts`, `power-platform-pcf` adds `fluent`,
+  `dataverse-solution` adds `dataverse`, `email` and `charts`; add `video` with video tours and
+  `office` when the project writes documents), point `theme.css` and `theme.tokens` at the
+  generated `tokens.css` and `tokens.json`, keep `theme.pairs` empty, and generate:
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/design-system.mjs" build <id> --out <out> --targets <targets>`
+  (it replaces the template's neutral files when the id differs). Fill `{{DESIGN_SYSTEM}}` in
+  CLAUDE.md with the name, id and version, and add it to ROADMAP.md (Decisions). Each profile's
+  README says where its targets go; the method is in `${CLAUDE_PLUGIN_ROOT}/docs/design-systems.md`.
 - **Profile**: if chosen, follow that profile's README to add its scaffold (build, database,
   infrastructure, CI, gate commands), and put its gate and run commands into CLAUDE.md
   (`{{GATE_COMMANDS}}`, `{{PROFILE_COMMANDS}}`). Do not copy anything the profile marks optional
@@ -88,6 +110,7 @@ Then:
 ## 4. Check locally
 
 ```
+node "${CLAUDE_PLUGIN_ROOT}/scripts/design-system.mjs" check <design system id>
 node scripts/check-vocabulary.mjs
 node --test "tests/contracts/*.test.mjs"
 node --test "tests/standins/*.test.mjs"
@@ -116,6 +139,6 @@ gh run watch <run-id> --exit-status
 ## 6. Report
 
 A short report: what was created (tree of top-level files), the languages (in picker order) and
-source, data residency, profile, the repo URL and visibility, CI run URL and result, and next
+source, data residency, profile, design system (name, id, version, and the targets generated), the repo URL and visibility, CI run URL and result, and next
 steps: "tell me what to build first, then `/build-framework:plan-wave`". Mention that the
 Operations readiness wave is in ROADMAP.md for before the first real users.

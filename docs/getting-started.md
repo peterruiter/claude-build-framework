@@ -125,7 +125,10 @@ multiple choice with a recommendation first:
 2. **Data residency**: where personal data may live (EU by default, a country, or none). It sets
    the regions for hosting, database, storage, backups, logs, vault and AI endpoints.
 3. **Profile**: the stack (for example `dotnet-react-azure`) or "none" for stack-neutral only.
-4. **GitHub repository**: name, private (default) or public, a one-line description, topics.
+4. **Design system**: the look of everything the project makes, from
+   [`design-systems/`](../design-systems/README.md): your account's org default design system when
+   there is one, otherwise `neutral` ([design-systems.md](design-systems.md)).
+5. **GitHub repository**: name, private (default) or public, a one-line description, topics.
 
 Claude then scaffolds `CLAUDE.md`, `STATE.md`, `ROADMAP.md`, the contracts, the checker and
 tests, runs them, creates the GitHub repository (`gh repo create … --private --description …`),

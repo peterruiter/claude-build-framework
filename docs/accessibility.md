@@ -11,7 +11,7 @@ when few other agents run, with "small targeted edits" rules.
 - **Keyboard**: everything reachable and usable; no traps except dialogs (which return focus).
 - **Focus visible** (2.4.7) with ≥ 3:1 ring, and **not obscured** by sticky bars (2.4.11).
 - **Labels and names** for every control, translated; icon buttons have accessible names.
-- **Contrast**: text 4.5:1, UI parts 3:1, in **light and dark** ([theming.md](theming.md)).
+- **Contrast**: text 4.5:1, UI parts 3:1, in **light and dark** ([design-systems.md](design-systems.md#light-and-dark)).
 - **Target size** at least 24×24 px or spaced (2.5.8).
 - **Reduced motion** honoured (2.3.3).
 - **`lang`** on the page and on content in another language (3.1.1, 3.1.2).

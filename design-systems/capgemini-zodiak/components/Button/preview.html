@@ -1,0 +1,36 @@
+<!-- @dsCard group="Actions" height=232 -->
+<div id="root"></div>
+<style>
+  body { margin: 0; padding: 24px; background: var(--page-background); font-family: var(--font-sans); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+  .stack { display: flex; flex-direction: column; gap: 24px; }
+  .heavy { background: var(--surface-azur-heavy); padding: 24px; border-radius: var(--radius-sm); }
+  .cap { color: var(--text-secondary); font-size: 12px; margin-bottom: 8px; }
+</style>
+<script>
+  var C = window.CapgeminiZodiak;
+  var h = React.createElement;
+
+  function Demo() {
+    return h('div', {className:'stack'},
+      h('div', null,
+        h('div', {className:'cap'}, 'On light grounds'),
+        h('div', {className:'row'},
+          h(C.Button, null, 'Read the report'),
+          h(C.Button, {icon:true}, 'Explore our work'),
+          h(C.Button, {variant:'secondary', size:'sm'}, 'Filter'),
+          h(C.Button, {disabled:true}, 'Unavailable')
+        )
+      ),
+      h('div', {className:'heavy'},
+        h('div', {className:'cap', style:{color:'var(--text-always-white)'}}, 'On surface-azur-heavy'),
+        h('div', {className:'row'},
+          h(C.Button, {tone:'heavy'}, 'Get in touch'),
+          h(C.Button, {tone:'heavy', icon:true, size:'sm'}, 'Learn more')
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>

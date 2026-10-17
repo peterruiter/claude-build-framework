@@ -1,0 +1,25 @@
+<!-- @dsCard group="Disclosure" height=300 -->
+<div id="root"></div>
+<style>
+  body { margin: 0; padding: 24px; background: var(--page-background); font-family: var(--font-sans); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+  .stack { display: flex; flex-direction: column; gap: 24px; }
+  .heavy { background: var(--surface-azur-heavy); padding: 24px; border-radius: var(--radius-sm); }
+  .cap { color: var(--text-secondary); font-size: 12px; margin-bottom: 8px; }
+</style>
+<script>
+  var C = window.CapgeminiZodiak;
+  var h = React.createElement;
+
+  function Demo() {
+    return h('div', {style:{maxWidth:'640px'}},
+      h(C.Accordion, {defaultOpen:0, items:[
+        {title:'What does the engagement cover?', content:'Discovery, architecture, build and run. Each phase has its own exit criteria and a named architect.'},
+        {title:'How long does it take?', content:'A first release lands in eight to twelve weeks, depending on how many source systems are in scope.'},
+        {title:'Who owns the code?', content:'You do. Everything is handed over in your own repositories at the end of each phase.'}
+      ]})
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>

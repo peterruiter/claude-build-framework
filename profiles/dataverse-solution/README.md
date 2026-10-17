@@ -228,6 +228,28 @@ responsibility:
 - Test per role with keyboard only and with a screen reader on the main journeys; record what
   was tested in STATE.md. Framework method: [docs/accessibility.md](../../docs/accessibility.md).
 
+## Design system
+
+The project's design system ([docs/design-systems.md](../../docs/design-systems.md)) is generated with the
+targets `dataverse`, `email` and `charts` (plus `css` and `ts` for web resources and the theme contract
+test, `office` for documents) into `design-system/` (`designSystem.out` in `build/framework.json`):
+
+- **Model-driven apps**: `dataverse-theme.xml` is a modern-look `CustomTheme` (the brand ramp in all 16
+  slots, the font, and `AppHeaderColors` for every header state, each checked at 4.5:1). Add it to the
+  core solution as a **Data (XML)** web resource and add the **Custom theme definition** setting with
+  that web resource's name as the environment value (or `dataverse-app-header.xml` with **Override app
+  header color** for the header only). Commit the unpacked web resource; regenerate and repack when the
+  design system changes. A logo goes in as an image web resource (about 156 × 48, the lockup for the
+  header's background) named in `logoWebResource`. No dark mode and no web fonts in model-driven apps.
+- **Web resources and custom pages**: `tokens.css` (with its fonts) for HTML web resources; custom
+  pages do not take the modern theme yet, so use the palette's values there.
+- **Email templates** (Dataverse email templates, Power Automate mails): the colours of
+  `email-palette.json`, inline.
+- **Charts and dashboards**: series in the order of `chart-palette.json`; system charts carry their
+  colours in the chart XML.
+- **PCF controls** follow the host theme ([PCF profile](../power-platform-pcf/), and
+  [PCF code components](../../docs/design-systems.md#pcf-code-components)).
+
 ## Privacy and data sovereignty
 
 - **Geo**: a Dataverse environment's data stays in the region it was created in. Create every

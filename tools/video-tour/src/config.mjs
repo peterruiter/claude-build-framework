@@ -4,6 +4,8 @@
 // named at run time.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { setLanguages } from './util.mjs';
 
 export const CONFIG_NAME = 'video-tour.config.json';
@@ -121,6 +123,27 @@ export function findConfig(explicit) {
   }
 }
 
+/**
+ * `brand: { designSystem: "<id>" }`: the brand block of a design system, resolved through the build
+ * framework's scripts/design-system.mjs (`show <id> --target video`, paths absolute). The design
+ * systems are looked for in `brand.designSystemsDir` (relative to the config), then
+ * <config folder>/design-systems, then the framework this tool sits in (tools/video-tour ->
+ * ../../design-systems); the script next to that folder (../scripts/design-system.mjs) or the
+ * framework's. Colours, font or logo set beside `designSystem` override the design system's.
+ */
+export function designSystemBrand(id, designSystemsDir, configRoot) {
+  const framework = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+  const folders = [designSystemsDir && resolve(configRoot, designSystemsDir), join(configRoot, 'design-systems'), join(framework, 'design-systems')].filter(Boolean);
+  const folder = folders.find((one) => existsSync(join(one, id, 'design-system.json')));
+  if (!folder) throw new Error(`brand.designSystem '${id}': no design-systems/${id}/design-system.json in ${folders.join(', ')} (set brand.designSystemsDir)`);
+  const script = [join(folder, '..', 'scripts', 'design-system.mjs'), join(framework, 'scripts', 'design-system.mjs')].find((one) => existsSync(one));
+  if (!script) throw new Error(`brand.designSystem '${id}': scripts/design-system.mjs not found next to ${folder} or in the framework`);
+  const run = spawnSync(process.execPath, [script, 'show', id, '--target', 'video', '--root', folder], { encoding: 'utf8' });
+  if (run.status !== 0) throw new Error(`brand.designSystem '${id}': ${(run.stderr || run.stdout).trim()}`);
+  const { colors, font, logo } = JSON.parse(run.stdout);
+  return { colors, font, logo };
+}
+
 let current = null;
 
 /** Loads (once) and returns the config, with absolute paths under `config.dirs`. */
@@ -129,6 +152,10 @@ export function loadConfig(explicit) {
   const file = findConfig(explicit);
   if (!file) throw new Error(`No ${CONFIG_NAME} here or above. Run "video-tour init" or pass --config <file>.`);
   const raw = JSON.parse(readFileSync(file, 'utf8'));
+  if (raw.brand?.designSystem) {
+    const { designSystem, designSystemsDir, ...own } = raw.brand;
+    raw.brand = { ...merge(designSystemBrand(designSystem, designSystemsDir, dirname(file)), own), designSystem };
+  }
   const config = merge(DEFAULTS, raw);
   config.file = file;
   config.root = dirname(file);

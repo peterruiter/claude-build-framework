@@ -1,6 +1,6 @@
 ---
 name: quality-gate
-description: Run the full quality gate and report every step with numbers - tests, release build with the pinned toolchain, front-end builds, vocabulary/translation checker for every configured language, contract tests (changelog, languages, plurals, light/dark theme contrast), accessibility (axe in light and dark at 390/1440), screenshots, privacy and data-residency checks, What's new, and CI green. Profile-aware. Use before reporting work as done, before a release, or when the user says "run the gate", "run all checks", "is it green", "verify".
+description: Run the full quality gate and report every step with numbers - tests, release build with the pinned toolchain, front-end builds, vocabulary/translation checker for every configured language, contract tests (changelog, languages, plurals, light/dark theme contrast), the design system check (names, both themes, documented contrast pairs), accessibility (axe in light and dark at 390/1440), screenshots, privacy and data-residency checks, What's new, and CI green. Profile-aware. Use before reporting work as done, before a release, or when the user says "run the gate", "run all checks", "is it green", "verify".
 argument-hint: "[--release] [scope]"
 ---
 
@@ -27,7 +27,8 @@ Reference: `${CLAUDE_PLUGIN_ROOT}/docs/quality-gate.md`.
 | 2 | Release build with the image's exact toolchain (temporary pin, removed afterwards) | profile |
 | 3 | Front-end type check and production builds | profile |
 | 4 | Vocabulary | `node scripts/check-vocabulary.mjs` |
-| 5 | Contracts | `node --test "tests/contracts/*.test.mjs"` |
+| 5 | Contracts (includes the theme contrast test on the generated tokens, in light and dark) | `node --test "tests/contracts/*.test.mjs"` |
+| 5b | Design system: the project's system (`designSystem.id` in `build/framework.json`) passes its own check; report its known exceptions and findings as they are | `node "${CLAUDE_PLUGIN_ROOT}/scripts/design-system.mjs" check <id>` |
 | 6 | Stand-ins | `node --test "tests/standins/*.test.mjs"` |
 | 7 | Accessibility (UI changed) | `node tests/a11y/axe-pages.mjs --probes` against a local run (light/dark, 390/1440) |
 | 8 | Screenshots (UI changed) | languages × 390/1440 × light/dark; look at them |

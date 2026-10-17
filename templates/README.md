@@ -21,7 +21,7 @@ stack's build) is in a profile, for example [`profiles/dotnet-react-azure/`](../
 | `scripts/check-vocabulary.mjs` | same | Translations, plurals (CLDR), glossary, key usage |
 | `scripts/release-tag.mjs` | same | Sets `release` on What's new entries |
 | `src/i18n/plural.ts` | wherever the app keeps i18n (update `pluralModule`) | Plural selection helper |
-| `src/styles/tokens.css` | the app's stylesheet folder (update `theme.css`) | Light/dark colour tokens |
+| `src/styles/design-system/` (`tokens.css`, `tokens.json`, `tokens.ts`) | the app's stylesheet folder (update `designSystem.out`, `theme.css`, `theme.tokens`) | Generated from the `neutral` design system; `new-project` regenerates them from the chosen one (`scripts/design-system.mjs`) |
 | `src/strings/ui.*.json` | the app's strings folder (update `strings`) | Sample bundles |
 | `tests/contracts/*.test.mjs` | same | Changelog, languages and plurals, theme contrast |
 | `tests/standins/standin.mjs` + `example-service.mjs` (+ test) | same | Generic stand-in server and an example service |

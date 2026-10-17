@@ -1,0 +1,23 @@
+<!-- @dsCard group="Forms" height=264 -->
+<div id="root"></div>
+<style>
+  body { margin: 0; padding: 24px; background: var(--page-background); font-family: var(--font-sans); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+  .stack { display: flex; flex-direction: column; gap: 24px; }
+  .heavy { background: var(--surface-azur-heavy); padding: 24px; border-radius: var(--radius-sm); }
+  .cap { color: var(--text-secondary); font-size: 12px; margin-bottom: 8px; }
+</style>
+<script>
+  var C = window.CapgeminiZodiak;
+  var h = React.createElement;
+
+  function Demo() {
+    return h('div', {className:'stack', style:{maxWidth:'420px'}},
+      h(C.Input, {label:'Work email', placeholder:'name@company.com', hint:'We only use this to send the report.'}),
+      h(C.Input, {label:'Company', defaultValue:'Capgemini', size:'lg'}),
+      h(C.Input, {label:'Phone', defaultValue:'06', error:'Enter a full phone number.'})
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>

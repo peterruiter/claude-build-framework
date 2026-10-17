@@ -21,7 +21,7 @@ Read in this order the first time; afterwards use it as a reference.
 | Polish rounds | [polish-rounds.md](polish-rounds.md) |
 | Security review checklist | [security-review.md](security-review.md) |
 | Accessibility (WCAG 2.2 AA from day one) | [accessibility.md](accessibility.md) |
-| Light and dark themes | [theming.md](theming.md) |
+| Design systems: one system for every output, light and dark themes | [design-systems.md](design-systems.md) |
 | Privacy by design and data sovereignty | [privacy-and-sovereignty.md](privacy-and-sovereignty.md) |
 | Testing patterns | [testing.md](testing.md) |
 | Operations readiness: monitoring, backups, restore drill, rate limits, load tests | [operations.md](operations.md) |

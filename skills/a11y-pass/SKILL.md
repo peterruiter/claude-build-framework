@@ -6,7 +6,7 @@ argument-hint: "[surfaces or pages]"
 
 # Accessibility pass
 
-Reference: `${CLAUDE_PLUGIN_ROOT}/docs/accessibility.md` and `${CLAUDE_PLUGIN_ROOT}/docs/theming.md`.
+Reference: `${CLAUDE_PLUGIN_ROOT}/docs/accessibility.md` and `${CLAUDE_PLUGIN_ROOT}/docs/design-systems.md`.
 WCAG 2.2 AA is part of every feature's definition of done; this pass is the full sweep on top.
 
 ## 1. Set up

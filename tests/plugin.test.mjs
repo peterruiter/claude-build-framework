@@ -103,12 +103,31 @@ const forbidden = [
 // Short names checked as whole words only.
 const forbiddenWords = [['u', 'wv'], ['n', 'za'], ['r', 'vdk']].map((parts) => new RegExp(`\\b${parts.join('')}\\b`));
 
+// One brand is a design system the framework ships, for that brand's own work. Its name may appear
+// in that design system's folder and where the system has to be named: the README's list,
+// docs/design-systems.md and the skills that offer it. Everywhere else it stays forbidden, and every
+// other name stays forbidden everywhere, those places included.
+const brand = ['cap', 'gemini'].join('');
+const brandAllowed = (path) => path.startsWith(`design-systems/${brand}-zodiak/`)
+  || ['README.md', 'docs/design-systems.md', 'skills/new-project/SKILL.md', 'skills/design-system/SKILL.md'].includes(path);
+
+test('the brand design system may be named only in its own folder and where it is offered', () => {
+  assert.ok(forbidden.includes(brand), 'the brand stays on the forbidden list');
+  assert.ok(brandAllowed(`design-systems/${brand}-zodiak/README.md`));
+  for (const path of ['docs/theming.md', 'docs/README.md', 'design-systems/README.md', 'design-systems/neutral/README.md', `design-systems/${brand}-other/x.md`, 'scripts/design-system.mjs', 'profiles/dotnet-react-azure/README.md', 'tools/video-tour/README.md', 'templates/project/CLAUDE.md']) {
+    assert.ok(!brandAllowed(path), `${path} may not name the brand`);
+  }
+});
+
 test('no file names the projects this was practised on, and nothing carries AI attribution', () => {
   const found = [];
   for (const file of walk(root)) {
-    if (/\.(png|jpe?g|gif|webp|mp4|webm|mp3|wav|ico|woff2?|zip)$/i.test(file)) continue;
+    if (/\.(png|jpe?g|gif|webp|mp4|webm|mp3|wav|ico|woff2?|zip|pdf)$/i.test(file)) continue;
     const text = readFileSync(file, 'utf8').toLowerCase();
-    for (const phrase of forbidden) if (text.includes(phrase)) found.push(`${rel(file)}: "${phrase}"`);
+    for (const phrase of forbidden) {
+      if (phrase === brand && brandAllowed(rel(file))) continue;
+      if (text.includes(phrase)) found.push(`${rel(file)}: "${phrase}"`);
+    }
     for (const word of forbiddenWords) if (word.test(text)) found.push(`${rel(file)}: ${word}`);
     if (text.includes('\u{1F916}')) found.push(`${rel(file)}: robot emoji`);
   }

@@ -13,6 +13,7 @@ the reason**, never as passed.
 | 3 | Front-end: type check and production builds of every app | Clean |
 | 4 | Vocabulary and translations: `node scripts/check-vocabulary.mjs` | "no problems", every configured language |
 | 5 | Contract tests: `node --test "tests/contracts/*.test.mjs"` (changelog, languages, plurals, **theme contrast in light and dark**) | All pass |
+| 5b | **Design system** check: `design-system.mjs check <id>` from the plugin, for the project's system ([design-systems.md](design-systems.md)) | No problems; known exceptions and findings reported as they are |
 | 6 | **Accessibility** (every UI change): `node tests/a11y/axe-pages.mjs --probes` on the changed pages, light and dark, 390 and 1440 | 0 violations outside `known.json` |
 | 7 | **Screenshots matrix** (every UI change): languages × 390/1440 × **light/dark**, looked at | Fixes made for what they show |
 | 8 | **Privacy checklist** for the feature ([privacy-and-sovereignty.md](privacy-and-sovereignty.md)) | Every item answered; erasure covers new tables |
@@ -29,7 +30,7 @@ The profile fills in the exact commands for steps 1–3. For the .NET/React/Azur
 - Every string in every configured language, plural forms, glossary terms.
 - **Accessible (WCAG 2.2 AA)**: keyboard, visible and unobscured focus, labels, contrast, 24 px
   targets, reduced motion, `lang`, status messages ([accessibility.md](accessibility.md)).
-- **Light and dark** both right, tokens only ([theming.md](theming.md)).
+- **Light and dark** both right, tokens only ([design-systems.md](design-systems.md)).
 - **Privacy by design** answered; erasure covers it; no personal data in logs.
 - **Data stays in the chosen region**, or the owner decided otherwise.
 - What's new entry; short STATE.md section with honest status.
