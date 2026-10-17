@@ -4,18 +4,7 @@
     "url": "https://notes.example.com"
   },
   "brand": {
-    "logo": "video-tour/brand/logo.svg",
-    "colors": {
-      "background": "#0f172a",
-      "backgroundAlt": "#1e3a5f",
-      "accent": "#34d399",
-      "accentAlt": "#10b981",
-      "text": "#ffffff",
-      "textMuted": "#cbd5e1",
-      "onAccent": "#052e1c",
-      "highlight": "#fbbf24"
-    },
-    "font": { "family": "Segoe UI", "file": null }
+    "designSystem": "neutral"
   },
   "app": {
     "baseUrl": "http://127.0.0.1:4173",

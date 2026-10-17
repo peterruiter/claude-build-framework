@@ -47,7 +47,7 @@ project moves configuration data.
 ## Scaffold a project
 
 ```powershell
-./profiles/dataverse-solution/scaffold.ps1 -Name Fabrikam -Prefix fab -Languages en,nl,de -Destination C:\src\fabrikam
+./profiles/dataverse-solution/scaffold.ps1 -Name Fabrikam -Prefix fab -Languages en,nl,de -Destination C:\src\fabrikam -DesignSystem neutral
 ```
 
 - `-Name` (PascalCase) replaces `CaseApp` everywhere: solution names (`FabrikamCore`), texts,
@@ -60,6 +60,8 @@ project moves configuration data.
 - Every label in the sample solution and in `schema.json` is written per LCID: English, Dutch
   and German texts are real; any other language gets the English text and the script says how
   many labels to translate (the checks cannot tell English from a translation).
+- `-DesignSystem` (default `neutral`) is the look of the apps, emails and documents: see
+  [Design system](#design-system).
 - It refuses a destination that exists and is not empty, initialises git on `main` and commits
   nothing. Afterwards `npm test`, `Build-Solution.ps1 -RoundTrip` and `Test-Translations.ps1`
   pass in the new repository.
@@ -73,7 +75,8 @@ environments.json                dev, build, test, prod (+ environments.local.js
 deployment-settings/<env>.json   environment variable values and connection references per environment
 build/*.ps1                      Build-Solution, Export-Solution, Import-Solution, New-Schema, New-SecurityRoles,
                                  Test-Translations, Export-PrivacyRegister, Test-CheckerResults, Test-Scripts, Common.psm1
-tests/contracts/*.test.mjs       schema, roles, privacy, environments and settings, scripts (npm test)
+docs/brand/                      generated from the design system: model-driven app theme, email, chart, Office palettes
+tests/contracts/*.test.mjs       schema, roles, privacy, environments and settings, scripts, design system (npm test)
 .github/workflows/pr.yml         contracts + pack round trip (always), solution checker (when configured)
 .github/workflows/release.yml    tag -> managed from the build environment -> test -> production (approval)
 ```
@@ -82,7 +85,7 @@ tests/contracts/*.test.mjs       schema, roles, privacy, environments and settin
 
 | The skill wants to | Run |
 | --- | --- |
-| Start a project | `./scaffold.ps1 -Name <Product> -Prefix <prefix> -Languages <base>,<others> -Destination <folder>`, then merge with the framework's project template (`package.json` scripts, `.gitignore`, CLAUDE.md), fill `environments.local.json`, replace the sample table with the product's |
+| Start a project | `./scaffold.ps1 -Name <Product> -Prefix <prefix> -Languages <base>,<others> -Destination <folder> -DesignSystem <id>`, then merge with the framework's project template (`package.json` scripts, `.gitignore`, CLAUDE.md), fill `environments.local.json`, replace the sample table with the product's |
 | Check tools | `node ${CLAUDE_PLUGIN_ROOT}/scripts/check-prereqs.mjs dataverse-solution` |
 | Run the quality gate | `npm test`, `pwsh ./build/Build-Solution.ps1 -RoundTrip`, plus the plug-in and PCF gates |
 | Add a table or column | `schema.json` + `roles.json` + `privacy.json` (labels in every LCID), `New-Schema.ps1` (plan), `-Environment dev` (compare), `-Apply`, `New-SecurityRoles.ps1 -Environment dev -Apply`, `Export-Solution.ps1`, `npm test` |
@@ -230,25 +233,47 @@ responsibility:
 
 ## Design system
 
-The project's design system ([docs/design-systems.md](../../docs/design-systems.md)) is generated with the
-targets `dataverse`, `email` and `charts` (plus `css` and `ts` for web resources and the theme contract
-test, `office` for documents) into `design-system/` (`designSystem.out` in `build/framework.json`):
+The apps, emails and documents take their look **only** from the project's design system
+([docs/design-systems.md](../../docs/design-systems.md)). `scaffold.ps1 -DesignSystem <id>` (default
+`neutral`) runs
+`node <framework>/scripts/design-system.mjs build <id> --out docs/brand --targets dataverse,email,office,charts`,
+puts the theme into the core solution and records `designSystem` (id, out, targets) in
+`build/framework.json`. The scaffold in the framework ships the `neutral` files; they are replaced, never
+edited.
 
-- **Model-driven apps**: `dataverse-theme.xml` is a modern-look `CustomTheme` (the brand ramp in all 16
-  slots, the font, and `AppHeaderColors` for every header state, each checked at 4.5:1). Add it to the
-  core solution as a **Data (XML)** web resource and add the **Custom theme definition** setting with
-  that web resource's name as the environment value (or `dataverse-app-header.xml` with **Override app
-  header color** for the header only). Commit the unpacked web resource; regenerate and repack when the
-  design system changes. A logo goes in as an image web resource (about 156 × 48, the lockup for the
-  header's background) named in `logoWebResource`. No dark mode and no web fonts in model-driven apps.
-- **Web resources and custom pages**: `tokens.css` (with its fonts) for HTML web resources; custom
-  pages do not take the modern theme yet, so use the palette's values there.
+- **Model-driven apps** (the modern look): `docs/brand/dataverse-theme.xml` is a `CustomTheme`
+  (`basePaletteColor` with `lockPrimary`, the brand ramp in all 16 palette slots, the font, and
+  `AppHeaderColors` for every header state, each at 4.5:1). It ships **in the core solution** as the
+  **Data (XML)** web resource `<prefix>_theme.xml` (`solutions/<Name>Core/src/WebResources/`, a root
+  component, a new id per project), byte for byte the generated file. `tests/contracts/design-system.test.mjs`
+  holds them together: `docs/brand` comes from the design system `build/framework.json` names, the web
+  resource equals `docs/brand/dataverse-theme.xml`, it is a Data (XML) root component of the core
+  solution, and the header text reaches 4.5:1 in every state. The pack round trip proves pac keeps it as it
+  is.
+- **The setting** that applies it, as
+  [Use modern themes in model-driven apps](https://learn.microsoft.com/power-apps/maker/model-driven-apps/modern-theme-overrides)
+  describes: in development, once, add the existing setting **Custom theme definition** to the core
+  solution with a **setting environment value** of the web resource's unique name (`<prefix>_theme.xml`),
+  publish, then `Export-Solution.ps1` so the setting value is in the unpacked solution too. The scaffold
+  does not write that setting XML by hand: its format comes from the export. Until then the theme ships
+  but is not applied. (`dataverse-app-header.xml` with **Override app header color** is the header-only
+  alternative; it is ignored when a custom theme is set.)
+- A logo goes in as an image web resource (about 156 × 48, the lockup for the header's background, by the
+  design system's logo rules) named in `logoWebResource` and `logoTooltip`: add both attributes to the
+  generated XML only through the design system, never by hand. No dark mode and no web fonts in
+  model-driven apps.
 - **Email templates** (Dataverse email templates, Power Automate mails): the colours of
-  `email-palette.json`, inline.
-- **Charts and dashboards**: series in the order of `chart-palette.json`; system charts carry their
-  colours in the chart XML.
-- **PCF controls** follow the host theme ([PCF profile](../power-platform-pcf/), and
-  [PCF code components](../../docs/design-systems.md#pcf-code-components)).
+  `docs/brand/email-palette.json`, light inline and dark in a `prefers-color-scheme` block, its PNG logo.
+- **Documents** (Word templates, generated documents): `docs/brand/office-theme.json` (theme slots and
+  fonts).
+- **Charts and dashboards**: series in the order of `docs/brand/chart-palette.json`; system charts carry
+  their colours in the chart XML.
+- **Web resources and custom pages**: add `css` and `ts` to `designSystem.targets` for HTML web resources
+  (`tokens.css` with its fonts); custom pages do not take the modern theme yet, so use the palette's values
+  there.
+- **PCF controls** follow the app's theme ([PCF profile](../power-platform-pcf/README.md#design-system)).
+- **Switch or regenerate** with the framework's `design-system` skill (it rebuilds `docs/brand`), then copy
+  `docs/brand/dataverse-theme.xml` over the web resource; the contract test fails until it is.
 
 ## Privacy and data sovereignty
 
@@ -527,7 +552,10 @@ the settings files hold; `npm test` in the scaffold passes 24 tests (schema, rol
 environments and settings, script parsing, translations, privacy register, the pack round trip
 (skipped with a note where pac is missing), the placeholder refusal); `Test-Translations.ps1`
 finds a removed Dutch label; every script parses; `New-Schema.ps1` and `New-SecurityRoles.ps1`
-print their offline plans; `actionlint` passes both workflows. `scaffold.ps1` produced
+print their offline plans; `actionlint` passes both workflows. The design system (17 October 2026):
+`npm test` in the scaffold passes 27 tests, the theme web resource included in the pack round trip;
+projects scaffolded with `-DesignSystem neutral` and with the corporate design system pass `npm test`
+(27), `Build-Solution.ps1 -RoundTrip`, `Test-Translations.ps1` and the privacy register. `scaffold.ps1` produced
 `-Name Fabrikam -Prefix fab -Languages en,nl,de`, `-Name Gemeentezaken -Prefix gz -Languages nl`
 (Dutch base, Dutch only) and `-Name Northwind -Prefix nw -Languages fr-BE,en-GB` (English
 fallback reported): in each, no sample name is left, `npm test` (24), `Build-Solution.ps1
@@ -537,6 +565,7 @@ language and an invalid prefix.
 Not validated: anything against an environment (Web API calls of New-Schema and
 New-SecurityRoles, Export-Solution, Import-Solution including its reading of `pac solution
 list`, the solution checker, `pac auth create --githubFederated`), the import of the
-hand-made sample solution into a real environment, the GitHub Actions runs themselves
-(actionlint only), and the shape of the checker's SARIF severity property (the script falls
-back to the SARIF level).
+hand-made sample solution into a real environment (the theme web resource included, and the
+**Custom theme definition** setting, which is added in an environment and exported, not
+written here), the GitHub Actions runs themselves (actionlint only), and the shape of the
+checker's SARIF severity property (the script falls back to the SARIF level).

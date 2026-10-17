@@ -1,7 +1,8 @@
 // The pac pcf init lint set (Power Apps checker rules included: paCheckerHosted), plus the
 // profile's rules: no console outside shared/diagnostics.ts (privacy: nothing about a person
 // reaches the browser console), no network calls the manifest does not declare (see
-// scripts/check-controls.mjs), accessibility-minded React rules.
+// scripts/check-controls.mjs), accessibility-minded React rules. shared/design-system is generated
+// (scripts/design-system.mjs of the build framework): type-checked, not linted.
 import eslintjs from "@eslint/js";
 import microsoftPowerApps from "@microsoft/eslint-plugin-power-apps";
 import pluginPromise from "eslint-plugin-promise";
@@ -12,7 +13,7 @@ import typescriptEslint from "typescript-eslint";
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   {
-    ignores: ["**/generated", "**/out/**", "**/node_modules/**", "**/obj/**", "**/bin/**", "scripts/**", "*.config.mts", "eslint.config.mjs"],
+    ignores: ["**/generated", "shared/design-system/**", "**/out/**", "**/node_modules/**", "**/obj/**", "**/bin/**", "scripts/**", "*.config.mts", "eslint.config.mjs"],
   },
   eslintjs.configs.recommended,
   ...typescriptEslint.configs.recommendedTypeChecked,

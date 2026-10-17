@@ -1,0 +1,21 @@
+{
+  "source": null,
+  "fonts": {
+    "major": "Aptos Display",
+    "minor": "Aptos"
+  },
+  "colors": {
+    "dk1": "#1B1F24",
+    "lt1": "#FFFFFF",
+    "dk2": "#0D1526",
+    "lt2": "#F5F6F8",
+    "accent1": "#2456C7",
+    "accent2": "#C2410C",
+    "accent3": "#0F766E",
+    "accent4": "#A21CAF",
+    "accent5": "#4D7C0F",
+    "accent6": "#B45309",
+    "hlink": "#2456C7",
+    "folHlink": "#6D28D9"
+  }
+}

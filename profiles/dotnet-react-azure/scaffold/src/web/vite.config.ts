@@ -1,11 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
+import { designSystemAssets } from './vite.design-system.ts';
 
 // The main app, served by the API at /app/. Every asset URL carries that prefix, or the page loads and
 // its own JavaScript 404s. The build writes into the API's wwwroot, so one container serves both.
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), designSystemAssets()],
   base: '/app/',
   build: {
     outDir: resolve(__dirname, '../App.Api/wwwroot/app'),

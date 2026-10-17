@@ -18,7 +18,11 @@
     5. Renames, in file contents and in file and folder names: CaseApp to -Name, Contoso to
        -Publisher, contoso_ / contoso to -Prefix, the option value prefix 75259 to one derived
        from the prefix.
-    6. git init on main (nothing committed), when git is available.
+    6. Applies the design system (-DesignSystem): the build framework's scripts/design-system.mjs
+       generates the model-driven app theme, the email, chart and Office palettes into docs/brand/;
+       the theme goes into the core solution as the Data (XML) web resource <prefix>_theme.xml
+       (with a new id), and build/framework.json records the choice.
+    7. git init on main (nothing committed), when git is available.
 
     Never connects to an environment. Afterwards, in the destination: npm test,
     ./build/Build-Solution.ps1 -RoundTrip, ./build/Test-Translations.ps1.
@@ -37,6 +41,11 @@
 .PARAMETER Publisher
     The publisher's unique name. Default: -Name.
 
+.PARAMETER DesignSystem
+    The design system the apps, emails and documents look like: a folder name in the framework's
+    design-systems/ (node scripts/design-system.mjs list). Default: neutral. A branded system is
+    for that brand's work only: read its README-USE.md first.
+
 .PARAMETER Destination
     Folder to create. Default: ./<name in lower case>.
 
@@ -52,7 +61,8 @@ param(
     [Parameter(Mandatory)][string]$Prefix,
     [Parameter(Mandatory)][string[]]$Languages,
     [ValidatePattern('^[A-Za-z_][A-Za-z0-9_]{0,63}$')][string]$Publisher,
-    [string]$Destination
+    [string]$Destination,
+    [string]$DesignSystem = 'neutral'
 )
 
 Set-StrictMode -Version Latest
@@ -62,6 +72,8 @@ if ($Prefix -cnotmatch '^[a-z][a-z0-9]{1,7}$' -or $Prefix.StartsWith('mscrm')) {
     throw "Prefix '$Prefix': 2 to 8 lower-case letters and digits, starting with a letter, not 'mscrm'."
 }
 if (-not $Publisher) { $Publisher = $Name }
+Import-Module (Join-Path $PSScriptRoot '../../scripts/DesignSystem.psm1') -Force
+$designManifest = Assert-DesignSystem -Id $DesignSystem
 $lower = $Name.ToLowerInvariant()
 if (-not $Destination) { $Destination = Join-Path (Get-Location) $lower }
 $Destination = [System.IO.Path]::GetFullPath($Destination)
@@ -256,6 +268,22 @@ foreach ($item in (Get-ChildItem -Path $Destination -Recurse -Force | Sort-Objec
     if ($newName -cne $item.Name) { Rename-Item -LiteralPath $item.FullName -NewName $newName }
 }
 
+# --- design system -----------------------------------------------------------------------------
+# After the rename, so nothing generated is touched by it. The scaffold ships the neutral files;
+# they are replaced by the chosen system's, never edited. The theme web resource is the generated
+# dataverse-theme.xml, unchanged (tests/contracts/design-system.test.mjs holds the two together).
+$designOut = 'docs/brand'
+$designTargets = 'dataverse', 'email', 'office', 'charts'
+Invoke-DesignSystemBuild -Id $DesignSystem -Out (Join-Path $Destination $designOut) -Targets $designTargets
+$core = Join-Path $Destination "solutions/$($Name)Core/src/WebResources"
+Copy-Item -LiteralPath (Join-Path $Destination "$designOut/dataverse-theme.xml") -Destination (Join-Path $core "$($Prefix)_theme.xml") -Force
+$themeData = Join-Path $core "$($Prefix)_theme.xml.data.xml"
+$text = [System.IO.File]::ReadAllText($themeData)
+$text = [regex]::Replace($text, '<WebResourceId>\{[^}]+\}</WebResourceId>', "<WebResourceId>{$([guid]::NewGuid())}</WebResourceId>")
+[System.IO.File]::WriteAllText($themeData, $text, $utf8)
+Remove-Item -LiteralPath (Join-Path $Destination 'build/framework.json') -ErrorAction SilentlyContinue
+Set-ProjectDesignSystem -Destination $Destination -Id $DesignSystem -Out $designOut -Targets $designTargets
+
 if (Get-Command git -ErrorAction SilentlyContinue) {
     & git -C $Destination init -b main --quiet 2>$null
 }
@@ -263,6 +291,7 @@ if (Get-Command git -ErrorAction SilentlyContinue) {
 Write-Host ''
 Write-Host "Created $Name in $Destination" -ForegroundColor Green
 Write-Host "  publisher $Publisher, prefix ${Prefix}_, option values from ${optionPrefix}0000"
+Write-Host "  design system $($designManifest.name) $($designManifest.version) ($DesignSystem): $designOut, and the app theme web resource $($Prefix)_theme.xml"
 Write-Host "  languages $(($targets | ForEach-Object { "$($_.Culture) ($($_.Lcid))" }) -join ', '); base $($base.Culture) ($($base.Lcid)): create every environment with this base language"
 if ($untranslated.Count -gt 0) {
     $byCulture = @($untranslated) | Group-Object { $_.Split(':')[0] } | ForEach-Object { "$($_.Name) ($($_.Count) labels)" }
@@ -272,3 +301,4 @@ if ($untranslated.Count -gt 0) {
 Write-Host ''
 Write-Host 'Next, in the new folder: npm test; pwsh ./build/Build-Solution.ps1 -RoundTrip; pwsh ./build/Test-Translations.ps1;' -ForegroundColor Cyan
 Write-Host 'then fill environments.local.json with the real tenant, merge CLAUDE.dataverse.md into CLAUDE.md, and replace the sample table with the product.' -ForegroundColor Cyan
+Write-Host "In development, once: add the setting Custom theme definition to the core solution with the value $($Prefix)_theme.xml, then Export-Solution.ps1 (README, Design system)." -ForegroundColor Cyan

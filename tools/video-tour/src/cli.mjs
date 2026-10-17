@@ -67,6 +67,9 @@ function init() {
   if (copied.includes(CONFIG_NAME)) {
     const json = JSON.parse(readFileSync(cfg, 'utf8'));
     if (json.app?.start?.command) json.app.start.command = json.app.start.command.replace('{tool}', relative(target, toolDir).replace(/\\/g, '/') || '.');
+    // The project's own design system (build/framework.json, here or above) instead of the example's.
+    const projectSystem = projectDesignSystem(target);
+    if (projectSystem && json.brand?.designSystem) json.brand.designSystem = projectSystem;
     writeFileSync(cfg, JSON.stringify(json, null, 2) + '\n');
   }
   console.log(`Copied ${copied.length} file(s) into ${target}:`);
@@ -74,6 +77,17 @@ function init() {
   if (skipped.length) console.log(`Kept ${skipped.length} existing file(s) (use --force to overwrite): ${skipped.join(', ')}`);
   console.log(`\nNext:\n  node ${relative(process.cwd(), join(toolDir, 'src', 'cli.mjs')).replace(/\\/g, '/')} validate\n  node ${relative(process.cwd(), join(toolDir, 'src', 'cli.mjs')).replace(/\\/g, '/')} render all --no-voice\n` +
     'Then edit video-tour.config.json (product, brand, app, narration, languages) and the scripts. Add video-tour/.work, .cache and output to .gitignore (the example has one).');
+}
+
+/** designSystem.id from the nearest build/framework.json at or above a folder, if any. */
+function projectDesignSystem(folder) {
+  for (let dir = resolve(folder); ; dir = dirname(dir)) {
+    const file = join(dir, 'build', 'framework.json');
+    if (existsSync(file)) {
+      try { return JSON.parse(readFileSync(file, 'utf8')).designSystem?.id ?? null; } catch { return null; }
+    }
+    if (dirname(dir) === dir) return null;
+  }
 }
 
 async function main() {

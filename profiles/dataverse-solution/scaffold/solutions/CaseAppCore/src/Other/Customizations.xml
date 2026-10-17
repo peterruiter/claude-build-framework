@@ -21,6 +21,7 @@
       <statuscode>1</statuscode>
     </connectionreference>
   </connectionreferences>
+  <WebResources />
   <Languages>
     <Language>1033</Language>
     <Language>1043</Language>

@@ -1,0 +1,39 @@
+{
+  "customTheme": {
+    "basePaletteColor": "#2456C7",
+    "lockPrimary": "true",
+    "font": "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    "darker70": "#000E43",
+    "darker60": "#021754",
+    "darker50": "#052166",
+    "darker40": "#0A2B78",
+    "darker30": "#10368B",
+    "darker20": "#17409F",
+    "darker10": "#1D4BB3",
+    "primary": "#2456C7",
+    "lighter10": "#4272D8",
+    "lighter20": "#5F8CE7",
+    "lighter30": "#7BA4F4",
+    "lighter40": "#96BAFF",
+    "lighter50": "#B4CEFF",
+    "lighter60": "#CEDFFE",
+    "lighter70": "#E4EDFE",
+    "lighter80": "#F0F5FF"
+  },
+  "appHeaderColors": {
+    "background": "#2456C7",
+    "foreground": "#FFFFFF",
+    "backgroundHover": "#1D47A8",
+    "foregroundHover": "#FFFFFF",
+    "backgroundPressed": "#173A8A",
+    "foregroundPressed": "#FFFFFF",
+    "backgroundSelected": "#173A8A",
+    "foregroundSelected": "#FFFFFF"
+  },
+  "notes": [
+    "Upload dataverse-theme.xml as a Data (XML) web resource and set it in the \"Custom theme definition\" setting (or dataverse-app-header.xml in \"Override app header color\" for the header only). The Custom theme definition wins when both are set.",
+    "Model-driven apps have no dark mode for custom themes; the light values are used.",
+    "The font only renders where it is installed or already loaded; model-driven apps do not load the design system's web fonts.",
+    "For a logo, add an image web resource (about 156 x 48 px, the lockup for the header background) and add logoWebResource=\"<prefix>_<name>\" and logoTooltip to CustomTheme."
+  ]
+}

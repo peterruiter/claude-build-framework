@@ -13,6 +13,7 @@ never relax one.
 | Environments | `environments.json` (dev, build, test, prod; personal dev environments in `environments.local.json`) |
 | Languages (LCIDs) | {{LCIDS}}, base {{BASE_LCID}}; every label in every one |
 | Environment geo | {{GEO}}; the solution checker runs with `--geo {{CHECKER_GEO}}` |
+| Design system | `designSystem.id` in `build/framework.json`; generated into `docs/brand/`; the app theme is the web resource `{{PREFIX}}_theme.xml` in the core solution, applied by the **Custom theme definition** setting. Regenerate, never edit (`/build-framework:design-system`) |
 | Plug-ins / PCF / side services | `profiles/dataverse-plugins`, `profiles/power-platform-pcf`, `profiles/dotnet-react-azure` of the build framework |
 
 ## Environment safety (overrides convenience, every time)

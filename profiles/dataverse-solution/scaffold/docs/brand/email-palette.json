@@ -1,0 +1,40 @@
+{
+  "light": {
+    "background": "#ffffff",
+    "surface": "#f5f6f8",
+    "text": "#1b1f24",
+    "textMuted": "#5b6577",
+    "link": "#2456c7",
+    "border": "#c4cad3",
+    "divider": "#c4cad3",
+    "danger": "#b3261e",
+    "buttonBackground": "#2456c7",
+    "buttonText": "#ffffff",
+    "headerBackground": "#2456c7",
+    "headerText": "#ffffff"
+  },
+  "dark": {
+    "background": "#121418",
+    "surface": "#1c2027",
+    "text": "#e8eaee",
+    "textMuted": "#a3acba",
+    "link": "#8fb0ff",
+    "border": "#5c6573",
+    "divider": "#5c6573",
+    "danger": "#ff8a80",
+    "buttonBackground": "#8fb0ff",
+    "buttonText": "#0d1526",
+    "headerBackground": "#8fb0ff",
+    "headerText": "#0d1526"
+  },
+  "fontFamily": "system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif",
+  "logo": {
+    "onHeader": null,
+    "onLight": null
+  },
+  "notes": [
+    "Use the light values inline; repeat the dark ones in a @media (prefers-color-scheme: dark) block in <style>, with <meta name=\"color-scheme\" content=\"light dark\">.",
+    "Logos in emails are PNG (many clients do not show SVG), served over https from the product, with width and height set and alt text.",
+    "Web fonts do not load in most mail clients; the stack falls back to the next font."
+  ]
+}

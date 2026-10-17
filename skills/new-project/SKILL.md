@@ -91,20 +91,33 @@ Then:
   the form of address (`notes`).
 - **What's new areas**: ask or propose 3–5 areas for `changelog.json`; leave `entries` empty.
 - Add the data residency to CLAUDE.md, STATE.md (data flows) and ROADMAP.md (Decisions).
-- **Design system**: set `designSystem` in `build/framework.json` (`id`, `out`: where the app keeps
-  its styles, default `src/styles/design-system`; `targets`: always `css` and `ts`, plus per
-  profile: `dotnet-react-azure` adds `email` and `charts`, `power-platform-pcf` adds `fluent`,
-  `dataverse-solution` adds `dataverse`, `email` and `charts`; add `video` with video tours and
-  `office` when the project writes documents), point `theme.css` and `theme.tokens` at the
-  generated `tokens.css` and `tokens.json`, keep `theme.pairs` empty, and generate:
+- **Design system, with a profile**: run the profile's `scaffold.ps1` with **`-DesignSystem <id>`**
+  (the answer to question 5). The scaffold generates the system's files where that profile keeps
+  them and records `designSystem` (and, for a web UI, `theme`) in `build/framework.json`:
+  `dotnet-react-azure` into `src/web/src/styles/design-system` (`css`, `ts`, `email`, `charts`; the
+  web app has no colours of its own; favicon from the system's mark), `power-platform-pcf` into
+  `controls/shared/design-system` (`fluent`, `ts`), `dataverse-solution` into `docs/brand`
+  (`dataverse`, `email`, `office`, `charts`; the app theme also as a web resource in the core
+  solution), `dataverse-plugins` records the id only. `dotnet-react-azure` and `dataverse-solution`
+  need an empty folder: run them first, then copy the template around them and **merge**
+  `build/framework.json` (keep the profile's `designSystem` and `theme`, add the template's other
+  keys; drop `theme` for a profile without web CSS). `power-platform-pcf` and `dataverse-plugins`
+  go into the project after the template and merge by themselves (they refuse a different design
+  system). Several profiles in one repository: the same `-DesignSystem` for each.
+- **Design system, stack-neutral** (no profile): set `designSystem` in `build/framework.json`
+  (`id`, `out`: where the app keeps its styles, default `src/styles/design-system`; `targets`:
+  always `css` and `ts`; add `video` with video tours and `office` when the project writes
+  documents), point `theme.css` and `theme.tokens` at the generated `tokens.css` and `tokens.json`,
+  keep `theme.pairs` empty, and generate:
   `node "${CLAUDE_PLUGIN_ROOT}/scripts/design-system.mjs" build <id> --out <out> --targets <targets>`
-  (it replaces the template's neutral files when the id differs). Fill `{{DESIGN_SYSTEM}}` in
-  CLAUDE.md with the name, id and version, and add it to ROADMAP.md (Decisions). Each profile's
-  README says where its targets go; the method is in `${CLAUDE_PLUGIN_ROOT}/docs/design-systems.md`.
+  (it replaces the template's neutral files when the id differs).
+- Either way: fill `{{DESIGN_SYSTEM}}` in CLAUDE.md with the name, id and version, and add it to
+  ROADMAP.md (Decisions). Each profile's README ("Design system") says where its targets go and
+  how they are wired; the method is in `${CLAUDE_PLUGIN_ROOT}/docs/design-systems.md`.
 - **Profile**: if chosen, follow that profile's README to add its scaffold (build, database,
-  infrastructure, CI, gate commands), and put its gate and run commands into CLAUDE.md
-  (`{{GATE_COMMANDS}}`, `{{PROFILE_COMMANDS}}`). Do not copy anything the profile marks optional
-  without asking.
+  infrastructure, CI, gate commands) with `-DesignSystem <id>` as above, and put its gate and run
+  commands into CLAUDE.md (`{{GATE_COMMANDS}}`, `{{PROFILE_COMMANDS}}`). Do not copy anything the
+  profile marks optional without asking.
 - Remove sample files the project does not need (e.g. `dataverse.mjs` if there is no Dataverse).
 
 ## 4. Check locally

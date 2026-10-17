@@ -8,6 +8,8 @@ says what is where.
 | Path | What | Sample? |
 | --- | --- | --- |
 | `solutions/CaseAppCore/src/` | An unpacked solution (pac's XML layout): one table `contoso_Request` with three columns, a global choice, an environment variable, a connection reference; labels in English (1033) and Dutch (1043) | **Sample**: replace with `pac solution clone` / `Export-Solution.ps1` of the real solution |
+| `solutions/CaseAppCore/src/WebResources/contoso_theme.xml` | The model-driven apps' modern theme (a Data (XML) web resource), byte for byte `docs/brand/dataverse-theme.xml` | Real: generated from the design system |
+| `docs/brand/` | Generated from the design system (`build/framework.json`: `designSystem`): the app theme, email, chart and Office palettes | Real: regenerate, never edit |
 | `build/contracts/schema.json` | Data model as code: publisher, solutions, languages, tables, columns, choices, variables, references | Sample content, real format |
 | `build/contracts/roles.json` | Security role matrix: role, table, privilege, depth | Sample content |
 | `build/contracts/privacy.json` | Privacy register: categories, purposes, legal basis, retention, erasure per table and column | Sample content |
@@ -23,7 +25,7 @@ says what is where.
 | `build/Export-PrivacyRegister.ps1` | Offline: the register as Markdown or CSV | Real |
 | `build/Test-CheckerResults.ps1` | Reads the solution checker's SARIF, fails on High and above | Real |
 | `build/Test-Scripts.ps1` | Parses every PowerShell file | Real |
-| `tests/contracts/*.test.mjs` | Contract tests (`npm test`) | Real |
+| `tests/contracts/*.test.mjs` | Contract tests (`npm test`), the design system's theme in the solution included | Real |
 | `.github/workflows/pr.yml` | PR and main: contracts, pack round trip, checker (when configured) | Real |
 | `.github/workflows/release.yml` | Tag: managed from the build environment, deploy test, deploy production behind approval | Real, inert until its variables are set |
 | `CLAUDE.dataverse.md` | Sections to merge into the project's CLAUDE.md | Real |

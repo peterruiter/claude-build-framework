@@ -38,9 +38,11 @@ src/App.Domain/    Localization/ LocaleCatalogue.cs  PluralRules.cs (data-driven
                    Resources/{ui,email}.{lang}.json
 tests/App.Tests/   TestDatabase.cs ([LocalDbFact], scratch DB per run, LocalDB or TEST_SQL_CONNECTION)
                    MigrationTests  DatabaseTests  ApiTests (routes contract)  LocalizationTests  RedactTests
-src/web/           vite.config.ts (/app/)  vite.portal.config.ts (/portal/)  src/ (i18n, plural.ts, strings.ts,
-                   theme.ts, Chrome.tsx, styles/tokens.css + base.css)  scripts/ (check-strings, check-plurals,
-                   add-language, axe-check)  tests/ (contrast.test.mjs, plural.test.ts)
+src/web/           vite.config.ts (/app/)  vite.portal.config.ts (/portal/)  vite.design-system.ts
+                   src/ (i18n, plural.ts, strings.ts, theme.ts, Chrome.tsx, styles/base.css,
+                   styles/design-system/ generated)  scripts/ (check-strings, check-plurals, add-language,
+                   axe-check)  tests/ (contrast.test.mjs, plural.test.ts)
+build/framework.json  the design system (designSystem, theme), merged with the framework's template
 ```
 
 Package versions are pinned centrally (`Directory.Packages.props`, `package.json` without ranges):
@@ -62,7 +64,7 @@ paid for commercial use), React 19.2, Vite 7.3, TypeScript 5.9, Node 22.
 
 | The skill wants to | Run |
 | --- | --- |
-| Start a project | `./scaffold.ps1 -Name MyProduct -Languages en-GB,nl,pl -Destination ../my-product` |
+| Start a project | `./scaffold.ps1 -Name MyProduct -Languages en-GB,nl,pl -Destination ../my-product -DesignSystem <id>` |
 | Run the quality gate | `dotnet build -c Release` (0 warnings), `dotnet test`, then in `src/web`: `npm run check`, `npm run typecheck`, `npm test`, `npm run build` |
 | Run the app locally | `./build/Start-Local.ps1 -Port <own port> -Database <own name>` (one port and database per agent) |
 | Add a language | `node src/web/scripts/add-language.mjs <code> [culture]`, then translate the new bundles |
@@ -78,7 +80,7 @@ Agent briefs should name: the repository path, `profile.config.json`, the agent'
 ## Scaffold a project
 
 ```powershell
-./profiles/dotnet-react-azure/scaffold.ps1 -Name MyProduct -Languages en-GB,nl,de,pl -Destination C:\src\my-product
+./profiles/dotnet-react-azure/scaffold.ps1 -Name MyProduct -Languages en-GB,nl,de,pl -Destination C:\src\my-product -DesignSystem neutral
 ```
 
 - `-Name` (PascalCase) replaces `App` everywhere in the skeleton: namespaces, folders, files, the solution,
@@ -89,6 +91,7 @@ Agent briefs should name: the repository path, `profile.config.json`, the agent'
   plural forms its culture needs (Polish: one, few, many; Arabic: zero, one, two, few, many). New bundles
   hold English text until translated: `npm run check` cannot tell an untranslated value from a translation,
   so translating is an explicit task in the brief.
+- `-DesignSystem` (default `neutral`) is the look: see [Design system](#design-system) below.
 - `profile.config.json` is filled with the names; fill in `azure.tenantId` and `azure.subscriptionId` before
   any script that touches Azure (they refuse the placeholder).
 - A git repository is initialised on `main`, nothing committed.
@@ -187,24 +190,39 @@ owner's go per run, never production.
 
 ## Design system
 
-The project's design system ([docs/design-systems.md](../../docs/design-systems.md)) is generated with the
-targets `css`, `ts`, `email` and `charts` (plus `video` with video tours, `office` for documents) into
-`src/web/src/styles/design-system/` (`designSystem.out` in `build/framework.json`):
+The web apps take their look **only** from the project's design system
+([docs/design-systems.md](../../docs/design-systems.md)); nothing in the scaffold carries a colour of its own.
+`scaffold.ps1 -DesignSystem <id>` (default `neutral`) runs
+`node <framework>/scripts/design-system.mjs build <id> --out src/web/src/styles/design-system --targets css,ts,email,charts`
+and records `designSystem` (id, out, targets) and `theme` (the generated `tokens.css` and `tokens.json`) in
+`build/framework.json`. The scaffold in the framework ships the `neutral` files; they are replaced, never
+edited.
 
-- `tokens.css` is imported first in `src/main.tsx` and `portal/src/main.tsx`, before `styles/tokens.css` and
-  `base.css`; with it come the fonts (served from the app, never a font CDN) and the logos.
-- The scaffold's own names (`--color-bg`, `--color-text`, ...) in `styles/tokens.css` point at the roles:
-  `--color-bg: var(--ds-background)`, `--color-surface: var(--ds-surface)`, `--color-text: var(--ds-text)`,
-  `--color-text-muted: var(--ds-text-muted)`, `--color-link: var(--ds-link)`, `--color-accent: var(--ds-accent)`,
-  `--color-on-accent: var(--ds-text-inverse)`, `--color-danger: var(--ds-danger)`,
-  `--color-border: var(--ds-divider)`, `--color-focus: var(--ds-focus)`. `tests/contrast.test.mjs` then
-  checks the generated `tokens.json` (`roles` per theme) instead of hex values in `styles/tokens.css`,
-  and the framework's theme contract test checks the design system's own pairs. Not wired in the scaffold
-  yet: the first project that uses a design system other than `neutral` makes this change.
+- `styles/design-system/tokens.css` is imported first in `src/main.tsx` and `portal/src/main.tsx`, then
+  `styles/base.css`. It carries both themes (the system preference, and `data-theme="light|dark"` on `<html>`
+  from the theme picker, `src/theme.ts`), the fonts as `@font-face` (served from the app, never a font CDN),
+  the type scale and the roles.
+- `styles/base.css` and every component use the **roles** (`--ds-background`, `--ds-surface`,
+  `--ds-surface-subtle`, `--ds-text`, `--ds-text-muted`, `--ds-link`, `--ds-accent`, `--ds-text-inverse`,
+  `--ds-focus`, `--ds-danger`, `--ds-divider` ...), the fonts (`--font-sans`, `--type-<style>-*`) and the
+  radius tokens, so the app survives a switch of design system. Control edges use `--ds-text-muted`, because a
+  design system's border role may be decorative (below 3:1).
+- `tests/contrast.test.mjs` (in `npm test`) reads the generated `tokens.json`: the design system's own pairs
+  in both themes, the role pairs `base.css` uses (`APP_PAIRS`: text 4.5:1, control edges and focus 3:1), the
+  two dark blocks, **no colour values in `src/`, `portal/` or `index.html`** and no undefined `--ds-*` name,
+  and that the files come from the design system `build/framework.json` names. Add a pair to `APP_PAIRS`
+  when a component puts a role on another.
+- `vite.design-system.ts` copies `tokens.css`, the fonts and the logos to `/app/design-system/` at build time:
+  the API's start page (`wwwroot/index.html`) links that stylesheet, and emails link the PNG logo from
+  `/app/design-system/logos/` (an absolute https URL from `PublicUrls`).
+- **Favicon**: for a design system with a mark (`logos.files.markOnLight` and `markOnDark`, where its logo
+  rules let the mark stand alone, as favicons), `scaffold.ps1` adds both as `<link rel="icon">` with
+  `prefers-color-scheme` to both apps' `index.html`. `neutral` has none: the product's own icon comes later.
 - Emails (`Resources/email.*`): the colours of `email-palette.json`, light inline and dark in the
-  `prefers-color-scheme` block; the PNG logo from the generated `logos/`, served by the app.
-- Charts: series from `chart-palette.json` (or `role()`/`color()` from `tokens.ts`), each chart with a table.
-- Favicons and app icons from the design system's mark, per its logo rules.
+  `prefers-color-scheme` block. Charts: series from `chart-palette.json` (or `role()`/`color()` from
+  `tokens.ts`), each chart with a table.
+- **Switch or regenerate** with the framework's `design-system` skill (it rebuilds the folder from
+  `build/framework.json`); add `video` with video tours and `office` for documents to `designSystem.targets`.
 
 ## Privacy
 
@@ -341,7 +359,12 @@ plural forms); `Release-Worktree.ps1` ran the full gate in a worktree with a tem
 node_modules intact; the generated API ran on LocalDB and passed `Test-Deployment.ps1`; the generator and all
 three k6 scenarios ran against it within thresholds, and the target guards refused remote and production
 targets; every Bicep file builds and lints without warnings; `actionlint` passes the workflow; every script
-parses, and the Azure scripts refuse the placeholder config before calling Azure.
+parses, and the Azure scripts refuse the placeholder config before calling Azure. The design system
+(17 Oct 2026): products generated with `-DesignSystem neutral` and with the corporate design system pass
+`npm ci`, check, typecheck, 12 node tests (the design system ones included) and both builds; the
+corporate one also `dotnet build` and 22 tests on LocalDB; both apps rendered in Edge in light and dark at
+1440 and 390 px (system preference and the theme picker), with the brand font loaded and the favicon
+links resolved, and the start page styled from `/app/design-system/tokens.css`.
 
 Not validated: anything against Azure (deployments, ACR builds, restore drill, log queries, the account
 switch), the Docker image build (no Docker on the validating machine: the CI `image` job covers it), the

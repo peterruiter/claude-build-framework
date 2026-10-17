@@ -13,5 +13,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "vite.portal.config.ts"]
+  "include": ["vite.config.ts", "vite.portal.config.ts", "vite.design-system.ts"]
 }

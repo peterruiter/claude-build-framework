@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WebResource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <WebResourceId>{3f1c2a9e-5b7d-4e8a-9c41-2d6f0b8e7a15}</WebResourceId>
+  <Name>contoso_theme.xml</Name>
+  <DisplayName>CaseApp theme</DisplayName>
+  <Description>Modern theme of the model-driven apps (the Custom theme definition setting names this web resource). Generated from the design system: docs/brand/dataverse-theme.xml.</Description>
+  <WebResourceType>4</WebResourceType>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsEnabledForMobileClient>0</IsEnabledForMobileClient>
+  <IsAvailableForMobileOffline>0</IsAvailableForMobileOffline>
+  <IsCustomizable>1</IsCustomizable>
+  <CanBeDeleted>1</CanBeDeleted>
+  <IsHidden>0</IsHidden>
+  <FileName>/WebResources/contoso_theme.xml</FileName>
+</WebResource>

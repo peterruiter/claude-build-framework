@@ -1,4 +1,4 @@
-// Light and dark. "system" follows prefers-color-scheme (tokens.css); "light" and "dark" set
+// Light and dark. "system" follows prefers-color-scheme (styles/design-system/tokens.css); "light" and "dark" set
 // data-theme on <html>, which tokens.css honours over the system setting.
 import { readSetting, writeSetting } from './storage.ts';
 

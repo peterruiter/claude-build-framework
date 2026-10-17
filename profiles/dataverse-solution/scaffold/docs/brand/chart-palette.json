@@ -1,0 +1,90 @@
+{
+  "source": "Chosen for this system: the accent first, then hues far apart for colour-blind readers. Dark: lighter versions of the same hues.",
+  "light": [
+    {
+      "token": "accent",
+      "hex": "#2456c7",
+      "contrast": 6.5
+    },
+    {
+      "token": null,
+      "hex": "#c2410c",
+      "contrast": 5.18
+    },
+    {
+      "token": null,
+      "hex": "#0f766e",
+      "contrast": 5.47
+    },
+    {
+      "token": null,
+      "hex": "#a21caf",
+      "contrast": 6.32
+    },
+    {
+      "token": null,
+      "hex": "#4d7c0f",
+      "contrast": 4.99
+    },
+    {
+      "token": null,
+      "hex": "#b45309",
+      "contrast": 5.02
+    },
+    {
+      "token": null,
+      "hex": "#6d28d9",
+      "contrast": 7.1
+    },
+    {
+      "token": null,
+      "hex": "#be123c",
+      "contrast": 6.29
+    }
+  ],
+  "dark": [
+    {
+      "token": "accent",
+      "hex": "#8fb0ff",
+      "contrast": 8.62
+    },
+    {
+      "token": null,
+      "hex": "#fdba74",
+      "contrast": 10.93
+    },
+    {
+      "token": null,
+      "hex": "#5eead4",
+      "contrast": 12.46
+    },
+    {
+      "token": null,
+      "hex": "#f0abfc",
+      "contrast": 10.48
+    },
+    {
+      "token": null,
+      "hex": "#bef264",
+      "contrast": 14.11
+    },
+    {
+      "token": null,
+      "hex": "#fcd34d",
+      "contrast": 12.79
+    },
+    {
+      "token": null,
+      "hex": "#c4b5fd",
+      "contrast": 9.99
+    },
+    {
+      "token": null,
+      "hex": "#fda4af",
+      "contrast": 9.75
+    }
+  ],
+  "notes": [
+    "Use the series in this order. Give every chart a table and label series directly; colour alone never carries the meaning. Series under 3:1 against the background need a direct label."
+  ]
+}

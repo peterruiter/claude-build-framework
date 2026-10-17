@@ -107,16 +107,26 @@ const forbiddenWords = [['u', 'wv'], ['n', 'za'], ['r', 'vdk']].map((parts) => n
 // in that design system's folder and where the system has to be named: the README's list,
 // docs/design-systems.md and the skills that offer it. Everywhere else it stays forbidden, and every
 // other name stays forbidden everywhere, those places included.
+// .github/workflows/profiles.yml names the design system's id (only the id, as a -DesignSystem value)
+// so CI scaffolds two profiles with it: every other workflow, and every profile file, stays clean.
 const brand = ['cap', 'gemini'].join('');
 const brandAllowed = (path) => path.startsWith(`design-systems/${brand}-zodiak/`)
-  || ['README.md', 'docs/design-systems.md', 'skills/new-project/SKILL.md', 'skills/design-system/SKILL.md'].includes(path);
+  || ['README.md', 'docs/design-systems.md', 'skills/new-project/SKILL.md', 'skills/design-system/SKILL.md', '.github/workflows/profiles.yml'].includes(path);
 
 test('the brand design system may be named only in its own folder and where it is offered', () => {
   assert.ok(forbidden.includes(brand), 'the brand stays on the forbidden list');
   assert.ok(brandAllowed(`design-systems/${brand}-zodiak/README.md`));
-  for (const path of ['docs/theming.md', 'docs/README.md', 'design-systems/README.md', 'design-systems/neutral/README.md', `design-systems/${brand}-other/x.md`, 'scripts/design-system.mjs', 'profiles/dotnet-react-azure/README.md', 'tools/video-tour/README.md', 'templates/project/CLAUDE.md']) {
+  assert.ok(brandAllowed('.github/workflows/profiles.yml'), 'the profiles workflow scaffolds with the design system id');
+  for (const path of ['docs/theming.md', 'docs/README.md', 'design-systems/README.md', 'design-systems/neutral/README.md', `design-systems/${brand}-other/x.md`, 'scripts/design-system.mjs', 'scripts/DesignSystem.psm1', 'profiles/dotnet-react-azure/README.md', 'profiles/dotnet-react-azure/scaffold.ps1', 'tools/video-tour/README.md', 'templates/project/CLAUDE.md', '.github/workflows/ci.yml']) {
     assert.ok(!brandAllowed(path), `${path} may not name the brand`);
   }
+});
+
+test('the profiles workflow names the brand only as the design system id', () => {
+  const workflow = readFileSync(join(root, '.github', 'workflows', 'profiles.yml'), 'utf8').toLowerCase();
+  const uses = [...workflow.matchAll(new RegExp(`.{0,40}${brand}.{0,20}`, 'g'))].map((match) => match[0]);
+  assert.ok(uses.length > 0, 'the workflow scaffolds with the branded design system');
+  for (const use of uses) assert.match(use, new RegExp(`design_system: ${brand}-zodiak$`), `only as DESIGN_SYSTEM: <id>: ${use}`);
 });
 
 test('no file names the projects this was practised on, and nothing carries AI attribution', () => {

@@ -4,6 +4,17 @@ All notable changes to the `build-framework` plugin. Users receive a new copy on
 `version` in `.claude-plugin/plugin.json` changes, so bump it with every change worth shipping and
 add a section here.
 
+## 0.3.0 (2026-10-17)
+
+- Every profile scaffold takes its look only from the chosen design system (scaffold.ps1
+  -DesignSystem <id>): the web app uses the generated tokens and roles with no colour literals of
+  its own, PCF controls fall back to the design system's Fluent theme outside Power Apps,
+  Dataverse solutions ship the model-driven app theme as a web resource, and contract tests check
+  that the generated files match the recorded design system.
+- The corporate design system's error text and links on its heavy surfaces now meet 4.5:1 in both
+  themes (1.0.1).
+- CI generates projects with both design systems.
+
 ## 0.2.0 (2026-10-17)
 
 - Profiles for Power Apps component framework (PCF) controls, Dataverse plug-ins and large Dataverse

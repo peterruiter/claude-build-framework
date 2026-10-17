@@ -77,7 +77,7 @@ publisher (prefix) and an unmanaged solution to develop in. Never production.
 
 | The task | Do |
 | --- | --- |
-| Start | `node ${CLAUDE_PLUGIN_ROOT}/scripts/check-prereqs.mjs dataverse-plugins`, then `./profiles/dataverse-plugins/scaffold.ps1 -Name <Name> -Prefix <prefix> -Languages en,nl -Destination <repo>` (prefix = the publisher's; ask the owner) |
+| Start | `node ${CLAUDE_PLUGIN_ROOT}/scripts/check-prereqs.mjs dataverse-plugins`, then `./profiles/dataverse-plugins/scaffold.ps1 -Name <Name> -Prefix <prefix> -Languages en,nl -Destination <repo> -DesignSystem <id>` (prefix = the publisher's; ask the owner) |
 | Add a plug-in | A class deriving from `PluginBase` with a `(string unsecure, string secure)` constructor; its steps in `registration.json`; tests with `PluginRun`. The manifest tests fail until both exist. |
 | Add a custom API | A `PluginBase` class for the main operation; the API, parameters and response properties in `customApis`; tests that set inputs and read outputs |
 | Add a message users read | A key in every `Strings/messages.<code>.json` (same `{placeholders}`), thrown with `context.Refuse("key", values)` |
@@ -103,7 +103,7 @@ gate commands above with the numbers to report, and "no environment access".
 ## Scaffold a project
 
 ```powershell
-./profiles/dataverse-plugins/scaffold.ps1 -Name Northwind.Sales -Prefix nw -Languages en,nl,de -Destination C:\src\northwind
+./profiles/dataverse-plugins/scaffold.ps1 -Name Northwind.Sales -Prefix nw -Languages en,nl,de -Destination C:\src\northwind -DesignSystem neutral
 ```
 
 - `-Name` (PascalCase, dots allowed) replaces `Contoso.Sample` in namespaces, files and folders;
@@ -121,6 +121,9 @@ gate commands above with the numbers to report, and "no environment access".
   `{ "name": "plugins", "folder": "src/<Name>.Plugins/Strings", "file": "messages.{code}.json" }`. The checker
   then holds every bundle to the glossary, the placeholders and the identical-text limit; the codes in
   `Strings/languages.json` must be the codes in `build/contracts/locales.json`.
+- `-DesignSystem` (default `neutral`) records the project's design system in `build/framework.json`
+  (nothing is generated: see [Design system](#design-system)). A project that already records another one
+  stops the script before anything is copied.
 - Replace the sample plug-ins, steps and custom API with the product's own before the first registration.
 
 ## The PluginBase pattern
@@ -387,12 +390,20 @@ deployment: registration and imports are human-approved steps.
 
 ## Design system
 
-Plug-ins have no UI, so they use no generated target. What they show (error messages,
-`InvalidPluginExecutionException` texts) is plain text in every configured language and takes its look from
-the app. A plug-in or custom API that builds HTML (an email body, a document) takes its colours from the
-project's generated `email-palette.json` or `office-theme.json`
-([docs/design-systems.md](../../docs/design-systems.md)), copied into the plug-in's resources at build time,
-never typed in.
+Plug-ins have no UI, so nothing is generated for them. `scaffold.ps1 -DesignSystem <id>` (default `neutral`)
+records the project's design system in `build/framework.json` (`designSystem.id`, keeping the `out` and
+`targets` a project already has) like every profile, so one project has one design system
+([docs/design-systems.md](../../docs/design-systems.md)).
+
+- **Messages users read** (`InvalidPluginExecutionException` texts, custom API errors, every bundle in
+  `Strings/`) follow the **content fundamentals of the chosen system's brand book** (its `README.md` in the
+  framework's `design-systems/<id>/`, the "Content fundamentals" section where it has one; for `neutral`, the
+  framework's [docs/docs-and-writing.md](../../docs/docs-and-writing.md)): its tone and form of address,
+  **sentence case**, plain words, no internal codes or stack traces, and what the user can do next. They take their look from the app that
+  shows them.
+- A plug-in or custom API that builds HTML (an email body, a document) takes its colours from the project's
+  generated `email-palette.json` or `office-theme.json`, copied into the plug-in's resources at build time,
+  never typed in.
 
 ## Related guidance elsewhere in the framework
 

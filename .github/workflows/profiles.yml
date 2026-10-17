@@ -31,6 +31,11 @@
 # missing or too old fails the job (optional tools only print). Scaffolds are
 # written to the runner's temporary folder, outside the checkout.
 #
+# Every scaffold takes its look from a design system (-DesignSystem, set per
+# job in DESIGN_SYSTEM) and its gate checks the generated files. Both shipped
+# systems run: the corporate one in dotnet-react-azure and the PCF controls
+# gate (web CSS, fonts, logos, favicon; Fluent themes), neutral in the others.
+#
 # Actions are pinned to full commit SHAs (the comment says which release), the
 # same pins the scaffolds' own workflows use; pac is pinned by version. No
 # secrets, no environment access, nothing deployed.
@@ -44,6 +49,8 @@ on:
     paths:
       - 'profiles/**'
       - 'scripts/**'
+      # The scaffolds generate their look from a design system.
+      - 'design-systems/**'
       # Read by check-prereqs.mjs (the framework's own tools) and by the PCF scaffold (languages).
       - 'prerequisites.json'
       - 'templates/languages-catalog.json'
@@ -52,6 +59,7 @@ on:
     paths:
       - 'profiles/**'
       - 'scripts/**'
+      - 'design-systems/**'
       - 'prerequisites.json'
       - 'templates/languages-catalog.json'
       - '.github/workflows/profiles.yml'
@@ -100,6 +108,7 @@ jobs:
 
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      DESIGN_SYSTEM: capgemini-zodiak
       TEST_SQL_CONNECTION: Server=localhost,1433;User ID=sa;Password=Ci-${{ github.run_id }}-Sql;TrustServerCertificate=True;Encrypt=False;Connect Timeout=30
 
     steps:
@@ -128,8 +137,8 @@ jobs:
       - name: Prerequisites (required tools must be present)
         run: node scripts/check-prereqs.mjs dotnet-react-azure
 
-      - name: Scaffold Acme (en-GB, nl, pl)
-        run: ./profiles/dotnet-react-azure/scaffold.ps1 -Name Acme -Languages en-GB,nl,pl -Destination "$env:RUNNER_TEMP/acme" -SkipGitInit
+      - name: Scaffold Acme (en-GB, nl, pl; design system from DESIGN_SYSTEM)
+        run: ./profiles/dotnet-react-azure/scaffold.ps1 -Name Acme -Languages en-GB,nl,pl -Destination "$env:RUNNER_TEMP/acme" -SkipGitInit -DesignSystem $env:DESIGN_SYSTEM
 
       - name: SDK in use
         working-directory: ${{ runner.temp }}/acme
@@ -160,7 +169,7 @@ jobs:
         working-directory: ${{ runner.temp }}/acme/src/web
         run: npm run typecheck
 
-      - name: Web tests (contrast, plurals)
+      - name: Web tests (design system contrast and no own colours, plurals)
         working-directory: ${{ runner.temp }}/acme/src/web
         run: npm test
 
@@ -179,6 +188,7 @@ jobs:
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
       BUILD_NUMBER: ${{ github.run_number }}
+      DESIGN_SYSTEM: neutral
 
     steps:
       - name: Check out
@@ -205,7 +215,7 @@ jobs:
         run: node scripts/check-prereqs.mjs dataverse-plugins
 
       - name: Scaffold Fabrikam.Sales (prefix fab; en, nl)
-        run: ./profiles/dataverse-plugins/scaffold.ps1 -Name Fabrikam.Sales -Prefix fab -Languages en,nl -Destination "$env:RUNNER_TEMP/plugins" -SkipGitInit
+        run: ./profiles/dataverse-plugins/scaffold.ps1 -Name Fabrikam.Sales -Prefix fab -Languages en,nl -Destination "$env:RUNNER_TEMP/plugins" -SkipGitInit -DesignSystem $env:DESIGN_SYSTEM
 
       - name: SDK in use
         working-directory: ${{ runner.temp }}/plugins
@@ -248,6 +258,7 @@ jobs:
     timeout-minutes: 15
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      DESIGN_SYSTEM: neutral
 
     steps:
       - name: Check out
@@ -275,7 +286,7 @@ jobs:
         run: node scripts/check-prereqs.mjs dataverse-plugins
 
       - name: Scaffold Fabrikam.Sales (prefix fab; en, nl)
-        run: ./profiles/dataverse-plugins/scaffold.ps1 -Name Fabrikam.Sales -Prefix fab -Languages en,nl -Destination "$env:RUNNER_TEMP/plugins" -SkipGitInit
+        run: ./profiles/dataverse-plugins/scaffold.ps1 -Name Fabrikam.Sales -Prefix fab -Languages en,nl -Destination "$env:RUNNER_TEMP/plugins" -SkipGitInit -DesignSystem $env:DESIGN_SYSTEM
 
       - name: Build the plug-in (Release, warnings are errors)
         working-directory: ${{ runner.temp }}/plugins
@@ -289,6 +300,8 @@ jobs:
     name: dataverse-solution (Ubuntu, pac round trip)
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      DESIGN_SYSTEM: neutral
 
     steps:
       - name: Check out
@@ -316,10 +329,11 @@ jobs:
         run: node scripts/check-prereqs.mjs dataverse-solution
 
       - name: Scaffold Fabrikam (prefix fab; en, nl, de)
-        run: ./profiles/dataverse-solution/scaffold.ps1 -Name Fabrikam -Prefix fab -Languages en,nl,de -Destination "$env:RUNNER_TEMP/solution"
+        run: ./profiles/dataverse-solution/scaffold.ps1 -Name Fabrikam -Prefix fab -Languages en,nl,de -Destination "$env:RUNNER_TEMP/solution" -DesignSystem $env:DESIGN_SYSTEM
 
       # The pack round-trip test skips itself where pac is missing; here pac is installed, so a skipped
-      # test means something is wrong.
+      # test means something is wrong. The design system test holds the theme web resource to the
+      # generated docs/brand/dataverse-theme.xml.
       - name: Contract tests (none skipped)
         working-directory: ${{ runner.temp }}/solution
         run: |
@@ -347,6 +361,8 @@ jobs:
     name: power-platform-pcf (Ubuntu, controls gate)
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      DESIGN_SYSTEM: capgemini-zodiak
 
     steps:
       - name: Check out
@@ -375,7 +391,7 @@ jobs:
         run: node scripts/check-prereqs.mjs power-platform-pcf
 
       - name: Scaffold FieldTools (prefix ftl; en-GB, nl, pl)
-        run: ./profiles/power-platform-pcf/scaffold.ps1 -Name FieldTools -Prefix ftl -Languages en-GB,nl,pl -Destination "$env:RUNNER_TEMP/pcf" -SkipGitInit
+        run: ./profiles/power-platform-pcf/scaffold.ps1 -Name FieldTools -Prefix ftl -Languages en-GB,nl,pl -Destination "$env:RUNNER_TEMP/pcf" -SkipGitInit -DesignSystem $env:DESIGN_SYSTEM
 
       - name: Install (locked)
         working-directory: ${{ runner.temp }}/pcf/controls
@@ -392,6 +408,7 @@ jobs:
     timeout-minutes: 25
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      DESIGN_SYSTEM: neutral
 
     steps:
       - name: Check out
@@ -426,7 +443,7 @@ jobs:
         run: node scripts/check-prereqs.mjs power-platform-pcf
 
       - name: Scaffold FieldTools (prefix ftl; en-GB, nl, pl)
-        run: ./profiles/power-platform-pcf/scaffold.ps1 -Name FieldTools -Prefix ftl -Languages en-GB,nl,pl -Destination "$env:RUNNER_TEMP/pcf" -SkipGitInit
+        run: ./profiles/power-platform-pcf/scaffold.ps1 -Name FieldTools -Prefix ftl -Languages en-GB,nl,pl -Destination "$env:RUNNER_TEMP/pcf" -SkipGitInit -DesignSystem $env:DESIGN_SYSTEM
 
       - name: Install (locked)
         working-directory: ${{ runner.temp }}/pcf/controls

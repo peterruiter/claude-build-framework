@@ -19,7 +19,14 @@
     forms its culture needs (src/web/scripts/add-language.mjs). Bundles for a new language start as
     the English text: translate them before that language goes live.
 
-    Requires node (22.18 or newer) for the language step. Runs nothing against Azure; initialises a
+    Then it applies the design system (-DesignSystem, from the framework's design-systems/): the web
+    app's look comes only from it. scripts/design-system.mjs generates tokens.css, tokens.ts,
+    tokens.json, the email and chart palettes (and the fonts and logos the system has) into
+    src/web/src/styles/design-system/; build/framework.json records the choice (designSystem, and
+    theme for the framework's theme contract test); a system with a mark (a logo that may stand
+    alone) gives both web apps their favicon from it, light and dark.
+
+    Requires node (22.18 or newer) for the language and design system steps. Runs nothing against Azure; initialises a
     git repository on branch main without committing.
 
 .PARAMETER Name
@@ -38,11 +45,19 @@
 .PARAMETER NamePrefix
     Azure resource name prefix (3-20 lower case letters and digits). Defaults to the lower-cased name.
 
+.PARAMETER DesignSystem
+    The design system the product looks like: a folder name in the framework's design-systems/
+    (node scripts/design-system.mjs list). Default: neutral. A branded system is for that brand's
+    work only: read its README-USE.md first.
+
 .PARAMETER SkipGitInit
     Do not run git init.
 
 .EXAMPLE
     ./scaffold.ps1 -Name MyProduct -Languages en-GB,nl,pl -Destination ../my-product
+
+.EXAMPLE
+    ./scaffold.ps1 -Name MyProduct -Languages en-GB,nl -Destination ../my-product -DesignSystem neutral
 #>
 [CmdletBinding(SupportsShouldProcess)]
 param(
@@ -51,6 +66,7 @@ param(
     [string] $DefaultLanguage,
     [Parameter(Mandatory)] [string] $Destination,
     [ValidatePattern('^[a-z0-9]{3,20}$')] [string] $NamePrefix,
+    [string] $DesignSystem = 'neutral',
     [switch] $SkipGitInit
 )
 
@@ -62,7 +78,9 @@ $profileRoot = $PSScriptRoot
 $languageTokens = @($Languages | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 if ($languageTokens.Count -eq 0) { throw 'Give at least one language: -Languages en or -Languages en-GB,nl.' }
 foreach ($token in $languageTokens) { if ($token -notmatch '^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$') { throw "'$token' is not a language code or culture." } }
-if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'node is needed for the language set-up (22.18 or newer): https://nodejs.org' }
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'node is needed for the language and design system set-up (22.18 or newer): https://nodejs.org' }
+Import-Module (Join-Path $profileRoot '../../scripts/DesignSystem.psm1') -Force
+$designManifest = Assert-DesignSystem -Id $DesignSystem
 
 if (-not $NamePrefix)
 {
@@ -77,7 +95,7 @@ if ((Test-Path $Destination) -and (Get-ChildItem -LiteralPath $Destination -Forc
     throw "$Destination is not empty. Scaffold into a new folder."
 }
 
-if (-not $PSCmdlet.ShouldProcess($Destination, "Scaffold $Name ($($languageTokens -join ', '))")) { return }
+if (-not $PSCmdlet.ShouldProcess($Destination, "Scaffold $Name ($($languageTokens -join ', '); design system $DesignSystem)")) { return }
 
 # --------------------------------------------------------------------- copy --
 $skip = @('bin', 'obj', 'node_modules', 'out', 'TestResults', '.vs')
@@ -159,6 +177,33 @@ foreach ($token in $languageTokens)
 & node $addLanguage --default $DefaultLanguage | Out-Null
 if ($LASTEXITCODE -ne 0) { throw "Could not make $DefaultLanguage the default." }
 
+# ------------------------------------------------------------ design system --
+# After the rename, so nothing generated (a brand's name, its logo files) is touched by it. The
+# scaffold ships the neutral files; they are replaced by the chosen system's, never edited.
+$designOut = 'src/web/src/styles/design-system'
+Invoke-DesignSystemBuild -Id $DesignSystem -Out (Join-Path $Destination $designOut) -Targets css, ts, email, charts
+Remove-Item -LiteralPath (Join-Path $Destination 'build/framework.json') -ErrorAction SilentlyContinue
+Set-ProjectDesignSystem -Destination $Destination -Id $DesignSystem -Out $designOut -Targets css, ts, email, charts -Theme
+
+# Favicon: the system's mark, where its logo rules let the mark stand alone (favicons, app icons),
+# the light-ground file for a light browser and the dark-ground file for a dark one. A system
+# without a mark (neutral) leaves the apps without one: the product's own icon comes later.
+$logos = if ($designManifest.PSObject.Properties['logos']) { $designManifest.logos.files } else { $null }
+if ($logos -and $logos.PSObject.Properties['markOnLight'] -and $logos.PSObject.Properties['markOnDark'])
+{
+    $light = Split-Path $logos.markOnLight -Leaf
+    $dark = Split-Path $logos.markOnDark -Leaf
+    foreach ($page in @(@{ Path = 'src/web/index.html'; Base = './src' }, @{ Path = 'src/web/portal/index.html'; Base = '../src' }))
+    {
+        $file = Join-Path $Destination $page.Path
+        $html = [System.IO.File]::ReadAllText($file)
+        $icons = "    <link rel=`"icon`" href=`"$($page.Base)/styles/design-system/logos/$light`" media=`"(prefers-color-scheme: light)`" />`n" +
+                 "    <link rel=`"icon`" href=`"$($page.Base)/styles/design-system/logos/$dark`" media=`"(prefers-color-scheme: dark)`" />`n"
+        $html = [regex]::Replace($html, '(\r?\n)(\s*<title>)', "`$1$($icons.TrimEnd("`n"))`$1`$2", 1)
+        [System.IO.File]::WriteAllText($file, $html, $utf8)
+    }
+}
+
 # -------------------------------------------------------------------- config --
 $config = Get-Content (Join-Path $profileRoot 'profile.config.json.example') -Raw | ConvertFrom-Json
 $lower = $Name.ToLowerInvariant()
@@ -179,6 +224,7 @@ if (-not $SkipGitInit -and (Get-Command git -ErrorAction SilentlyContinue))
 Write-Host ''
 Write-Host "$Name is at $Destination" -ForegroundColor Green
 Write-Host "    Languages: $($languageTokens -join ', ') (default $DefaultLanguage). New bundles hold English: translate them."
+Write-Host "    Design system: $($designManifest.name) $($designManifest.version) ($DesignSystem), generated into $designOut."
 Write-Host '    Next:'
 Write-Host '      dotnet build -c Release; dotnet test'
 Write-Host '      cd src/web; npm ci; npm run build; npm test'

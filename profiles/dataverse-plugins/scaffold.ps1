@@ -19,6 +19,10 @@
     with the source language. Bundles for languages the profile does not ship (it ships en and nl) start
     as a copy of the English text: translate them before that language goes live.
 
+    Design system: plug-ins have no UI, so nothing is generated; build/framework.json records the
+    project's design system (-DesignSystem) like every profile does, and the messages users read
+    follow its brand book's writing rules (tone, sentence case).
+
     The destination may already hold a project (for example one /build-framework:new-project set up): no
     existing file is overwritten; the script stops and names the clash instead. Runs nothing against any
     environment.
@@ -41,6 +45,11 @@
 .PARAMETER Destination
     The repository folder. Created when absent.
 
+.PARAMETER DesignSystem
+    The project's design system: a folder name in the framework's design-systems/ (node
+    scripts/design-system.mjs list). Default: neutral. Recorded in build/framework.json; a project
+    that already records another one stops the script.
+
 .PARAMETER SkipGitInit
     Do not run git init when the destination is not a repository yet.
 
@@ -54,6 +63,7 @@ param(
     [Parameter(Mandatory)] [string[]] $Languages,
     [string] $SourceLanguage,
     [Parameter(Mandatory)] [string] $Destination,
+    [string] $DesignSystem = 'neutral',
     [switch] $SkipGitInit
 )
 
@@ -70,6 +80,8 @@ if (-not $SourceLanguage) { $SourceLanguage = if ($codes -contains 'en') { 'en' 
 if ($codes -notcontains $SourceLanguage) { throw "-SourceLanguage $SourceLanguage is not in -Languages." }
 
 $profileRoot = $PSScriptRoot
+Import-Module (Join-Path $profileRoot '../../scripts/DesignSystem.psm1') -Force
+$designManifest = Assert-DesignSystem -Id $DesignSystem -Destination $Destination
 $from = Join-Path $profileRoot 'scaffold'
 $Destination = [System.IO.Path]::GetFullPath($Destination)
 $solutionName = $Name -replace '\.', ''
@@ -126,6 +138,8 @@ foreach ($code in $codes)
     else { $text = $english; $untranslated += $code }
     [System.IO.File]::WriteAllText((Join-Path $stringsTo "messages.$code.json"), (Rename-Text $text), $utf8)
 }
+Set-ProjectDesignSystem -Destination $Destination -Id $DesignSystem
+
 $quoted = ($codes | ForEach-Object { '"' + $_ + '"' }) -join ', '
 $languagesJson = "{`n  `"source`": `"$SourceLanguage`",`n  `"languages`": [$quoted]`n}`n"
 [System.IO.File]::WriteAllText((Join-Path $stringsTo 'languages.json'), $languagesJson, $utf8)
@@ -145,6 +159,7 @@ if (-not $SkipGitInit -and -not (Test-Path (Join-Path $Destination '.git')) -and
 Write-Host ''
 Write-Host "$Name plug-ins are at $Destination" -ForegroundColor Green
 Write-Host "    Prefix $Prefix, solution $solutionName, languages $($codes -join ', ') (source $SourceLanguage)."
+Write-Host "    Design system: $($designManifest.name) $($designManifest.version) ($DesignSystem), recorded in build/framework.json; messages follow its brand book's writing rules."
 if ($untranslated.Count -gt 0) { Write-Host "    messages.{$($untranslated -join ',')}.json hold the English text: translate them." -ForegroundColor Yellow }
 Write-Host '    Next:'
 Write-Host '      dotnet build -c Release; dotnet test -c Release'

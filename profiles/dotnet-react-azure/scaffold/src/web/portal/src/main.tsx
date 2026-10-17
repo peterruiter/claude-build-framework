@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Chrome } from '../../src/Chrome.tsx';
 import { I18nProvider, useI18n } from '../../src/i18n.tsx';
 import { applyTheme, storedTheme } from '../../src/theme.ts';
-import '../../src/styles/tokens.css';
+import '../../src/styles/design-system/tokens.css';
 import '../../src/styles/base.css';
 
 applyTheme(storedTheme());

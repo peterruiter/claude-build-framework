@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <title>App</title>
+  <!-- The design system's colours, fonts and focus ring (light and dark), copied by the web build
+       (src/web/vite.design-system.ts). No colour values here. -->
+  <link rel="stylesheet" href="/app/design-system/tokens.css">
   <style>
-    :root { color-scheme: light dark; --bg: #ffffff; --fg: #1a1a1a; --link: #0b57d0; }
-    @media (prefers-color-scheme: dark) { :root { --bg: #121212; --fg: #ececec; --link: #8ab4f8; } }
-    body { margin: 0; padding: 2rem 1rem; font: 1rem/1.5 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+    body { margin: 0; padding: 2rem 1rem; font-family: var(--font-sans, system-ui, sans-serif); line-height: 1.5; }
     main { max-width: 40rem; margin: 0 auto; }
-    a { color: var(--link); }
-    a:focus-visible { outline: 3px solid var(--link); outline-offset: 2px; }
+    a { color: var(--ds-link); }
   </style>
 </head>
 <body>

@@ -34,6 +34,17 @@ owner whose org default is Capgemini Zodiak, `capgemini-zodiak`), and `neutral` 
 answer goes into `build/framework.json` (`designSystem`), the Project facts in CLAUDE.md, and the
 generated files. Switch later with the `design-system` skill.
 
+Every profile's `scaffold.ps1` takes it as **`-DesignSystem <id>`** (default `neutral`), generates the
+targets that profile needs where it keeps them, and records them in `build/framework.json`; a
+profile's scaffold carries no colours of its own:
+
+| Profile | Generated into | Targets | Wired |
+| --- | --- | --- | --- |
+| `dotnet-react-azure` | `src/web/src/styles/design-system` | `css`, `ts`, `email`, `charts` | `tokens.css` before `base.css`, which uses the `--ds-*` roles only; the contrast test reads `tokens.json`; favicon from the mark |
+| `power-platform-pcf` | `controls/shared/design-system` | `fluent`, `ts` | `shared/theme.ts`: the host app's theme when it passes one, else the generated themes |
+| `dataverse-solution` | `docs/brand` | `dataverse`, `email`, `office`, `charts` | the app theme as the web resource `<prefix>_theme.xml` in the core solution, held to the generated file by a contract test |
+| `dataverse-plugins` | nothing | none | the id only; messages follow the brand book's content rules |
+
 ## The generator
 
 [`scripts/design-system.mjs`](../scripts/design-system.mjs), Node's own modules only:
@@ -127,10 +138,10 @@ asks for a specific token, as a system's own components do.
 
 ## PCF code components
 
-For the [`power-platform-pcf`](../profiles/power-platform-pcf/) profile: generate the `fluent` and
-`ts` targets into the component's source (for example
-`node "${CLAUDE_PLUGIN_ROOT}/scripts/design-system.mjs" build <id> --out <Control>/design-system --targets fluent,ts`;
-the folder name is the project's choice).
+For the [`power-platform-pcf`](../profiles/power-platform-pcf/) profile: `scaffold.ps1 -DesignSystem <id>`
+generates the `fluent` and `ts` targets into `controls/shared/design-system`
+(`node "${CLAUDE_PLUGIN_ROOT}/scripts/design-system.mjs" build <id> --out controls/shared/design-system --targets fluent,ts`),
+and `shared/theme.ts` applies the rule below.
 
 - In a **model-driven app**, wrap the control in a `FluentProvider` with the host's theme
   (`context.fluentDesignLanguage?.tokenTheme`) so it matches the app, which the app's

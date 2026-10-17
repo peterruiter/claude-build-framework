@@ -66,8 +66,9 @@ controls/                           one npm workspace, one lock file, one node_m
                                     strings/SampleControl.<lcid>.resx, strings/fallback.generated.ts
   SampleGrid/                       a DATASET control project: table, sorting, paging, selection,
     SampleGrid/                     a list below 480 px; same layout
-  shared/                           strings.ts (RESX + CLDR plurals + fallback), theme.ts (host theme,
-                                    direction), diagnostics.ts (the only console output), languages.generated.ts
+  shared/                           strings.ts (RESX + CLDR plurals + fallback), theme.ts (host theme or
+                                    the design system, direction), diagnostics.ts (the only console output),
+                                    languages.generated.ts, design-system/ (generated: fluent-theme.ts, tokens.ts)
   scripts/                          sync-languages, check-controls, check-bundle-size, bump-version,
                                     check-version-bump, dataverse-languages.json (LCIDs)
   tests/                            mockContext.ts (a context reading the real RESX files), tests for
@@ -88,12 +89,14 @@ Validated (17 Oct 2026, Windows 11, Node 26.7, .NET SDK 10.0.303, pac 2.11.2): `
 full gate (`npm run gate`: check, refreshTypes, lint 0 warnings, typecheck, 35 tests, release
 build, size: 6 KB and 7.5 KB bundles), and `dotnet build -c Release` of the solution from a
 clean tree (both zips; the managed one holds both controls with their RESX files). The same for
-projects generated with `scaffold.ps1` (see the end of this file).
+projects generated with `scaffold.ps1` (see the end of this file). The design system (17 Oct 2026):
+projects generated with `-DesignSystem neutral` and with the corporate design system pass the full
+gate (38 tests; 8.2 KB and 9.9 KB bundles, the generated themes included).
 
 ## Scaffold a project
 
 ```powershell
-./profiles/power-platform-pcf/scaffold.ps1 -Name FieldTools -Prefix ftl -Languages en-GB,nl,pl -Destination C:\src\field-tools
+./profiles/power-platform-pcf/scaffold.ps1 -Name FieldTools -Prefix ftl -Languages en-GB,nl,pl -Destination C:\src\field-tools -DesignSystem neutral
 cd C:\src\field-tools\controls; npm ci; npm run gate
 dotnet build ..\solution\FieldTools.cdsproj -c Release
 ```
@@ -109,14 +112,17 @@ dotnet build ..\solution\FieldTools.cdsproj -c Release
   catalogue and a RESX file per control and language. New languages start as the English text
   marked `untranslated`; `npm run check` warns, `npm run check:release` (the release gate)
   refuses. Without English in the list, the default language becomes the source.
+- `-DesignSystem` (default `neutral`) generates the controls' themes from a design system into
+  `controls/shared/design-system/` and records it in `build/framework.json`: see
+  [Design system](#design-system). A project that already records another one stops the script.
 - `-WithDeployWorkflow` adds the manual deploy workflow. Nothing is imported anywhere.
 - Into an existing framework project (CLAUDE.md, build/contracts, ...): the script copies
   beside it, keeps the project's files and merges `.gitignore` and `.gitattributes`.
 
 In a project made by `new-project`, the framework's string bundles are not used for the
 controls: set `"strings": []` in `build/framework.json`, remove `theme` and `pluralModule`
-there (the controls take the host's theme; their contrast is tested in
-`controls/tests/theme.test.ts`), and delete `src/strings`, `src/styles` and `src/i18n`. The
+there (keep `designSystem`, which the scaffold points at `controls/shared/design-system`; the
+controls' contrast is tested in `controls/tests/theme.test.ts`), and delete `src/strings`, `src/styles` and `src/i18n`. The
 checker then covers What's new and the glossary, and its contract tests skip what does not
 apply (tried: 9 pass, 3 skip). The CI's framework job runs them when they are there.
 
@@ -185,11 +191,12 @@ residency, CI green): see [quality-gate](../../skills/quality-gate/SKILL.md).
 - **Space**: `trackContainerResize(true)` and `context.mode.allocatedWidth`: the field stacks
   below 320 px, the grid becomes a list below 480 px. Test at 320 and 1280 px, and at 200% zoom.
 - **Theme, light and dark, high contrast**: the controls render inside a `FluentProvider` with
-  `context.fluentDesignLanguage.tokenTheme` (the host's tokens, in model-driven apps also the
-  display density), else `webDarkTheme` or `webLightTheme` by `isDarkTheme`. Colours come from
+  `hostTheme(context)` (`shared/theme.ts`): the host's `context.fluentDesignLanguage.tokenTheme`
+  when it passes one (in model-driven apps also the display density), else the design system's
+  `darkTheme` or `lightTheme` by `isDarkTheme` ([Design system](#design-system)). Colours come from
   tokens only (`tokens.colorNeutralForeground2` and so on); `tests/theme.test.ts` holds the
-  pairs the controls use to 4.5:1 (text) and 3:1 (focus) in the light, dark and high-contrast
-  themes. Read the theme in every `updateView`: it can change while the control is open.
+  pairs the controls use to 4.5:1 (text) and 3:1 (focus) in the design system's light and dark
+  themes and Fluent's high-contrast theme. Read the theme in every `updateView`: it can change while the control is open.
 - **Right to left**: `dir` from `context.userSettings.isRTL`; use logical CSS properties
   (`paddingInline`, `marginInlineStart`).
 - In the app: the framework's [accessibility](../../docs/accessibility.md) pass with a screen
@@ -401,12 +408,32 @@ and a screen reader pass.
 
 ## Design system
 
-The project's design system ([docs/design-systems.md](../../docs/design-systems.md)) is generated with the
-`fluent` and `ts` targets into the control's source (for example `<Control>/design-system/`):
-`fluent-theme.ts` exports `brand` (a `BrandVariants` ramp with the brand colour at 80), `lightTheme` and
-`darkTheme`. In a model-driven app the controls keep the host's `tokenTheme` (the app's own theme, branded by
-the solution's `dataverse-theme.xml`); where the host passes none, they use the generated `darkTheme` or
-`lightTheme` by `isDarkTheme` instead of `webDarkTheme`/`webLightTheme`; add the generated themes to
-`tests/theme.test.ts` so their pairs are held to the same ratios (the scaffold does not do this yet). Colours
-outside Fluent controls come from `tokens.ts`, never as literals. Details:
+The controls take their own look **only** from the project's design system
+([docs/design-systems.md](../../docs/design-systems.md)). `scaffold.ps1 -DesignSystem <id>` (default `neutral`)
+runs `node <framework>/scripts/design-system.mjs build <id> --out controls/shared/design-system --targets fluent,ts`
+and records `designSystem` in `build/framework.json`. `fluent-theme.ts` exports `brand` (a `BrandVariants` ramp
+with the brand colour at 80), `lightTheme` and `darkTheme` (Fluent's themes with the design system's roles,
+font and radius laid over); `tokens.ts` the tokens and roles for colours outside Fluent controls (`role()`,
+`color()`), never literals. The scaffold in the framework ships the `neutral` files; they are replaced, never
+edited (lint skips the folder; the type check covers it).
+
+**The rule** (`shared/theme.ts`, `hostTheme`):
+
+- **Inside Power Apps, follow the app.** Model-driven apps with the modern look and canvas apps with modern
+  themes pass `context.fluentDesignLanguage.tokenTheme`; the control renders with it, so it matches the app
+  (light or dark, display density). A model-driven app carries the brand through its own theme: the
+  solution's `dataverse-theme.xml` from the same design system
+  ([dataverse-solution](../dataverse-solution/README.md#design-system)).
+- **Everywhere else, the design system**: hosts without modern theming (classic forms, the test harness,
+  canvas apps without modern themes, a standalone page) get the generated `darkTheme` or `lightTheme` by
+  `isDarkTheme`, never Fluent's `webLightTheme`/`webDarkTheme`.
+- **A control that must carry the brand** inside an app (a branded canvas component) asks for it:
+  `hostTheme(context, { carryBrand: true })`. Portalled content (dialogs, popovers) gets the same theme in
+  its own `FluentProvider`.
+
+`tests/theme.test.ts` reads the generated values: the controls' pairs in the design system's light and dark
+themes (and Fluent's high-contrast theme, which a host can pass), the design system's own contrast pairs in
+both themes, that the Fluent themes carry the roles and the font of `tokens.ts`, and the rule above. Fonts:
+a control cannot rely on the brand's web font being loaded in the host; the generated themes name a stack
+that falls back. Switch or regenerate with the framework's `design-system` skill. Details:
 [PCF code components](../../docs/design-systems.md#pcf-code-components).

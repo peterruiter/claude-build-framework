@@ -20,6 +20,12 @@
     Dataverse language ids (LCIDs). New languages start as the English text marked untranslated:
     translate them before that language goes live (the release gate refuses untranslated strings).
 
+    Then the design system (-DesignSystem, from the framework's design-systems/): the build
+    framework's scripts/design-system.mjs generates the Fluent UI themes (fluent-theme.ts) and the
+    tokens (tokens.ts) into controls/shared/design-system/, and build/framework.json records the
+    choice. shared/theme.ts follows the host app's theme when it passes one and uses these themes
+    everywhere else.
+
     Requires node (22.18 or newer). Runs nothing against an environment; initialises a git
     repository on branch main without committing.
 
@@ -47,6 +53,11 @@
     The publisher's option value prefix (10000-99999). Derived from the prefix by default; use the
     existing publisher's value when the environments already have it.
 
+.PARAMETER DesignSystem
+    The design system the controls take their look from outside an app's own theme: a folder name in
+    the framework's design-systems/ (node scripts/design-system.mjs list). Default: neutral. A
+    branded system is for that brand's work only: read its README-USE.md first.
+
 .PARAMETER WithDeployWorkflow
     Also add .github/workflows/deploy-dev.yml (manual, through a protected GitHub environment).
 
@@ -62,6 +73,7 @@ param(
     [Parameter(Mandatory)] [string] $Destination,
     [string] $PublisherName,
     [ValidateRange(10000, 99999)] [int] $OptionValuePrefix,
+    [string] $DesignSystem = 'neutral',
     [switch] $WithDeployWorkflow,
     [switch] $SkipGitInit
 )
@@ -82,6 +94,8 @@ if (-not $DefaultLanguage) { $DefaultLanguage = $codes[0] }
 $DefaultLanguage = ($DefaultLanguage -split '-')[0].ToLowerInvariant()
 if ($codes -notcontains $DefaultLanguage) { throw "-DefaultLanguage $DefaultLanguage is not in -Languages." }
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'node is needed (22.18 or newer): https://nodejs.org' }
+Import-Module (Join-Path $profileRoot '../../scripts/DesignSystem.psm1') -Force
+$designManifest = Assert-DesignSystem -Id $DesignSystem -Destination $Destination
 if (-not $OptionValuePrefix) {
     # A stable number from the prefix (pac derives its own; any value in range is valid).
     $hash = 0
@@ -92,7 +106,7 @@ if (-not $OptionValuePrefix) {
 if ((Test-Path $Destination) -and (Get-ChildItem -LiteralPath $Destination -Force | Where-Object { $_.Name -notin '.git', 'CLAUDE.md', 'STATE.md', 'ROADMAP.md', 'build', 'scripts', 'tests', 'src', '.github', '.githooks', 'package.json', '.gitignore', 'README.md' } | Select-Object -First 1)) {
     throw "$Destination has files this scaffold would mix with. Scaffold into a new folder, or into a project that only has the framework's files."
 }
-if (-not $PSCmdlet.ShouldProcess($Destination, "Scaffold $Name (prefix $Prefix; $($tokens -join ', '))")) { return }
+if (-not $PSCmdlet.ShouldProcess($Destination, "Scaffold $Name (prefix $Prefix; $($tokens -join ', '); design system $DesignSystem)")) { return }
 
 # --------------------------------------------------------------------- copy --
 $skip = @('node_modules', 'out', 'bin', 'obj', 'generated', '.vs')
@@ -163,6 +177,12 @@ if ($codes -notcontains 'en') {
     if ($LASTEXITCODE -ne 0) { throw 'Could not remove English.' }
 }
 
+# ------------------------------------------------------------ design system --
+# The scaffold ships the neutral files; they are replaced by the chosen system's, never edited.
+$designOut = 'controls/shared/design-system'
+Invoke-DesignSystemBuild -Id $DesignSystem -Out (Join-Path $Destination $designOut) -Targets fluent, ts
+Set-ProjectDesignSystem -Destination $Destination -Id $DesignSystem -Out $designOut -Targets fluent, ts
+
 if (-not $SkipGitInit -and (Get-Command git -ErrorAction SilentlyContinue) -and -not (Test-Path (Join-Path $Destination '.git'))) {
     git -C $Destination init -b main --quiet
 }
@@ -170,6 +190,7 @@ if (-not $SkipGitInit -and (Get-Command git -ErrorAction SilentlyContinue) -and 
 Write-Host ''
 Write-Host "$Name is at $Destination (publisher prefix $Prefix, option value prefix $OptionValuePrefix)" -ForegroundColor Green
 Write-Host "    Languages: $($tokens -join ', ') (default $DefaultLanguage). Strings marked untranslated need a translator."
+Write-Host "    Design system: $($designManifest.name) $($designManifest.version) ($DesignSystem), generated into $designOut."
 Write-Host '    Next:'
 Write-Host '      cd controls; npm ci; npm run gate'
 Write-Host "      dotnet build ../solution/$Name.cdsproj -c Release"

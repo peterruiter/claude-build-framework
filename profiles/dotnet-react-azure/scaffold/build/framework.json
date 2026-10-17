@@ -1,0 +1,18 @@
+{
+  "description": "The design system this project uses (designSystem: id, where its generated files go and which targets; regenerate with the build framework's scripts/design-system.mjs build <id> --out <out> --targets <targets>) and, for a web UI, the generated files the theme contract test reads (theme.pairs: pairs the project adds, { fg, bg, min } with CSS custom property names). new-project merges this file with the framework's project template.",
+  "designSystem": {
+    "id": "neutral",
+    "out": "src/web/src/styles/design-system",
+    "targets": [
+      "css",
+      "ts",
+      "email",
+      "charts"
+    ]
+  },
+  "theme": {
+    "css": "src/web/src/styles/design-system/tokens.css",
+    "tokens": "src/web/src/styles/design-system/tokens.json",
+    "pairs": []
+  }
+}

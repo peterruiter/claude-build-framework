@@ -28,7 +28,9 @@ One design system drives every output a project makes. Method:
    system"): `fluent` for PCF and React with Fluent, `dataverse` for model-driven apps, `email` and
    `charts` for apps that send mail or draw charts, `video` with video tours, `office` when the
    project writes documents. A switch removes the old system's files the new one does not write
-   (old fonts and logos in `out/fonts`, `out/logos`).
+   (old fonts and logos in `out/fonts`, `out/logos`): empty `out` before the build. A project made
+   with a profile's `scaffold.ps1 -DesignSystem` already has `designSystem` (`out`, `targets`)
+   set: use those.
 5. **Update** `build/framework.json` (`designSystem.id`, `targets`; `theme.css`/`theme.tokens`
    at the generated files), clear `theme.pairs` entries that name the old system's tokens (the
    design system's own pairs come from `tokens.json`), and the Design system row in CLAUDE.md
@@ -41,7 +43,11 @@ One design system drives every output a project makes. Method:
    components; `fluent-theme.ts` in the code components' provider; `dataverse-theme.xml` as a web
    resource with the Custom theme definition setting; `email-palette.json` in the email
    templates; `chart-palette.json` in chart code; `brand.designSystem` (or `video-brand.json`) in
-   `video-tour.config.json`; `office-theme.json` for document templates.
+   `video-tour.config.json`; `office-theme.json` for document templates. Per profile: in
+   `dataverse-solution`, copy `docs/brand/dataverse-theme.xml` over the core solution's
+   `WebResources/<prefix>_theme.xml` (its contract test fails until they match); in
+   `dotnet-react-azure`, point the favicon links in `src/web/index.html` and `portal/index.html`
+   at the new system's mark (or remove them when it has none).
 8. **Verify**: `node --test "tests/contracts/*.test.mjs"` (theme contrast in both themes, files
    generated from the configured system), the profile's build, and screenshots of the main pages
    in light and dark at 390 and 1440, looked at. Favicons and app icons from the system's mark,

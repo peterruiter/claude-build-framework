@@ -48,6 +48,10 @@ tool's own `src/serve.mjs`. The render starts that server, records the part, sto
 again, and writes the video to `video-tour/output/`. Then make it yours:
 
 1. Edit `video-tour.config.json`: product, brand, `app.baseUrl` and `app.start`, narration, languages.
+   The example's brand is `{ "designSystem": "neutral" }`: the cards take their colours, font and
+   logo from a design system; `init` puts in the project's own (`designSystem.id` in
+   `build/framework.json`) when there is one. A product logo goes in `video-tour/brand/` and
+   `brand.logo`, next to `designSystem`.
 2. Replace `video-tour/studio.mjs` with your product's adapter (sign-in, demo data, tidying).
 3. Write one YAML script per part in `video-tour/scripts/`, rehearse it with `dry`, and render it.
 4. Add `video-tour/.work/`, `video-tour/.cache/` and `video-tour/output/` to `.gitignore`. `init`
@@ -81,7 +85,7 @@ tools/video-tour/                   the tool (product-neutral; copy it into a re
   video-tour/studio.mjs             the studio adapter
   video-tour/lexicon.yaml           how the voice says product terms
   video-tour/assets/                files the scripts upload
-  video-tour/brand/                 logo (and font) for the cards
+  video-tour/brand/                 a product logo (and font) for the cards, when brand.logo names it
   video-tour/youtube-state.json     which YouTube upload is which part (no secrets; commit it)
   video-tour/.work/  .cache/  output/   never committed
 ```

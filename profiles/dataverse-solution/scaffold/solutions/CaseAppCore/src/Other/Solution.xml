@@ -85,6 +85,7 @@
     </Publisher>
     <RootComponents>
       <RootComponent type="1" schemaName="contoso_request" behavior="0" />
+      <RootComponent type="61" schemaName="contoso_theme.xml" behavior="0" />
       <RootComponent type="9" schemaName="contoso_channel" behavior="0" />
     </RootComponents>
     <MissingDependencies />
