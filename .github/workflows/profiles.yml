@@ -1,0 +1,451 @@
+# ===========================================================================
+# Profiles: every profile's scaffold is generated with its own scaffold.ps1
+# and must pass that profile's own quality gate on GitHub's runners, so "the
+# scaffold builds and its workflows work" is checked on every change, not
+# assumed.
+#
+#   dotnet-react-azure        Ubuntu: Release build (warnings are errors),
+#                             every test against a SQL Server service
+#                             container (TEST_SQL_CONNECTION, as ci/pr.yml),
+#                             web check, typecheck, tests and builds, and the
+#                             container image builds.
+#   dataverse-plugins         Windows: Release build, tests on .NET Framework
+#                             4.8, the plug-in package, the registration
+#                             manifest offline, every script parses (as the
+#                             scaffold's plugins.yml).
+#   dataverse-plugins-linux   Ubuntu: the plug-in builds and packs from the
+#                             reference assemblies package (tests need .NET
+#                             Framework, so they stay on Windows).
+#   dataverse-solution        Ubuntu: contract tests with nothing skipped (pac
+#                             is installed, so the pack round trip really
+#                             runs), Build-Solution -RoundTrip,
+#                             Test-Translations, the privacy register.
+#   power-platform-pcf        Ubuntu: npm ci and the controls gate.
+#   power-platform-pcf-solution
+#                             Windows: the solution project builds both the
+#                             managed and the unmanaged zip (as the
+#                             scaffold's ci.yml).
+#
+# Each job first installs what the profile lists as required and then runs
+# scripts/check-prereqs.mjs for that profile strictly: a required tool that is
+# missing or too old fails the job (optional tools only print). Scaffolds are
+# written to the runner's temporary folder, outside the checkout.
+#
+# Actions are pinned to full commit SHAs (the comment says which release), the
+# same pins the scaffolds' own workflows use; pac is pinned by version. No
+# secrets, no environment access, nothing deployed.
+# ===========================================================================
+
+name: Profiles
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'profiles/**'
+      - 'scripts/**'
+      # Read by check-prereqs.mjs (the framework's own tools) and by the PCF scaffold (languages).
+      - 'prerequisites.json'
+      - 'templates/languages-catalog.json'
+      - '.github/workflows/profiles.yml'
+  pull_request:
+    paths:
+      - 'profiles/**'
+      - 'scripts/**'
+      - 'prerequisites.json'
+      - 'templates/languages-catalog.json'
+      - '.github/workflows/profiles.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: profiles-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+  # The Power Platform CLI version the dataverse-solution and PCF profiles name.
+  PAC_VERSION: 2.11.2
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  dotnet-react-azure:
+    name: dotnet-react-azure (Ubuntu, SQL Server container)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+
+    services:
+      sql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: 'Y'
+          MSSQL_PID: Developer
+          # A throwaway password for a container that lives as long as this job and is reachable only
+          # from the runner. Not a secret; it only has to satisfy SQL Server's complexity rule.
+          MSSQL_SA_PASSWORD: Ci-${{ github.run_id }}-Sql
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P Ci-${{ github.run_id }}-Sql -Q 'SELECT 1' -b -o /dev/null"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 20
+          --health-start-period 20s
+
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      TEST_SQL_CONNECTION: Server=localhost,1433;User ID=sa;Password=Ci-${{ github.run_id }}-Sql;TrustServerCertificate=True;Encrypt=False;Connect Timeout=30
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: profiles/dotnet-react-azure/scaffold/src/web/package-lock.json
+
+      - name: .NET SDK from the scaffold's global.json
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: profiles/dotnet-react-azure/scaffold/global.json
+
+      - name: NuGet cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: nuget-drz-${{ runner.os }}-${{ hashFiles('profiles/dotnet-react-azure/scaffold/Directory.Packages.props', 'profiles/dotnet-react-azure/scaffold/**/*.csproj', 'profiles/dotnet-react-azure/scaffold/global.json') }}
+          restore-keys: nuget-drz-${{ runner.os }}-
+
+      - name: Prerequisites (required tools must be present)
+        run: node scripts/check-prereqs.mjs dotnet-react-azure
+
+      - name: Scaffold Acme (en-GB, nl, pl)
+        run: ./profiles/dotnet-react-azure/scaffold.ps1 -Name Acme -Languages en-GB,nl,pl -Destination "$env:RUNNER_TEMP/acme" -SkipGitInit
+
+      - name: SDK in use
+        working-directory: ${{ runner.temp }}/acme
+        run: dotnet --version
+
+      - name: Restore
+        working-directory: ${{ runner.temp }}/acme
+        run: dotnet restore
+
+      - name: Build (Release, warnings are errors)
+        working-directory: ${{ runner.temp }}/acme
+        run: dotnet build --configuration Release --no-restore
+
+      # No --artifacts-path: some tests find the repository by walking up from their output.
+      - name: Test (database tests against the SQL Server container)
+        working-directory: ${{ runner.temp }}/acme
+        run: dotnet test --configuration Release --no-build --logger "console;verbosity=normal"
+
+      - name: Web install (locked)
+        working-directory: ${{ runner.temp }}/acme/src/web
+        run: npm ci --no-audit --no-fund
+
+      - name: Web strings and plural rules
+        working-directory: ${{ runner.temp }}/acme/src/web
+        run: npm run check
+
+      - name: Web type check
+        working-directory: ${{ runner.temp }}/acme/src/web
+        run: npm run typecheck
+
+      - name: Web tests (contrast, plurals)
+        working-directory: ${{ runner.temp }}/acme/src/web
+        run: npm test
+
+      - name: Web builds (both apps)
+        working-directory: ${{ runner.temp }}/acme/src/web
+        run: npm run build
+
+      - name: Container image builds (tests ran above)
+        working-directory: ${{ runner.temp }}/acme
+        run: docker build --build-arg RUN_TESTS=false --tag acme:${{ github.sha }} .
+
+  dataverse-plugins:
+    name: dataverse-plugins (Windows, .NET Framework 4.8 tests)
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      BUILD_NUMBER: ${{ github.run_number }}
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+
+      - name: .NET SDK from the scaffold's global.json
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: profiles/dataverse-plugins/scaffold/global.json
+
+      - name: NuGet cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: nuget-dvp-${{ runner.os }}-${{ hashFiles('profiles/dataverse-plugins/scaffold/Directory.Packages.props', 'profiles/dataverse-plugins/scaffold/**/*.csproj', 'profiles/dataverse-plugins/scaffold/global.json') }}
+          restore-keys: nuget-dvp-${{ runner.os }}-
+
+      - name: Prerequisites (required tools must be present)
+        run: node scripts/check-prereqs.mjs dataverse-plugins
+
+      - name: Scaffold Fabrikam.Sales (prefix fab; en, nl)
+        run: ./profiles/dataverse-plugins/scaffold.ps1 -Name Fabrikam.Sales -Prefix fab -Languages en,nl -Destination "$env:RUNNER_TEMP/plugins" -SkipGitInit
+
+      - name: SDK in use
+        working-directory: ${{ runner.temp }}/plugins
+        run: dotnet --version
+
+      - name: Restore
+        working-directory: ${{ runner.temp }}/plugins
+        run: dotnet restore
+
+      - name: Build (Release, warnings are errors)
+        working-directory: ${{ runner.temp }}/plugins
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test (.NET Framework 4.8)
+        working-directory: ${{ runner.temp }}/plugins
+        run: dotnet test --configuration Release --no-build --logger "console;verbosity=normal"
+
+      - name: Plug-in package
+        working-directory: ${{ runner.temp }}/plugins
+        run: dotnet pack src/Fabrikam.Sales.Plugins/Fabrikam.Sales.Plugins.csproj --configuration Release --no-build --output out/package
+
+      - name: Registration manifest, offline
+        working-directory: ${{ runner.temp }}/plugins
+        run: ./build/Register-Plugins.ps1 -Offline
+
+      - name: Scripts parse
+        working-directory: ${{ runner.temp }}/plugins
+        run: |
+          $failed = $false
+          foreach ($file in Get-ChildItem -Path . -Recurse -Include *.ps1 | Where-Object { $_.FullName -notmatch '[\\/](bin|obj|\.nuget)[\\/]' }) {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$null, [ref]$errors) | Out-Null
+            if ($errors) { $failed = $true; Write-Host "$($file.Name): $($errors[0].Message)" }
+          }
+          if ($failed) { exit 1 }
+
+  dataverse-plugins-linux:
+    name: dataverse-plugins (Ubuntu, plug-in builds from reference assemblies)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+
+      - name: .NET SDK from the scaffold's global.json
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: profiles/dataverse-plugins/scaffold/global.json
+
+      - name: NuGet cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: nuget-dvp-${{ runner.os }}-${{ hashFiles('profiles/dataverse-plugins/scaffold/Directory.Packages.props', 'profiles/dataverse-plugins/scaffold/**/*.csproj', 'profiles/dataverse-plugins/scaffold/global.json') }}
+          restore-keys: nuget-dvp-${{ runner.os }}-
+
+      # The .NET Framework runtime is optional in the list (tests only), so this passes on Linux.
+      - name: Prerequisites (required tools must be present)
+        run: node scripts/check-prereqs.mjs dataverse-plugins
+
+      - name: Scaffold Fabrikam.Sales (prefix fab; en, nl)
+        run: ./profiles/dataverse-plugins/scaffold.ps1 -Name Fabrikam.Sales -Prefix fab -Languages en,nl -Destination "$env:RUNNER_TEMP/plugins" -SkipGitInit
+
+      - name: Build the plug-in (Release, warnings are errors)
+        working-directory: ${{ runner.temp }}/plugins
+        run: dotnet build src/Fabrikam.Sales.Plugins/Fabrikam.Sales.Plugins.csproj --configuration Release
+
+      - name: Plug-in package
+        working-directory: ${{ runner.temp }}/plugins
+        run: dotnet pack src/Fabrikam.Sales.Plugins/Fabrikam.Sales.Plugins.csproj --configuration Release --no-build --output out/package
+
+  dataverse-solution:
+    name: dataverse-solution (Ubuntu, pac round trip)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+
+      - name: .NET SDK 10 (pac runs on it)
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install the Power Platform CLI (pinned)
+        run: |
+          dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version $env:PAC_VERSION
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Join-Path $HOME '.dotnet/tools' | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      # Needs pac, .NET 10, PowerShell, Node, git, the GitHub CLI and the Azure CLI (the last two are on
+      # GitHub's images).
+      - name: Prerequisites (required tools must be present)
+        run: node scripts/check-prereqs.mjs dataverse-solution
+
+      - name: Scaffold Fabrikam (prefix fab; en, nl, de)
+        run: ./profiles/dataverse-solution/scaffold.ps1 -Name Fabrikam -Prefix fab -Languages en,nl,de -Destination "$env:RUNNER_TEMP/solution"
+
+      # The pack round-trip test skips itself where pac is missing; here pac is installed, so a skipped
+      # test means something is wrong.
+      - name: Contract tests (none skipped)
+        working-directory: ${{ runner.temp }}/solution
+        run: |
+          $output = npm test
+          $code = $LASTEXITCODE
+          $output | ForEach-Object { Write-Host $_ }
+          if ($code) { exit $code }
+          # Node 22 prints the TAP summary when not on a terminal ("# skip 0" or "# skipped 0"); newer
+          # Node prints the spec summary ("ℹ skipped 0").
+          if (-not ($output -match '^(#|ℹ) skip(ped)? 0\s*$')) { throw 'A contract test was skipped (or the count was not printed): the round trip has to run here.' }
+
+      - name: Pack from source; the source round-trips unchanged
+        working-directory: ${{ runner.temp }}/solution
+        run: ./build/Build-Solution.ps1 -RoundTrip -BuildNumber ${{ github.run_number }}
+
+      - name: Every label in every language
+        working-directory: ${{ runner.temp }}/solution
+        run: ./build/Test-Translations.ps1
+
+      - name: Privacy register
+        working-directory: ${{ runner.temp }}/solution
+        run: ./build/Export-PrivacyRegister.ps1 -Out out/privacy-register.md
+
+  power-platform-pcf:
+    name: power-platform-pcf (Ubuntu, controls gate)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: profiles/power-platform-pcf/scaffold/controls/package-lock.json
+
+      - name: .NET SDK 10 (pac runs on it)
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+
+      # pac is required by the profile (new controls, solution references, imports), not by the gate.
+      - name: Install the Power Platform CLI (pinned)
+        run: |
+          dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version $env:PAC_VERSION
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Join-Path $HOME '.dotnet/tools' | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Prerequisites (required tools must be present)
+        run: node scripts/check-prereqs.mjs power-platform-pcf
+
+      - name: Scaffold FieldTools (prefix ftl; en-GB, nl, pl)
+        run: ./profiles/power-platform-pcf/scaffold.ps1 -Name FieldTools -Prefix ftl -Languages en-GB,nl,pl -Destination "$env:RUNNER_TEMP/pcf" -SkipGitInit
+
+      - name: Install (locked)
+        working-directory: ${{ runner.temp }}/pcf/controls
+        run: npm ci --no-audit --no-fund
+
+      # check, refreshTypes, lint (0 warnings), typecheck, tests, release build, bundle size.
+      - name: Controls gate
+        working-directory: ${{ runner.temp }}/pcf/controls
+        run: npm run gate
+
+  power-platform-pcf-solution:
+    name: power-platform-pcf (Windows, solution zips)
+    runs-on: windows-2025
+    timeout-minutes: 25
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: profiles/power-platform-pcf/scaffold/controls/package-lock.json
+
+      - name: .NET SDK 10
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: NuGet cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: nuget-pcf-${{ runner.os }}-${{ hashFiles('profiles/power-platform-pcf/scaffold/**/*.cdsproj', 'profiles/power-platform-pcf/scaffold/**/*.pcfproj') }}
+          restore-keys: nuget-pcf-${{ runner.os }}-
+
+      - name: Install the Power Platform CLI (pinned)
+        run: |
+          dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version $env:PAC_VERSION
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Join-Path $HOME '.dotnet/tools' | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Prerequisites (required tools must be present)
+        run: node scripts/check-prereqs.mjs power-platform-pcf
+
+      - name: Scaffold FieldTools (prefix ftl; en-GB, nl, pl)
+        run: ./profiles/power-platform-pcf/scaffold.ps1 -Name FieldTools -Prefix ftl -Languages en-GB,nl,pl -Destination "$env:RUNNER_TEMP/pcf" -SkipGitInit
+
+      - name: Install (locked)
+        working-directory: ${{ runner.temp }}/pcf/controls
+        run: npm ci --no-audit --no-fund
+
+      - name: Build the solution (controls in production mode)
+        working-directory: ${{ runner.temp }}/pcf
+        run: dotnet build solution/FieldTools.cdsproj --configuration Release
+
+      - name: Both zips, with the new prefix
+        working-directory: ${{ runner.temp }}/pcf
+        run: |
+          Get-ChildItem solution/bin/Release/*.zip | Format-Table Name, Length
+          foreach ($zip in 'FieldTools.zip', 'FieldTools_managed.zip') {
+            if (-not (Test-Path "solution/bin/Release/$zip")) { throw "$zip was not built." }
+          }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $archive = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path 'solution/bin/Release/FieldTools_managed.zip'))
+          try {
+            $names = @($archive.Entries.FullName)
+            if (-not ($names -match '^Controls/ftl_FieldTools\.')) { throw "No ftl_FieldTools control in the managed zip: $($names -join ', ')" }
+          } finally { $archive.Dispose() }
