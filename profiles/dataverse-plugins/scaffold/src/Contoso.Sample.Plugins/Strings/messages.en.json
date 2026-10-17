@@ -1,0 +1,6 @@
+{
+  "contact.email.invalid": "Enter a valid email address in Email, for example name@example.com.",
+  "contact.email.too-long": "The email address is longer than {maximum} characters. Shorten it and save again.",
+  "api.email.required": "Give an email address to check.",
+  "error.unexpected": "Something went wrong while saving. Try again; if it keeps happening, give your administrator this reference: {correlationId}."
+}

@@ -1,0 +1,69 @@
+<Project>
+  <!--
+    Shared settings for every project in this repository. Change things here rather than in the
+    individual project files.
+  -->
+  <PropertyGroup>
+    <!--
+      C# is a compiler feature, not a runtime one: a recent language version compiles to .NET
+      Framework 4.6.2 as long as the code avoids features that need newer runtime types (records,
+      init-only setters, default interface members, Span-heavy APIs). Pinned so a newer SDK does
+      not change what compiles.
+    -->
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <!-- Off on purpose: the implicit usings for net4x include System.Net.Http, which the sandbox
+         project does not reference unless it calls out. Every file says what it uses. -->
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <!--
+      Analyzers on for .NET Framework too (they are on by default only for net5+), at a pinned
+      level so a newer SDK on a laptop and the one in CI agree on which rules exist. Raise it
+      deliberately, together with global.json.
+    -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>10.0-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <Product>Contoso.Sample</Product>
+    <Company>Contoso</Company>
+    <Copyright>Copyright (c) Contoso</Copyright>
+
+    <!--
+      The release version lives in VERSION at the repository root (major.minor.patch).
+        AssemblyVersion        major.minor.0.0   For a classic (non-package) assembly in a solution,
+                                                 a new major.minor is a NEW assembly to Dataverse and
+                                                 steps keep pointing at the old one. Change it only
+                                                 on purpose.
+        FileVersion            major.minor.patch.build   build = CI run number (BUILD_NUMBER), else 0.
+        InformationalVersion   VERSION as written, shown in the trace log at start.
+      The NuGet package version (PluginPackageVersion) is separate and fixed: Dataverse does not
+      allow the name or version of a plug-in package to change once it exists, and the version
+      plays no part in upgrades.
+    -->
+    <VersionFile>$(MSBuildThisFileDirectory)VERSION</VersionFile>
+    <ReleaseVersion Condition="Exists('$(VersionFile)')">$([System.IO.File]::ReadAllText('$(VersionFile)').Trim())</ReleaseVersion>
+    <ReleaseVersion Condition="'$(ReleaseVersion)' == ''">0.0.0</ReleaseVersion>
+    <BuildNumber Condition="'$(BuildNumber)' == '' and '$(BUILD_NUMBER)' != ''">$(BUILD_NUMBER)</BuildNumber>
+    <BuildNumber Condition="'$(BuildNumber)' == ''">0</BuildNumber>
+    <AssemblyVersion>$([System.Version]::Parse('$(ReleaseVersion)').Major).$([System.Version]::Parse('$(ReleaseVersion)').Minor).0.0</AssemblyVersion>
+    <FileVersion>$(ReleaseVersion).$(BuildNumber)</FileVersion>
+    <InformationalVersion>$(ReleaseVersion)</InformationalVersion>
+    <Version>$(ReleaseVersion)</Version>
+    <PluginPackageVersion>1.0.0</PluginPackageVersion>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- CS1591: missing XML comment. Internal plumbing does not need a comment on every member. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    Warnings are errors in Release, which is what CI builds and what gets registered. A Debug build
+    on a laptop may carry a warning for an hour; a Release build may not carry one at all.
+  -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,132 @@
+{
+  "profile": "dataverse-plugins",
+  "tools": [
+    {
+      "id": "dotnet",
+      "name": ".NET SDK",
+      "command": "dotnet",
+      "args": ["--list-sdks"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "10.0.100",
+      "required": true,
+      "why": "builds the net462 plug-in and the net48 tests (global.json pins 10.0.100, latest feature band); the .NET Framework reference assemblies come from NuGet, so no targeting pack is needed",
+      "install": {
+        "windows": "winget install Microsoft.DotNet.SDK.10",
+        "macos": "brew install --cask dotnet-sdk",
+        "linux": "see https://learn.microsoft.com/dotnet/core/install/linux"
+      },
+      "docs": "https://dotnet.microsoft.com/download"
+    },
+    {
+      "id": "netfx-runtime",
+      "name": ".NET Framework 4.8 runtime (Windows)",
+      "command": "reg",
+      "args": ["query", "HKLM\\SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full", "/v", "Version"],
+      "pattern": "Version\\s+REG_SZ\\s+(\\d+\\.\\d+\\.\\d+)",
+      "min": "4.8.0",
+      "required": false,
+      "why": "runs the unit tests locally; Windows only (part of Windows 10 and 11). Elsewhere, build only: CI runs the tests on windows-latest",
+      "install": {
+        "windows": "winget install Microsoft.DotNet.Framework.DeveloperPack_4",
+        "macos": "not available: build here, test in CI",
+        "linux": "not available: build here, test in CI"
+      },
+      "docs": "https://dotnet.microsoft.com/download/dotnet-framework/net48"
+    },
+    {
+      "id": "pwsh",
+      "name": "PowerShell 7",
+      "command": "pwsh",
+      "args": ["--version"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "7.4.0",
+      "required": true,
+      "why": "runs build/Register-Plugins.ps1, build/Set-Version.ps1 and scaffold.ps1",
+      "install": {
+        "windows": "winget install Microsoft.PowerShell",
+        "macos": "brew install --cask powershell",
+        "linux": "see https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-linux"
+      },
+      "docs": "https://learn.microsoft.com/powershell/scripting/install/installing-powershell"
+    },
+    {
+      "id": "git",
+      "name": "git",
+      "command": "git",
+      "args": ["--version"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "2.40.0",
+      "required": true,
+      "why": "every project is a repository",
+      "install": {
+        "windows": "winget install Git.Git",
+        "macos": "brew install git",
+        "linux": "sudo apt-get install git"
+      },
+      "docs": "https://git-scm.com/downloads"
+    },
+    {
+      "id": "node",
+      "name": "Node.js",
+      "command": "node",
+      "args": ["--version"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "22.18.0",
+      "required": true,
+      "why": "the framework's vocabulary checker and contract tests (message bundles, What's new)",
+      "install": {
+        "windows": "winget install OpenJS.NodeJS.LTS",
+        "macos": "brew install node@22",
+        "linux": "see https://nodejs.org/en/download"
+      },
+      "docs": "https://nodejs.org/en/download"
+    },
+    {
+      "id": "az",
+      "name": "Azure CLI",
+      "command": "az",
+      "args": ["version"],
+      "pattern": "\"azure-cli\": \"(\\d+\\.\\d+\\.\\d+)\"",
+      "min": "2.60.0",
+      "required": false,
+      "why": "the sign-in token for build/Register-Plugins.ps1 against an environment (dry run or -Apply); not needed to build, test or run it -Offline",
+      "install": {
+        "windows": "winget install Microsoft.AzureCLI",
+        "macos": "brew install azure-cli",
+        "linux": "see https://learn.microsoft.com/cli/azure/install-azure-cli-linux"
+      },
+      "docs": "https://learn.microsoft.com/cli/azure/install-azure-cli"
+    },
+    {
+      "id": "pac",
+      "name": "Power Platform CLI (pac)",
+      "command": "pac",
+      "args": ["help"],
+      "pattern": "Version: (\\d+\\.\\d+\\.\\d+)",
+      "min": "1.17.0",
+      "required": false,
+      "why": "solutions at release time (pac solution export/unpack/version), pac plugin push for a quick dev update, pac tool prt; not needed to build or test",
+      "install": {
+        "windows": "dotnet tool install --global Microsoft.PowerApps.CLI.Tool (or the Windows MSI https://aka.ms/PowerAppsCLI, or the Power Platform Tools extension for VS Code)",
+        "macos": "dotnet tool install --global Microsoft.PowerApps.CLI.Tool",
+        "linux": "dotnet tool install --global Microsoft.PowerApps.CLI.Tool"
+      },
+      "docs": "https://learn.microsoft.com/power-platform/developer/howto/install-cli-net-tool"
+    },
+    {
+      "id": "prt",
+      "name": "Plugin Registration Tool (Windows)",
+      "command": "pac",
+      "args": ["tool", "list"],
+      "pattern": "PRT\\s+Yes\\s+(\\d+\\.\\d+\\.\\d+)",
+      "required": false,
+      "why": "looking at registrations, the plug-in profiler and trace logs by hand; registration itself is build/Register-Plugins.ps1 from the manifest",
+      "install": {
+        "windows": "pac tool prt",
+        "macos": "not available (Windows desktop tool)",
+        "linux": "not available (Windows desktop tool)"
+      },
+      "docs": "https://learn.microsoft.com/power-apps/developer/data-platform/download-tools-nuget"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Contoso.Sample.Plugins/Contoso.Sample.Plugins.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Contoso.Sample.Plugins.Tests/Contoso.Sample.Plugins.Tests.csproj" />
+  </Folder>
+</Solution>

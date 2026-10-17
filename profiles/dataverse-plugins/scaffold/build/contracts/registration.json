@@ -1,0 +1,66 @@
+{
+  "_doc": "Every plug-in step, image and custom API, as code. build/Register-Plugins.ps1 reads it (dry run by default); tests/*/RegistrationManifestTests hold it to the assembly and to the solution checker's registration rules. Never register a step by hand in an environment: add it here.",
+  "solution": {
+    "uniqueName": "ContosoSample",
+    "publisherPrefix": "contoso"
+  },
+  "package": {
+    "uniqueName": "contoso_Contoso.Sample.Plugins",
+    "assembly": "Contoso.Sample.Plugins",
+    "project": "src/Contoso.Sample.Plugins/Contoso.Sample.Plugins.csproj"
+  },
+  "steps": [
+    {
+      "name": "Contoso.Sample: contact Create, validate email (PreOperation)",
+      "plugin": "Contoso.Sample.Plugins.Contacts.ValidateContactEmail",
+      "message": "Create",
+      "table": "contact",
+      "stage": "PreOperation",
+      "mode": "Synchronous",
+      "rank": 10,
+      "description": "Refuses an invalid email address and stores a valid one tidied."
+    },
+    {
+      "name": "Contoso.Sample: contact Update, validate email (PreOperation)",
+      "plugin": "Contoso.Sample.Plugins.Contacts.ValidateContactEmail",
+      "message": "Update",
+      "table": "contact",
+      "stage": "PreOperation",
+      "mode": "Synchronous",
+      "rank": 10,
+      "filteringAttributes": ["emailaddress1"],
+      "description": "Refuses an invalid email address and stores a valid one tidied."
+    },
+    {
+      "name": "Contoso.Sample: contact Create, set account primary contact (async)",
+      "plugin": "Contoso.Sample.Plugins.Contacts.SetAccountPrimaryContact",
+      "message": "Create",
+      "table": "contact",
+      "stage": "PostOperation",
+      "mode": "Asynchronous",
+      "rank": 10,
+      "asyncAutoDelete": true,
+      "description": "Makes a new contact the primary contact of its account when the account has none."
+    }
+  ],
+  "customApis": [
+    {
+      "uniqueName": "contoso_NormalizeEmail",
+      "displayName": "Normalize email",
+      "description": "Checks an email address and returns it tidied.",
+      "plugin": "Contoso.Sample.Plugins.Apis.NormalizeEmailApi",
+      "bindingType": "Global",
+      "isFunction": false,
+      "isPrivate": false,
+      "allowedCustomProcessingStepType": "None",
+      "executePrivilegeName": null,
+      "requestParameters": [
+        { "uniqueName": "Email", "displayName": "Email", "description": "The address to check.", "type": "String", "isOptional": false }
+      ],
+      "responseProperties": [
+        { "uniqueName": "NormalizedEmail", "displayName": "Normalized email", "description": "The address, trimmed, domain in lower case.", "type": "String" },
+        { "uniqueName": "IsValid", "displayName": "Is valid", "description": "Whether the address has a valid format.", "type": "Boolean" }
+      ]
+    }
+  ]
+}

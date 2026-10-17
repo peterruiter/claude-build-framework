@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Dataverse runs plug-ins in its sandbox on .NET Framework 4.6.2: nothing newer loads there.
+
+    Shipped as a plug-in PACKAGE (NuGet, "dependent assemblies"), which Microsoft recommends from
+    the start: it carries dependent assemblies and resources, and the assembly does not need a
+    strong name. ILMerge/ILRepack is not supported by Microsoft; do not merge. The package is made
+    with plain `dotnet pack` (target below), without the Power Apps MSBuild package, so the build
+    needs nothing machine-wide and sends no build telemetry.
+
+      dotnet build -c Release
+      dotnet pack src/Contoso.Sample.Plugins -c Release -o out/package   (after the build; see CI)
+  -->
+  <PropertyGroup>
+    <TargetFramework>net462</TargetFramework>
+    <RootNamespace>Contoso.Sample.Plugins</RootNamespace>
+    <AssemblyName>Contoso.Sample.Plugins</AssemblyName>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Contoso.Sample.Plugins</PackageId>
+    <PackageVersion>$(PluginPackageVersion)</PackageVersion>
+    <Authors>Contoso</Authors>
+    <Description>Contoso.Sample Dataverse plug-ins and their runtime dependencies.</Description>
+    <!-- Dependencies go INSIDE the package (the sandbox does not restore NuGet dependencies). -->
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <IncludeSymbols>false</IncludeSymbols>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <!-- Assemblies only: no XML docs or PDBs in what the sandbox extracts. -->
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>.dll</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);AddDependentAssembliesToPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- In the sandbox already: compile against it, never pack it. -->
+    <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" PrivateAssets="all" />
+    <!--
+      A dependent assembly is a normal PackageReference (no PrivateAssets): it is published, so the
+      target below puts it in the plug-in package next to the plug-in assembly. Do not depend on
+      System.Text.Json without packing it: the sandbox's copy may be another version.
+    -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Messages users read, one file per language, embedded in the plug-in assembly itself.
+      WithCulture="false" matters: MSBuild reads "messages.nl.json" as a Dutch resource and would
+      otherwise move it into a satellite assembly (nl/*.resources.dll) that a classic assembly
+      registration cannot carry and Messages.cs would not find.
+    -->
+    <EmbeddedResource Include="Strings\*.json" WithCulture="false" LogicalName="$(AssemblyName).Strings.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Contoso.Sample.Plugins.Tests" />
+  </ItemGroup>
+
+  <!--
+    Everything `publish` would ship (the plug-in's own runtime dependencies, not the PrivateAssets
+    SDK) goes into lib/net462 of the package, next to the plug-in assembly.
+  -->
+  <Target Name="AddDependentAssembliesToPackage" DependsOnTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <_DependentAssembly Include="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.dll' and '%(Filename)' != '$(AssemblyName)'" />
+      <BuildOutputInPackage Include="@(_DependentAssembly)" TargetPath="%(_DependentAssembly.RelativePath)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

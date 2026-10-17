@@ -1,0 +1,25 @@
+<Project>
+  <!--
+    Central package versions. Projects name a package; the version is decided here. Exact versions,
+    moved on purpose (no floating versions: a build must not change because a feed did).
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Dataverse SDK. Present in the sandbox already: referenced with PrivateAssets="all", so it is
+         compiled against and never packed or uploaded. -->
+    <PackageVersion Include="Microsoft.CrmSdk.CoreAssemblies" Version="9.0.2.60" />
+    <!-- .NET Framework reference assemblies as a package: builds net462/net48 on any OS without a
+         machine-wide targeting pack. -->
+    <PackageVersion Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
+
+    <!-- Tests (net48, Windows). No FakeXrmEasy: v2 and later are RPL-1.5 or paid for closed-source
+         commercial use, and v1 is frozen. The test project carries its own small fakes. -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+</Project>

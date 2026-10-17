@@ -1,0 +1,25 @@
+# Build output
+bin/
+obj/
+out/
+TestResults/
+*.binlog
+
+# The plug-in package is built by CI and by the release, never committed
+*.nupkg
+
+# Signing material and local settings: never committed
+*.snk
+*.pfx
+*.p12
+*.cer
+.env
+.env.*
+*.local.json
+
+# Tools and editors
+.vs/
+.idea/
+*.user
+.DS_Store
+Thumbs.db

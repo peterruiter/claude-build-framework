@@ -1,0 +1,6 @@
+{
+  "contact.email.invalid": "Vul bij E-mail een geldig e-mailadres in, bijvoorbeeld naam@voorbeeld.nl.",
+  "contact.email.too-long": "Het e-mailadres is langer dan {maximum} tekens. Maak het korter en sla opnieuw op.",
+  "api.email.required": "Geef een e-mailadres om te controleren.",
+  "error.unexpected": "Er ging iets mis bij het opslaan. Probeer het opnieuw; blijft het gebeuren, geef dan deze referentie aan je beheerder: {correlationId}."
+}

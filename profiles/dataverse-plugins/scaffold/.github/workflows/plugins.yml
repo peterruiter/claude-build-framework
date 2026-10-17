@@ -1,0 +1,119 @@
+# ===========================================================================
+# Dataverse plug-ins: the same quality gate as a local release, on every pull
+# request and push to main. Sits next to the framework's ci.yml (vocabulary
+# checker, contract tests); keep both.
+#
+#   windows  Release build (warnings are errors, analyzers on), every test on
+#            .NET Framework 4.8 (fakes, registration manifest contract, code
+#            rules, message bundles), the plug-in package, the registration
+#            script offline, every script parses. The package is kept as an
+#            artifact of the run; nothing is deployed.
+#   linux    The plug-in project builds on Linux too, from the .NET Framework
+#            reference assemblies NuGet package (no targeting pack). Tests need
+#            the .NET Framework runtime, so they run on Windows only.
+#
+# Actions are pinned to a full commit SHA (the comment says which release);
+# update them deliberately. No secrets, no environment access.
+# ===========================================================================
+
+name: Plug-ins
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plugins-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+  BUILD_NUMBER: ${{ github.run_number }}
+
+jobs:
+  windows:
+    name: Build, test and package (Windows, .NET Framework)
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: .NET SDK from global.json
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: NuGet cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: SDK in use
+        run: dotnet --version
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (Release, warnings are errors)
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --logger "console;verbosity=normal"
+
+      - name: Plug-in package
+        run: dotnet pack src/Contoso.Sample.Plugins/Contoso.Sample.Plugins.csproj --configuration Release --no-build --output out/package
+
+      - name: Registration manifest, offline
+        shell: pwsh
+        run: ./build/Register-Plugins.ps1 -Offline
+
+      - name: Scripts parse
+        shell: pwsh
+        run: |
+          $failed = $false
+          foreach ($file in Get-ChildItem -Path . -Recurse -Include *.ps1 | Where-Object { $_.FullName -notmatch '[\\/](bin|obj|\.nuget)[\\/]' }) {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$null, [ref]$errors) | Out-Null
+            if ($errors) { $failed = $true; Write-Host "$($file.Name): $($errors[0].Message)" }
+          }
+          if ($failed) { exit 1 }
+
+      - name: Keep the package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: plugin-package
+          path: out/package/*.nupkg
+          if-no-files-found: error
+          retention-days: 14
+
+  linux:
+    name: Plug-in builds on Linux (reference assemblies package)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: .NET SDK from global.json
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Build the plug-in (Release, warnings are errors)
+        run: dotnet build src/Contoso.Sample.Plugins/Contoso.Sample.Plugins.csproj --configuration Release
+
+      - name: Plug-in package
+        run: dotnet pack src/Contoso.Sample.Plugins/Contoso.Sample.Plugins.csproj --configuration Release --no-build --output out/package
