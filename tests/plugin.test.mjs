@@ -95,7 +95,13 @@ const forbidden = [
   ['generated with', '[claude'].join(' '),
   ['generated with', 'claude code'].join(' '),
   ['co-authored-by:', 'github copilot'].join(' '),
+  ['gov', 'case'].join(''),
+  ['cap', 'gemini'].join(''),
+  ['power', 'pete'].join(''),
+  ['ivr', 'toolkit'].join(''),
 ];
+// Short names checked as whole words only.
+const forbiddenWords = [['u', 'wv'], ['n', 'za'], ['r', 'vdk']].map((parts) => new RegExp(`\\b${parts.join('')}\\b`));
 
 test('no file names the projects this was practised on, and nothing carries AI attribution', () => {
   const found = [];
@@ -103,6 +109,7 @@ test('no file names the projects this was practised on, and nothing carries AI a
     if (/\.(png|jpe?g|gif|webp|mp4|webm|mp3|wav|ico|woff2?|zip)$/i.test(file)) continue;
     const text = readFileSync(file, 'utf8').toLowerCase();
     for (const phrase of forbidden) if (text.includes(phrase)) found.push(`${rel(file)}: "${phrase}"`);
+    for (const word of forbiddenWords) if (word.test(text)) found.push(`${rel(file)}: ${word}`);
     if (text.includes('\u{1F916}')) found.push(`${rel(file)}: robot emoji`);
   }
   assert.deepEqual(found, []);
