@@ -223,6 +223,13 @@ owner's go per run, never production.
 
 ## Gotchas learned the hard way
 
+- **`/path` is an absolute URI on Linux.** `Uri.TryCreate("/x", UriKind.Absolute, …)` succeeds on Linux (as
+  `file:///x`) and fails on Windows, so code that treats "not absolute" as "relative" behaves differently on
+  the CI runner and in the Linux image. Check `!uri.IsFile` (or the scheme) as well. Found by the scaffold's
+  first CI run.
+- **Static state leaks between tests.** A test that configures a process-wide value (a remembered origin, a
+  clock) changes what later tests see, and Linux runs tests in a different order. Assert against the
+  configured value, or reset it in the test.
 - **SDK pin vs the image's SDK, and analyzers as errors.** A newer local SDK has newer compiler warnings
   and analyzers; the image (`sdk:9.0`) built with warnings as errors failed on what the laptop never showed
   (CS1998, CA1859). Commit `global.json` (9.0.200, latestFeature), pin `AnalysisLevel` to the major

@@ -24,7 +24,8 @@ public static partial class Redact
     public static string Url(string? url)
     {
         if (string.IsNullOrWhiteSpace(url)) return string.Empty;
-        return Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.IsAbsoluteUri
+        // On Linux "/path" parses as an absolute file:// URI, so file URIs count as relative.
+        return Uri.TryCreate(url, UriKind.Absolute, out var uri) && !uri.IsFile
             ? $"{uri.Scheme}://{uri.Host}{(uri.IsDefaultPort ? string.Empty : $":{uri.Port}")}"
             : "(relative url)";
     }
