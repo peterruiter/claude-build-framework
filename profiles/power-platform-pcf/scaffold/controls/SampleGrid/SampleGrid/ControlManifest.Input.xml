@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <!--
+    A dataset control: shows the records of a view (model-driven grid or subgrid) or a table
+    (canvas gallery data source). Virtual (React) with the platform's React and Fluent v9.
+    Raise version for every change that should reach an environment (npm run version:bump).
+  -->
+  <control namespace="Contoso" constructor="SampleGrid" version="1.0.0"
+           display-name-key="SampleGrid_Name" description-key="SampleGrid_Description"
+           control-type="virtual">
+
+    <!-- No calls outside Dataverse. Declaring a domain here makes the control premium and needs an owner decision. -->
+    <external-service-usage enabled="false" />
+
+    <data-set name="records" display-name-key="Records_Name" description-key="Records_Description" />
+
+    <property name="pageSize" display-name-key="PageSize_Name" description-key="PageSize_Description"
+              of-type="Whole.None" usage="input" required="false" default-value="25" />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <platform-library name="React" version="16.14.0" />
+      <platform-library name="Fluent" version="9.68.0" />
+      <!-- languages: written by scripts/sync-languages.mjs from build/contracts/locales.json -->
+      <resx path="strings/SampleGrid.1033.resx" version="1.0.0" />
+      <resx path="strings/SampleGrid.1043.resx" version="1.0.0" />
+      <!-- /languages -->
+    </resources>
+  </control>
+</manifest>

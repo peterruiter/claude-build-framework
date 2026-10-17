@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["SampleGrid", "../shared"],
+  "exclude": ["node_modules", "out"]
+}

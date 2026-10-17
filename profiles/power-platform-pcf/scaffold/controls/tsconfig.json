@@ -1,0 +1,14 @@
+{
+  "extends": "./node_modules/pcf-scripts/tsconfig_base.json",
+  "compilerOptions": {
+    "typeRoots": ["node_modules/@types"],
+    "types": ["powerapps-component-framework"],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["*/*/**/*.ts", "*/*/**/*.tsx", "shared/**/*.ts"],
+  "exclude": ["node_modules", "**/node_modules", "**/out", "tests", "scripts"]
+}

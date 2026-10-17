@@ -1,0 +1,184 @@
+# Release: on a version tag (v1.2.0), make the managed solutions in the BUILD environment and
+# deploy them to test and production, each behind its GitHub environment.
+#
+#   build-managed  pack from source, import unmanaged into the build environment (which only
+#                  ever holds this product), export managed, attach to the GitHub release.
+#   deploy-test    GitHub environment "test": import the managed zips with
+#                  deployment-settings/test.json.
+#   deploy-prod    GitHub environment "production" with required reviewers: the owner's
+#                  approval in GitHub IS the go for this run. Imports with
+#                  deployment-settings/prod.json.
+#
+# Sign-in: one app registration per stage with a federated credential for this repository's
+# environment (subject repo:<owner>/<repo>:environment:<name>), added as an application user
+# with a least-privilege role in that Dataverse environment. No client secrets.
+#
+# Repository variables (Settings, Secrets and variables, Actions, Variables):
+#   DATAVERSE_TENANT_ID, DATAVERSE_BUILD_URL, DATAVERSE_TEST_URL, DATAVERSE_PROD_URL,
+#   DATAVERSE_BUILD_CLIENT_ID, DATAVERSE_TEST_CLIENT_ID, DATAVERSE_PROD_CLIENT_ID.
+# A job whose URL variable is empty is skipped, so this workflow is inert until set up.
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  PAC_VERSION: 2.11.2
+
+jobs:
+  build-managed:
+    name: Managed solutions from the build environment
+    if: vars.DATAVERSE_BUILD_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Contract tests (never release on red)
+        run: npm test
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install the Power Platform CLI (pinned)
+        run: dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version "$PAC_VERSION"
+      - name: Tag and VERSION agree
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: test "v$(tr -d '[:space:]' < VERSION)" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME does not match VERSION"; exit 1; }
+      - name: Pack from source
+        shell: pwsh
+        run: ./build/Build-Solution.ps1 -RoundTrip -BuildNumber ${{ github.run_number }}
+      - name: Point the scripts at the real tenant and the build environment
+        env:
+          TENANT_ID: ${{ vars.DATAVERSE_TENANT_ID }}
+          BUILD_URL: ${{ vars.DATAVERSE_BUILD_URL }}
+        run: |
+          printf '{ "tenantId": "%s", "environments": [ { "id": "build", "url": "%s" } ] }\n' "$TENANT_ID" "$BUILD_URL" > environments.local.json
+      - name: Sign in to the build environment (federated, no secret)
+        env:
+          TENANT_ID: ${{ vars.DATAVERSE_TENANT_ID }}
+          CLIENT_ID: ${{ vars.DATAVERSE_BUILD_CLIENT_ID }}
+          BUILD_URL: ${{ vars.DATAVERSE_BUILD_URL }}
+        run: pac auth create --name build --githubFederated --tenant "$TENANT_ID" --applicationId "$CLIENT_ID" --environment "$BUILD_URL"
+      - name: Import unmanaged into the build environment
+        shell: pwsh
+        env:
+          BUILD_URL: ${{ vars.DATAVERSE_BUILD_URL }}
+        run: ./build/Import-Solution.ps1 -Environment build -BuildManifest out/build.json -ConfirmUrl $env:BUILD_URL -AllowSameVersion
+      - name: Export managed
+        shell: pwsh
+        env:
+          BUILD_URL: ${{ vars.DATAVERSE_BUILD_URL }}
+        run: |
+          $build = Get-Content out/build.json -Raw | ConvertFrom-Json
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          $solutions = foreach ($s in @($build.solutions | Sort-Object importOrder)) {
+            $file = "$($s.uniqueName)_$($s.version.Replace('.', '_'))_managed.zip"
+            pac solution export --name $s.uniqueName --managed --path "release/$file" --environment $env:BUILD_URL --overwrite
+            if ($LASTEXITCODE -ne 0) { throw "export of $($s.uniqueName) failed" }
+            [ordered]@{ uniqueName = $s.uniqueName; version = $s.version; importOrder = $s.importOrder; file = $file }
+          }
+          [ordered]@{ version = $build.version; commit = $env:GITHUB_SHA; solutions = @($solutions) } | ConvertTo-Json -Depth 5 | Set-Content release/release.json
+          Get-ChildItem release
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release
+          path: release/
+          retention-days: 90
+      - name: Attach to the GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release/* --title "$GITHUB_REF_NAME" --notes "Managed solutions for $GITHUB_REF_NAME. What's new is in build/contracts/changelog.json." --verify-tag
+
+  deploy-test:
+    name: Deploy to test
+    needs: build-managed
+    if: vars.DATAVERSE_TEST_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment: test
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release
+          path: release
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install the Power Platform CLI (pinned)
+        run: dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version "$PAC_VERSION"
+      - name: Point the scripts at the real tenant and the test environment
+        env:
+          TENANT_ID: ${{ vars.DATAVERSE_TENANT_ID }}
+          TEST_URL: ${{ vars.DATAVERSE_TEST_URL }}
+        run: |
+          printf '{ "tenantId": "%s", "environments": [ { "id": "test", "url": "%s" } ] }\n' "$TENANT_ID" "$TEST_URL" > environments.local.json
+      - name: Sign in to test (federated, no secret)
+        env:
+          TENANT_ID: ${{ vars.DATAVERSE_TENANT_ID }}
+          CLIENT_ID: ${{ vars.DATAVERSE_TEST_CLIENT_ID }}
+          TEST_URL: ${{ vars.DATAVERSE_TEST_URL }}
+        run: pac auth create --name test --githubFederated --tenant "$TENANT_ID" --applicationId "$CLIENT_ID" --environment "$TEST_URL"
+      - name: Import the managed solutions
+        shell: pwsh
+        env:
+          TEST_URL: ${{ vars.DATAVERSE_TEST_URL }}
+        run: ./build/Import-Solution.ps1 -Environment test -BuildManifest release/release.json -ConfirmUrl $env:TEST_URL
+
+  deploy-prod:
+    name: Deploy to production
+    needs: deploy-test
+    if: vars.DATAVERSE_PROD_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    # Required reviewers on this GitHub environment are the owner's go for this release.
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release
+          path: release
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install the Power Platform CLI (pinned)
+        run: dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version "$PAC_VERSION"
+      - name: Point the scripts at the real tenant and production
+        env:
+          TENANT_ID: ${{ vars.DATAVERSE_TENANT_ID }}
+          PROD_URL: ${{ vars.DATAVERSE_PROD_URL }}
+        run: |
+          printf '{ "tenantId": "%s", "environments": [ { "id": "prod", "url": "%s" } ] }\n' "$TENANT_ID" "$PROD_URL" > environments.local.json
+      - name: Sign in to production (federated, no secret)
+        env:
+          TENANT_ID: ${{ vars.DATAVERSE_TENANT_ID }}
+          CLIENT_ID: ${{ vars.DATAVERSE_PROD_CLIENT_ID }}
+          PROD_URL: ${{ vars.DATAVERSE_PROD_URL }}
+        run: pac auth create --name prod --githubFederated --tenant "$TENANT_ID" --applicationId "$CLIENT_ID" --environment "$PROD_URL"
+      - name: Import the managed solutions
+        shell: pwsh
+        env:
+          PROD_URL: ${{ vars.DATAVERSE_PROD_URL }}
+        run: ./build/Import-Solution.ps1 -Environment prod -BuildManifest release/release.json -ConfirmUrl $env:PROD_URL -ProductionGo

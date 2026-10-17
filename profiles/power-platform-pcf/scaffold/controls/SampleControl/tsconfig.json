@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["SampleControl", "../shared"],
+  "exclude": ["node_modules", "out"]
+}

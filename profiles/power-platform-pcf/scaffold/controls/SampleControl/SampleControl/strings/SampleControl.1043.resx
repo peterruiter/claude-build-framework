@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="SampleControl_Name" xml:space="preserve"><value>Voorbeeld tekstveld</value></data>
+  <data name="SampleControl_Description" xml:space="preserve"><value>Een tekstkolom met het aantal tekens en een knop die de tekst wist.</value></data>
+  <data name="Value_Name" xml:space="preserve"><value>Waarde</value></data>
+  <data name="Value_Description" xml:space="preserve"><value>De tekstkolom die dit onderdeel toont en bewerkt.</value></data>
+  <data name="ShowCounter_Name" xml:space="preserve"><value>Aantal tekens tonen</value></data>
+  <data name="ShowCounter_Description" xml:space="preserve"><value>Toon hoeveel tekens de waarde heeft, of hoeveel er nog over zijn.</value></data>
+  <data name="field.clear" xml:space="preserve"><value>Wissen</value></data>
+  <data name="field.clearLabel" xml:space="preserve"><value>{0} wissen</value></data>
+  <data name="field.counter" xml:space="preserve"><value>{0} tekens</value></data>
+  <data name="field.counter.one" xml:space="preserve"><value>{0} teken</value></data>
+  <data name="field.remaining" xml:space="preserve"><value>Nog {0} tekens</value></data>
+  <data name="field.remaining.one" xml:space="preserve"><value>Nog {0} teken</value></data>
+  <data name="field.hidden" xml:space="preserve"><value>Je hebt geen toegang tot deze waarde.</value></data>
+</root>

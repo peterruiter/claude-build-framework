@@ -1,0 +1,56 @@
+{
+  "contract": "environments",
+  "version": 1,
+  "description": "SAMPLE. Every Dataverse environment the scripts may talk to, and what each may receive. No secrets here, ever: authentication is the operator's own sign-in (az login / pac auth) or, in CI, a federated credential. Scripts refuse to run while tenantId is the placeholder. Per-developer environments go in environments.local.json (gitignored), which is merged on top by id. kind decides what a script may do: development takes unmanaged changes (schema, roles, exports); build is a clean environment that only ever holds the product's own solutions and makes the managed release; test and production take managed solutions only. requireApproval: imports need the owner's explicit go for this run (locally -ProductionGo, in CI the GitHub environment's required reviewers).",
+  "tenantId": "00000000-0000-0000-0000-000000000000",
+  "environments": [
+    {
+      "id": "dev",
+      "name": "Development",
+      "kind": "development",
+      "url": "https://contoso-caseapp-dev.crm4.dynamics.com",
+      "type": "Sandbox",
+      "managedEnvironment": true,
+      "geo": "Europe",
+      "accepts": "unmanaged",
+      "requireApproval": false,
+      "deploymentSettings": null
+    },
+    {
+      "id": "build",
+      "name": "Build",
+      "kind": "build",
+      "url": "https://contoso-caseapp-build.crm4.dynamics.com",
+      "type": "Sandbox",
+      "managedEnvironment": true,
+      "geo": "Europe",
+      "accepts": "unmanaged",
+      "requireApproval": false,
+      "deploymentSettings": null
+    },
+    {
+      "id": "test",
+      "name": "Test",
+      "kind": "test",
+      "url": "https://contoso-caseapp-test.crm4.dynamics.com",
+      "type": "Sandbox",
+      "managedEnvironment": true,
+      "geo": "Europe",
+      "accepts": "managed",
+      "requireApproval": false,
+      "deploymentSettings": "deployment-settings/test.json"
+    },
+    {
+      "id": "prod",
+      "name": "Production",
+      "kind": "production",
+      "url": "https://contoso-caseapp.crm4.dynamics.com",
+      "type": "Production",
+      "managedEnvironment": true,
+      "geo": "Europe",
+      "accepts": "managed",
+      "requireApproval": true,
+      "deploymentSettings": "deployment-settings/prod.json"
+    }
+  ]
+}

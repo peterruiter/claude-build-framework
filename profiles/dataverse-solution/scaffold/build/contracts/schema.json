@@ -1,0 +1,107 @@
+{
+  "contract": "schema",
+  "version": 1,
+  "description": "SAMPLE. The data model as code: publisher, solutions, languages and every table, column and choice the product owns. build/New-Schema.ps1 applies it to a DEVELOPMENT environment (additive only: it creates what is missing and never deletes or retypes), Export-Solution.ps1 brings the result into solutions/, and tests/contracts/schema.test.mjs holds this file, the unpacked solutions, roles.json and privacy.json to each other. Rules: every name starts with the publisher prefix; schema names never change once released; option values start at optionValuePrefix * 10000 and are never reused; every label has every LCID in languages.lcids. Replace the sample (contoso, CaseApp, contoso_Request) with the product's own.",
+  "publisher": {
+    "uniqueName": "Contoso",
+    "friendlyName": "Contoso",
+    "prefix": "contoso",
+    "optionValuePrefix": 75259
+  },
+  "languages": {
+    "$comment": "The base language is the one the development environment was created with and cannot change. Every other LCID needs its language enabled in each environment (Power Platform admin center, Settings, Languages) before labels in it import. Map from build/contracts/locales.json: en-US 1033, en-GB 2057, nl-NL 1043, de-DE 1031, fr-FR 1036, es-ES 3082, it-IT 1040, pl-PL 1045, pt-PT 2070, sv-SE 1053, da-DK 1030, fi-FI 1035, nb-NO 1044.",
+    "base": 1033,
+    "lcids": [1033, 1043],
+    "cultures": { "1033": "en-US", "1043": "nl-NL" }
+  },
+  "solutions": [
+    {
+      "uniqueName": "CaseAppCore",
+      "folder": "solutions/CaseAppCore/src",
+      "layer": "core",
+      "importOrder": 1,
+      "description": "Tables, choices, environment variables and connection references. No apps, no flows: those live in the solutions that depend on this one."
+    }
+  ],
+  "globalChoices": [
+    {
+      "name": "contoso_channel",
+      "solution": "CaseAppCore",
+      "displayName": { "1033": "Channel", "1043": "Kanaal" },
+      "description": { "1033": "How a request reached us.", "1043": "Hoe een verzoek binnenkwam." },
+      "options": [
+        { "value": 752590000, "label": { "1033": "Web form", "1043": "Webformulier" } },
+        { "value": 752590001, "label": { "1033": "Email", "1043": "E-mail" } },
+        { "value": 752590002, "label": { "1033": "Phone", "1043": "Telefoon" } }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "schemaName": "contoso_Request",
+      "logicalName": "contoso_request",
+      "entitySetName": "contoso_requests",
+      "solution": "CaseAppCore",
+      "ownership": "UserOwned",
+      "audit": true,
+      "displayName": { "1033": "Request", "1043": "Verzoek" },
+      "pluralName": { "1033": "Requests", "1043": "Verzoeken" },
+      "description": { "1033": "A request someone sends in; the sample table of the CaseApp scaffold.", "1043": "Een verzoek dat iemand indient; de voorbeeldtabel van de CaseApp-basis." },
+      "primaryName": {
+        "schemaName": "contoso_Name",
+        "logicalName": "contoso_name",
+        "maxLength": 200,
+        "displayName": { "1033": "Title", "1043": "Titel" },
+        "description": { "1033": "Short title of the request.", "1043": "Korte titel van het verzoek." }
+      },
+      "columns": [
+        {
+          "schemaName": "contoso_ReceivedOn",
+          "logicalName": "contoso_receivedon",
+          "type": "date",
+          "required": "recommended",
+          "audit": true,
+          "displayName": { "1033": "Received on", "1043": "Ontvangen op" },
+          "description": { "1033": "Date the request was received.", "1043": "Datum waarop het verzoek is ontvangen." }
+        },
+        {
+          "schemaName": "contoso_RequesterEmail",
+          "logicalName": "contoso_requesteremail",
+          "type": "email",
+          "maxLength": 100,
+          "required": "none",
+          "audit": true,
+          "displayName": { "1033": "Requester email", "1043": "E-mailadres aanvrager" },
+          "description": { "1033": "Email address the answer goes to.", "1043": "E-mailadres waar het antwoord naartoe gaat." }
+        },
+        {
+          "schemaName": "contoso_Channel",
+          "logicalName": "contoso_channel",
+          "type": "choice",
+          "globalChoice": "contoso_channel",
+          "required": "none",
+          "audit": true,
+          "displayName": { "1033": "Channel", "1043": "Kanaal" },
+          "description": { "1033": "How the request reached us.", "1043": "Hoe het verzoek binnenkwam." }
+        }
+      ]
+    }
+  ],
+  "environmentVariables": [
+    {
+      "schemaName": "contoso_PortalBaseUrl",
+      "solution": "CaseAppCore",
+      "type": "String",
+      "required": true,
+      "secret": false,
+      "displayName": { "1033": "Portal base URL", "1043": "Basisadres portaal" }
+    }
+  ],
+  "connectionReferences": [
+    {
+      "logicalName": "contoso_CaseAppDataverse",
+      "solution": "CaseAppCore",
+      "connectorId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+    }
+  ]
+}

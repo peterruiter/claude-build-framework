@@ -1,0 +1,115 @@
+{
+  "profile": "power-platform-pcf",
+  "tools": [
+    {
+      "id": "node",
+      "name": "Node.js",
+      "command": "node",
+      "args": ["--version"],
+      "pattern": "v?(\\d+\\.\\d+\\.\\d+)",
+      "min": "22.18.0",
+      "required": true,
+      "why": "builds, lints and tests the controls (pcf-scripts, eslint, vitest) and runs the language and gate scripts",
+      "install": {
+        "windows": "winget install OpenJS.NodeJS.LTS",
+        "macos": "brew install node@22",
+        "linux": "see https://nodejs.org/en/download/package-manager"
+      },
+      "docs": "https://nodejs.org"
+    },
+    {
+      "id": "npm",
+      "name": "npm",
+      "command": "npm",
+      "args": ["--version"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "10.0.0",
+      "required": true,
+      "why": "installs the pinned packages from package-lock.json (npm ci)",
+      "install": {
+        "windows": "comes with Node.js: winget install OpenJS.NodeJS.LTS",
+        "macos": "comes with Node.js: brew install node@22",
+        "linux": "comes with Node.js: see https://nodejs.org/en/download/package-manager"
+      },
+      "docs": "https://docs.npmjs.com/cli"
+    },
+    {
+      "id": "dotnet",
+      "name": ".NET SDK",
+      "command": "dotnet",
+      "args": ["--list-sdks"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "8.0.100",
+      "required": true,
+      "why": "builds the solution project (solution/*.cdsproj with Microsoft.PowerApps.MSBuild.Solution) into the managed and unmanaged solution zips, and installs the pac CLI as a .NET tool",
+      "install": {
+        "windows": "winget install Microsoft.DotNet.SDK.10",
+        "macos": "brew install --cask dotnet-sdk",
+        "linux": "see https://learn.microsoft.com/dotnet/core/install/linux"
+      },
+      "docs": "https://learn.microsoft.com/dotnet/core/install/"
+    },
+    {
+      "id": "pac",
+      "name": "Power Platform CLI (pac)",
+      "command": "pac",
+      "args": ["help"],
+      "pattern": "Version: (\\d+\\.\\d+\\.\\d+)",
+      "min": "2.11.2",
+      "required": true,
+      "why": "creates new controls (pac pcf init), adds them to the solution (pac solution add-reference), bumps versions, imports into a development environment with the owner's go, and runs the Power Apps checker",
+      "install": {
+        "windows": "dotnet tool install --global Microsoft.PowerApps.CLI.Tool",
+        "macos": "dotnet tool install --global Microsoft.PowerApps.CLI.Tool",
+        "linux": "dotnet tool install --global Microsoft.PowerApps.CLI.Tool"
+      },
+      "docs": "https://learn.microsoft.com/power-platform/developer/cli/introduction"
+    },
+    {
+      "id": "git",
+      "name": "Git",
+      "command": "git",
+      "args": ["--version"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "2.40.0",
+      "required": true,
+      "why": "the repository, and the version check that compares control versions with the base branch",
+      "install": {
+        "windows": "winget install Git.Git",
+        "macos": "brew install git",
+        "linux": "sudo apt-get install git"
+      },
+      "docs": "https://git-scm.com/downloads"
+    },
+    {
+      "id": "vscode-power-platform-tools",
+      "name": "Power Platform Tools for Visual Studio Code",
+      "command": "code",
+      "args": ["--list-extensions", "--show-versions"],
+      "pattern": "[Mm]icrosoft-[Ii]sv[Ee]xp[Tt]ools\\.powerplatform-vscode@(\\d+\\.\\d+\\.\\d+)",
+      "required": false,
+      "why": "auth profile management and pac inside VS Code terminals; also the only way to get the Windows-only pac commands (pac data, pac package deploy) besides the MSI",
+      "install": {
+        "windows": "code --install-extension microsoft-IsvExpTools.powerplatform-vscode",
+        "macos": "code --install-extension microsoft-IsvExpTools.powerplatform-vscode",
+        "linux": "code --install-extension microsoft-IsvExpTools.powerplatform-vscode"
+      },
+      "docs": "https://learn.microsoft.com/power-platform/developer/howto/install-vs-code-extension"
+    },
+    {
+      "id": "actionlint",
+      "name": "actionlint",
+      "command": "actionlint",
+      "args": ["--version"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "required": false,
+      "why": "lints the GitHub Actions workflows before they are pushed",
+      "install": {
+        "windows": "winget install rhysd.actionlint",
+        "macos": "brew install actionlint",
+        "linux": "see https://github.com/rhysd/actionlint/blob/main/docs/install.md"
+      },
+      "docs": "https://github.com/rhysd/actionlint"
+    }
+  ]
+}

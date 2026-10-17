@@ -1,0 +1,39 @@
+{
+  "contract": "roles",
+  "version": 1,
+  "description": "SAMPLE. The security role matrix as code: per role, per table, which privilege at which depth. build/New-SecurityRoles.ps1 applies it to a DEVELOPMENT environment (adds what is missing, reports what is extra, never removes a privilege someone added by hand unless -Prune); the roles then travel in the solution. tests/contracts/roles.test.mjs fails when a table in schema.json has no row here, when a role names a table or privilege that does not exist, or when a depth is not one of the four. Depth names are the Web API's: Basic (the user's own rows), Local (the business unit), Deep (business unit and below), Global (the organisation). Role names are not translated by Dataverse: name roles in the base language. Least privilege first: start from nothing and add what the job needs; never copy System Administrator or Basic User.",
+  "privileges": ["Create", "Read", "Write", "Delete", "Append", "AppendTo", "Assign", "Share"],
+  "depths": ["Basic", "Local", "Deep", "Global"],
+  "roles": [
+    {
+      "name": "CaseApp Caseworker",
+      "solution": "CaseAppCore",
+      "description": "Handles requests in their own business unit. Cannot delete.",
+      "tables": {
+        "contoso_request": { "Create": "Local", "Read": "Local", "Write": "Local", "Append": "Local", "AppendTo": "Local", "Assign": "Local" }
+      },
+      "platform": { "prvReadUser": "Global", "prvReadTeam": "Global", "prvReadBusinessUnit": "Global" }
+    },
+    {
+      "name": "CaseApp Team Lead",
+      "solution": "CaseAppCore",
+      "description": "Everything a caseworker does, across the business unit and the units below it, and may share and delete.",
+      "tables": {
+        "contoso_request": { "Create": "Deep", "Read": "Deep", "Write": "Deep", "Delete": "Deep", "Append": "Deep", "AppendTo": "Deep", "Assign": "Deep", "Share": "Deep" }
+      },
+      "platform": { "prvReadUser": "Global", "prvReadTeam": "Global", "prvReadBusinessUnit": "Global" }
+    },
+    {
+      "name": "CaseApp Reader",
+      "solution": "CaseAppCore",
+      "description": "Reads requests across the organisation, changes nothing. For management and audit.",
+      "tables": {
+        "contoso_request": { "Read": "Global" }
+      },
+      "platform": { "prvReadUser": "Global" }
+    }
+  ],
+  "noRole": {
+    "$comment": "Tables in schema.json that deliberately get no privileges in any product role, with the reason. Empty in the sample."
+  }
+}

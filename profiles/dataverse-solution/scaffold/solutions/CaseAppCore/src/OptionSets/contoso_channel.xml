@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<optionset Name="contoso_channel" localizedName="Channel" description="How a request reached us." xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <OptionSetType>picklist</OptionSetType>
+  <IsGlobal>1</IsGlobal>
+  <IntroducedVersion>1.0.0.0</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <ExternalTypeName></ExternalTypeName>
+  <displaynames>
+    <displayname description="Channel" languagecode="1033" />
+    <displayname description="Kanaal" languagecode="1043" />
+  </displaynames>
+  <Descriptions>
+    <Description description="How a request reached us." languagecode="1033" />
+    <Description description="Hoe een verzoek binnenkwam." languagecode="1043" />
+  </Descriptions>
+  <options>
+    <option value="752590000" ExternalValue="">
+      <labels>
+        <label description="Web form" languagecode="1033" />
+        <label description="Webformulier" languagecode="1043" />
+      </labels>
+      <Descriptions>
+        <Description description="" languagecode="1033" />
+      </Descriptions>
+    </option>
+    <option value="752590001" ExternalValue="">
+      <labels>
+        <label description="Email" languagecode="1033" />
+        <label description="E-mail" languagecode="1043" />
+      </labels>
+      <Descriptions>
+        <Description description="" languagecode="1033" />
+      </Descriptions>
+    </option>
+    <option value="752590002" ExternalValue="">
+      <labels>
+        <label description="Phone" languagecode="1033" />
+        <label description="Telefoon" languagecode="1043" />
+      </labels>
+      <Descriptions>
+        <Description description="" languagecode="1033" />
+      </Descriptions>
+    </option>
+  </options>
+</optionset>

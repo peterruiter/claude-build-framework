@@ -1,0 +1,46 @@
+{
+  "contract": "privacy",
+  "version": 1,
+  "description": "SAMPLE. The privacy register as code: the record of processing activities (GDPR article 30) for what the product stores. Every table and every custom column in schema.json has an entry here, with its category of personal data (or none), the purposes it serves, and how erasure treats it. tests/contracts/privacy.test.mjs fails on a table or column without an entry, a purpose without a legal basis or retention, a special category without an article 9 condition, or a retention that is not an ISO 8601 duration. build/Export-PrivacyRegister.ps1 turns it into a Markdown or CSV register for the privacy officer. The controller and DPO are filled in per deployment (each customer is its own controller); the product supplies the rest.",
+  "controller": "{{CUSTOMER_NAME}} (per deployment)",
+  "dataProtectionOfficer": "{{DPO_CONTACT}} (per deployment)",
+  "categories": {
+    "none": "No personal data.",
+    "identification": "Names, identifiers, reference numbers that point to a person.",
+    "contact": "Email addresses, phone numbers, postal addresses.",
+    "financial": "Bank accounts, amounts tied to a person.",
+    "content": "Free text a person wrote; may contain anything, treat as personal data.",
+    "special": "GDPR article 9 data (health, ethnicity, religion, union membership, biometrics, sex life, political opinions). Needs article9Condition.",
+    "criminal": "GDPR article 10 data (criminal convictions and offences). Needs a legal basis in national law."
+  },
+  "legalBases": ["consent", "contract", "legal-obligation", "vital-interests", "public-task", "legitimate-interests"],
+  "purposes": [
+    {
+      "id": "handle-request",
+      "name": "Handle a request",
+      "description": "Register a request, answer it and keep the file for the period the law or the customer's policy requires.",
+      "legalBasis": "public-task",
+      "legalBasisNote": "Per deployment: public task for a public body, contract or legitimate interests for a company. The customer confirms.",
+      "dataSubjects": ["requesters"],
+      "recipients": ["caseworkers of the controller"],
+      "retention": "P7Y",
+      "retentionTrigger": "after the request is closed",
+      "transfersOutsideRegion": "none"
+    }
+  ],
+  "tables": {
+    "contoso_request": {
+      "personalData": true,
+      "purposes": ["handle-request"],
+      "erasure": "anonymise",
+      "erasureNote": "On an erasure request or at the end of retention: clear the requester email and the title, keep the row with its dates for statistics.",
+      "audit": "Auditing is on for this table: audit history holds old values of personal data, so the environment's audit retention must not exceed the purpose's retention.",
+      "columns": {
+        "contoso_name": { "category": "content", "note": "A title someone types can name a person." },
+        "contoso_receivedon": { "category": "none" },
+        "contoso_requesteremail": { "category": "contact" },
+        "contoso_channel": { "category": "none" }
+      }
+    }
+  }
+}

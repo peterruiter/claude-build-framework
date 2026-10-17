@@ -33,8 +33,11 @@ Read in this order the first time; afterwards use it as a reference.
 | Safety rules | [safety-rules.md](safety-rules.md) |
 | Communication with the owner | [communication.md](communication.md) |
 
-Stack-specific scripts (build, database, deploy, smoke test) live in a **profile**, for example
-[`profiles/dotnet-react-azure/`](../profiles/dotnet-react-azure/). The docs here are stack-neutral
-and say "the profile's script" where a profile fills in the detail.
+Stack-specific scripts (build, database, deploy, smoke test) live in a **profile**:
+[`dotnet-react-azure`](../profiles/dotnet-react-azure/) (.NET, React, Azure),
+[`dataverse-solution`](../profiles/dataverse-solution/) (a full product on Dataverse / Dynamics
+365), [`power-platform-pcf`](../profiles/power-platform-pcf/) (PCF code components) and
+[`dataverse-plugins`](../profiles/dataverse-plugins/) (plug-ins and custom APIs). The docs here
+are stack-neutral and say "the profile's script" where a profile fills in the detail.
 
 Templates for everything the docs mention are in [`templates/`](../templates/README.md).

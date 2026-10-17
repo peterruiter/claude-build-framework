@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <!--
+    A field control: bound to one column on a form (model-driven) or to a property (canvas).
+    Virtual (React): the platform provides React and Fluent v9 (platform-library below), so the
+    bundle holds only this control's code.
+    Raise version for every change that should reach an environment: the platform keeps the old
+    bundle while the version is unchanged (npm run version:bump).
+  -->
+  <control namespace="Contoso" constructor="SampleControl" version="1.0.0"
+           display-name-key="SampleControl_Name" description-key="SampleControl_Description"
+           control-type="virtual">
+
+    <!-- No calls outside Dataverse. Declaring a domain here makes the control premium and needs an owner decision. -->
+    <external-service-usage enabled="false" />
+
+    <property name="value" display-name-key="Value_Name" description-key="Value_Description"
+              of-type="SingleLine.Text" usage="bound" required="true" />
+
+    <property name="showCounter" display-name-key="ShowCounter_Name" description-key="ShowCounter_Description"
+              of-type="TwoOptions" usage="input" required="false" default-value="true" />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <platform-library name="React" version="16.14.0" />
+      <platform-library name="Fluent" version="9.68.0" />
+      <!-- languages: written by scripts/sync-languages.mjs from build/contracts/locales.json -->
+      <resx path="strings/SampleControl.1033.resx" version="1.0.0" />
+      <resx path="strings/SampleControl.1043.resx" version="1.0.0" />
+      <!-- /languages -->
+    </resources>
+  </control>
+</manifest>

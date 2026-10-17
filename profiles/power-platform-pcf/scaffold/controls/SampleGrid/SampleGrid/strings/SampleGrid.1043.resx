@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="SampleGrid_Name" xml:space="preserve"><value>Voorbeeldraster</value></data>
+  <data name="SampleGrid_Description" xml:space="preserve"><value>De records van een weergave in een tabel die met het toetsenbord werkt, met sorteren en pagina's.</value></data>
+  <data name="Records_Name" xml:space="preserve"><value>Records</value></data>
+  <data name="Records_Description" xml:space="preserve"><value>De weergave waarvan het raster de records toont.</value></data>
+  <data name="PageSize_Name" xml:space="preserve"><value>Paginagrootte</value></data>
+  <data name="PageSize_Description" xml:space="preserve"><value>Hoeveel records een pagina toont, van 1 tot 250.</value></data>
+  <data name="grid.label" xml:space="preserve"><value>Records</value></data>
+  <data name="grid.select" xml:space="preserve"><value>{0} selecteren</value></data>
+  <data name="grid.selectAll" xml:space="preserve"><value>Alle records op deze pagina selecteren</value></data>
+  <data name="grid.count" xml:space="preserve"><value>{0} records</value></data>
+  <data name="grid.count.one" xml:space="preserve"><value>{0} record</value></data>
+  <data name="grid.page" xml:space="preserve"><value>Pagina {0}</value></data>
+  <data name="grid.previous" xml:space="preserve"><value>Vorige pagina</value></data>
+  <data name="grid.next" xml:space="preserve"><value>Volgende pagina</value></data>
+  <data name="grid.loading" xml:space="preserve"><value>Records laden</value></data>
+  <data name="grid.empty" xml:space="preserve"><value>Er zijn geen records om te tonen.</value></data>
+  <data name="grid.failed" xml:space="preserve"><value>De records konden niet worden geladen. Probeer het later opnieuw.</value></data>
+  <data name="grid.untitled" xml:space="preserve"><value>(geen naam)</value></data>
+  <data name="grid.labelValue" xml:space="preserve"><value>{0}: {1}</value></data>
+</root>

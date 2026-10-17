@@ -1,0 +1,129 @@
+{
+  "profile": "dataverse-solution",
+  "note": "Tools for the solution itself. Plug-ins (profiles/dataverse-plugins) and PCF controls (profiles/power-platform-pcf) bring their own lists; side services follow profiles/dotnet-react-azure. Checked with: node ${CLAUDE_PLUGIN_ROOT}/scripts/check-prereqs.mjs dataverse-solution",
+  "tools": [
+    {
+      "id": "pac",
+      "name": "Power Platform CLI",
+      "command": "pac",
+      "args": [],
+      "pattern": "Version: (\\d+\\.\\d+\\.\\d+)",
+      "min": "2.4.1",
+      "required": true,
+      "why": "Packs, unpacks, checks, exports and imports solutions; creates deployment settings. 2.4.1 or newer reads the YAML source format. The .NET tool install has no 'pac data' (Configuration Migration data): on Windows install the MSI or the VS Code extension as well when the project moves configuration data.",
+      "install": {
+        "windows": "dotnet tool install --global Microsoft.PowerApps.CLI.Tool",
+        "macos": "dotnet tool install --global Microsoft.PowerApps.CLI.Tool",
+        "linux": "dotnet tool install --global Microsoft.PowerApps.CLI.Tool"
+      },
+      "docs": "https://learn.microsoft.com/power-platform/developer/howto/install-cli-net-tool"
+    },
+    {
+      "id": "dotnet",
+      "name": ".NET SDK",
+      "command": "dotnet",
+      "args": [
+        "--list-sdks"
+      ],
+      "pattern": "(\\d+\\.\\d+\\.\\d+) \\[",
+      "min": "10.0.100",
+      "required": true,
+      "why": "Runs the Power Platform CLI (installed as a .NET tool; .NET 10 recommended).",
+      "install": {
+        "windows": "winget install --id Microsoft.DotNet.SDK.10 --source winget",
+        "macos": "brew install --cask dotnet-sdk",
+        "linux": "sudo apt-get install -y dotnet-sdk-10.0 (other distributions: https://learn.microsoft.com/dotnet/core/install/linux)"
+      },
+      "docs": "https://learn.microsoft.com/dotnet/core/install/"
+    },
+    {
+      "id": "pwsh",
+      "name": "PowerShell 7",
+      "command": "pwsh",
+      "args": [
+        "--version"
+      ],
+      "pattern": "PowerShell (\\d+\\.\\d+\\.\\d+)",
+      "min": "7.4.0",
+      "required": true,
+      "why": "Runs the build/ scripts (export, import, pack, schema, roles, translations, privacy register).",
+      "install": {
+        "windows": "winget install --id Microsoft.PowerShell --source winget",
+        "macos": "brew install --cask powershell",
+        "linux": "sudo snap install powershell --classic (other ways: https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-linux)"
+      },
+      "docs": "https://learn.microsoft.com/powershell/scripting/install/installing-powershell"
+    },
+    {
+      "id": "node",
+      "name": "Node.js",
+      "command": "node",
+      "args": [
+        "--version"
+      ],
+      "pattern": "v(\\d+\\.\\d+\\.\\d+)",
+      "min": "22.18.0",
+      "required": true,
+      "why": "Runs the contract tests (schema, roles, privacy, solutions, deployment settings) and the framework's checkers.",
+      "install": {
+        "windows": "winget install --id OpenJS.NodeJS.LTS --source winget",
+        "macos": "brew install node@22",
+        "linux": "nvm install 22 (https://github.com/nvm-sh/nvm)"
+      },
+      "docs": "https://nodejs.org/en/download"
+    },
+    {
+      "id": "git",
+      "name": "Git",
+      "command": "git",
+      "args": [
+        "--version"
+      ],
+      "pattern": "git version (\\d+\\.\\d+\\.\\d+)",
+      "min": "2.40.0",
+      "required": true,
+      "why": "Unpacked solutions live in source control; every change is a reviewed diff.",
+      "install": {
+        "windows": "winget install --id Git.Git -e --source winget",
+        "macos": "brew install git",
+        "linux": "sudo apt-get install -y git"
+      },
+      "docs": "https://git-scm.com/downloads"
+    },
+    {
+      "id": "gh",
+      "name": "GitHub CLI",
+      "command": "gh",
+      "args": [
+        "--version"
+      ],
+      "pattern": "gh version (\\d+\\.\\d+\\.\\d+)",
+      "required": true,
+      "why": "Creates the repository, watches CI runs and sets environment protection for deployments.",
+      "install": {
+        "windows": "winget install --id GitHub.cli --source winget",
+        "macos": "brew install gh",
+        "linux": "see https://github.com/cli/cli/blob/trunk/docs/install_linux.md"
+      },
+      "docs": "https://cli.github.com/"
+    },
+    {
+      "id": "az",
+      "name": "Azure CLI",
+      "command": "az",
+      "args": [
+        "version"
+      ],
+      "pattern": "\"azure-cli\": \"(\\d+\\.\\d+\\.\\d+)\"",
+      "required": true,
+      "why": "Gives New-Schema.ps1 and New-SecurityRoles.ps1 their Web API token (the operator's own sign-in, checked against the tenant in environments.json), and manages side services and the Key Vault behind secret environment variables.",
+      "install": {
+        "windows": "winget install --exact --id Microsoft.AzureCLI",
+        "macos": "brew install azure-cli",
+        "linux": "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash"
+      },
+      "docs": "https://learn.microsoft.com/cli/azure/install-azure-cli",
+      "min": "2.60.0"
+    }
+  ]
+}

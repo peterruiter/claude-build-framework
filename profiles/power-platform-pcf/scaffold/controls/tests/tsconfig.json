@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["powerapps-component-framework", "node"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "noUnusedParameters": false
+  },
+  "include": ["../*/*/**/*.ts", "../*/*/**/*.tsx", "../shared/**/*.ts", "./**/*.ts", "./**/*.tsx"],
+  "exclude": ["../node_modules", "../**/node_modules", "../**/out"]
+}

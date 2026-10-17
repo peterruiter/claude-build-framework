@@ -28,7 +28,11 @@ Ask with the AskUserQuestion tool if available, otherwise as a numbered list:
 3. **Data residency**: EU (recommended default), a specific country, or none. This sets the
    regions for hosting, database, storage, backups, logs, vault and AI endpoints.
 4. **Profile**: list the folders in `${CLAUDE_PLUGIN_ROOT}/profiles/` (read each README's first
-   lines), plus "none (stack-neutral)".
+   lines), plus "none (stack-neutral)". Today: `dotnet-react-azure` (.NET API + React on Azure),
+   `dataverse-solution` (a full product on Dataverse / Dynamics 365), `power-platform-pcf` (PCF
+   code components), `dataverse-plugins` (plug-ins and custom APIs). A Dataverse product usually
+   combines `dataverse-solution` with the PCF and plug-in profiles (and `dotnet-react-azure` for
+   side services): offer the combination.
 5. **GitHub repository**: name (default: folder name), **private (recommended) or public**,
    topics (suggest 3–5).
 

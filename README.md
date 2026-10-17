@@ -81,6 +81,11 @@ watches CI until it is green. Then tell it what to build and run `/build-framewo
   owner checklist, runbook, load-test plan).
 - [profiles/dotnet-react-azure/](profiles/dotnet-react-azure/): .NET + React + Azure scaffolding,
   build, deploy, infrastructure and load-test scenarios.
+- [profiles/dataverse-solution/](profiles/dataverse-solution/): a full product on Dataverse /
+  Dynamics 365: unpacked solutions in git, schema, role matrix and privacy register as code,
+  environment-guarded export and import, managed releases behind approval.
+- [profiles/power-platform-pcf/](profiles/power-platform-pcf/): PCF code components.
+- [profiles/dataverse-plugins/](profiles/dataverse-plugins/): Dataverse plug-ins and custom APIs.
 - [tools/video-tour/](tools/video-tour/README.md): the video pipeline (YAML scripts, Playwright
   recording, voice, subtitles, self-hosted library, YouTube publishing).
 - [hooks/](hooks/hooks.json): a guard that blocks `git commit` and `gh pr create/edit` commands

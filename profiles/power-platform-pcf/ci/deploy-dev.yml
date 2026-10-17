@@ -1,0 +1,103 @@
+# ===========================================================================
+# Import the solution into the DEVELOPMENT environment. Manual only, and only
+# through the GitHub environment "development", which the owner protects with
+# required reviewers: a person approves every run. Never on push, never to
+# test, acceptance or production (those get the managed zip through the
+# release flow, with the owner's go per release).
+#
+# scaffold.ps1 -WithDeployWorkflow copies this file to
+# .github/workflows/deploy-dev.yml. Before the first run the owner sets, on
+# the "development" environment (Settings -> Environments):
+#   variables  DEV_ENVIRONMENT_URL  https://<org>.crm4.dynamics.com
+#              DEV_APP_ID           the app registration (client) id
+#              DEV_TENANT_ID        the tenant id
+#   secret     DEV_CLIENT_SECRET    the app registration's client secret
+# The app registration is an application user in that environment only, with
+# a role that can import solutions there and nothing elsewhere.
+# ===========================================================================
+
+name: Deploy to development
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type the development environment host (for example contoso-dev.crm4.dynamics.com) to confirm'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-development
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and import (unmanaged) into development
+    runs-on: windows-2025
+    timeout-minutes: 30
+    environment: development
+
+    steps:
+      - name: The confirmation matches the configured environment
+        shell: pwsh
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+          TARGET: ${{ vars.DEV_ENVIRONMENT_URL }}
+        run: |
+          if (-not $env:TARGET) { throw 'Set the DEV_ENVIRONMENT_URL variable on the development environment first.' }
+          $hostName = ([Uri]$env:TARGET).Host
+          if ($env:CONFIRM.Trim() -ne $hostName) { throw "The confirmation '$($env:CONFIRM)' is not $hostName. Nothing was imported." }
+          Write-Host "Target: $hostName"
+
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: controls/package-lock.json
+
+      - name: .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install (locked) and check
+        working-directory: controls
+        run: |
+          npm ci --no-audit --no-fund
+          npm run check
+
+      - name: Build the solution
+        shell: pwsh
+        run: |
+          $project = Get-ChildItem solution -Filter *.cdsproj | Select-Object -First 1
+          dotnet build $project.FullName --configuration Release
+          $zip = Get-ChildItem solution/bin/Release/*.zip | Where-Object { $_.Name -notlike '*_managed.zip' } | Select-Object -First 1
+          "SOLUTION_ZIP=$($zip.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Install the Power Platform CLI
+        uses: microsoft/powerplatform-actions/actions-install@59c0b2abadc26618ca914c689ab9dc399da4d6bb # v1.9.2
+
+      - name: Who am I (the account and environment this run uses)
+        uses: microsoft/powerplatform-actions/who-am-i@59c0b2abadc26618ca914c689ab9dc399da4d6bb # v1.9.2
+        with:
+          environment-url: ${{ vars.DEV_ENVIRONMENT_URL }}
+          app-id: ${{ vars.DEV_APP_ID }}
+          tenant-id: ${{ vars.DEV_TENANT_ID }}
+          client-secret: ${{ secrets.DEV_CLIENT_SECRET }}
+
+      - name: Import (unmanaged, development only) and publish
+        uses: microsoft/powerplatform-actions/import-solution@59c0b2abadc26618ca914c689ab9dc399da4d6bb # v1.9.2
+        with:
+          environment-url: ${{ vars.DEV_ENVIRONMENT_URL }}
+          app-id: ${{ vars.DEV_APP_ID }}
+          tenant-id: ${{ vars.DEV_TENANT_ID }}
+          client-secret: ${{ secrets.DEV_CLIENT_SECRET }}
+          solution-file: ${{ env.SOLUTION_ZIP }}
+          publish-changes: 'true'
+          run-asynchronously: 'true'

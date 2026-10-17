@@ -1,0 +1,24 @@
+# Build output: packed zips, checker results, exports, the privacy register
+out/
+release/
+bin/
+obj/
+node_modules/
+
+# Local environments, personal dev environments and anything with a real tenant or URL
+environments.local.json
+*.local.json
+.env
+.env.*
+
+# Solution zips never go into git: the unpacked source is the truth
+*.zip
+
+# pac and editor leftovers
+*.cdsproj.user
+.vs/
+.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+*.log

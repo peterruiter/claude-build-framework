@@ -1,0 +1,15 @@
+{
+  "EnvironmentVariables": [
+    {
+      "SchemaName": "contoso_PortalBaseUrl",
+      "Value": "https://portal.contoso.example"
+    }
+  ],
+  "ConnectionReferences": [
+    {
+      "LogicalName": "contoso_CaseAppDataverse",
+      "ConnectionId": "",
+      "ConnectorId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+    }
+  ]
+}

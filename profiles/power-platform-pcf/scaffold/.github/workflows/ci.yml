@@ -1,0 +1,148 @@
+# ===========================================================================
+# Checks for every pull request and every push to main: the PCF quality gate.
+#
+#   framework  the build framework's checker and contract tests (What's new,
+#              languages, glossary), when the project has them
+#   controls   strings in every language, manifests, privacy rules, lint
+#              (Power Apps checker rules), type check, unit tests, release
+#              build, bundle size; on pull requests also: every changed
+#              control raised its version
+#   solution   dotnet build of the solution project: the managed and the
+#              unmanaged solution zip, kept as a build artifact
+#
+# Actions are pinned to a full commit SHA (the comment says which release);
+# update them deliberately. Nothing here deploys or needs a secret: importing
+# into an environment is .github/workflows/deploy-dev.yml (manual, approved)
+# or scripts/Deploy-Dev.ps1 (a person, with the owner's go).
+# ===========================================================================
+
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  framework:
+    name: Framework checks (What's new, languages, contracts)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+
+      - name: Vocabulary, translations and contracts
+        shell: bash
+        run: |
+          ran=0
+          if [ -f scripts/check-vocabulary.mjs ]; then node scripts/check-vocabulary.mjs; ran=1; fi
+          if compgen -G "tests/contracts/*.test.mjs" > /dev/null; then node --test "tests/contracts/*.test.mjs"; ran=1; fi
+          if [ "$ran" = 0 ]; then echo "No framework checker in this repository: the controls job covers strings and languages."; fi
+
+  controls:
+    name: Controls (strings, lint, types, tests, release build, size)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: controls
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The version check compares with the base branch.
+          fetch-depth: 0
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: controls/package-lock.json
+
+      - name: Install (locked)
+        run: npm ci --no-audit --no-fund
+
+      - name: Strings in every language, manifests, privacy rules
+        run: npm run check
+
+      - name: Manifest types
+        run: npm run refreshTypes
+
+      - name: Lint (includes the Power Apps checker rules)
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Release build
+        run: npm run build:release
+
+      - name: Bundle size
+        run: npm run size
+
+      - name: Versions raised for changed controls
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: npm run version:check -- --base "origin/$BASE_REF"
+
+  solution:
+    name: Solution zip (managed and unmanaged)
+    needs: controls
+    # Windows: the solution build is verified there; Microsoft.PowerApps.MSBuild.* also runs on Linux.
+    runs-on: windows-2025
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: controls/package-lock.json
+
+      - name: .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install (locked)
+        working-directory: controls
+        run: npm ci --no-audit --no-fund
+
+      - name: Build the solution (controls in production mode)
+        shell: pwsh
+        run: |
+          $project = Get-ChildItem solution -Filter *.cdsproj | Select-Object -First 1
+          dotnet build $project.FullName --configuration Release
+          Get-ChildItem solution/bin/Release/*.zip | Format-Table Name, Length
+
+      - name: Keep the solution zips
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: solution-${{ github.sha }}
+          path: solution/bin/Release/*.zip
+          if-no-files-found: error
+          retention-days: 30

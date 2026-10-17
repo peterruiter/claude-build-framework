@@ -1,0 +1,14 @@
+{
+  "contract": "locales",
+  "version": "1.0.0",
+  "description": "The languages this product offers. Written by the new-project skill (or scaffold.ps1 -Languages); edit to add or remove a language, then run `npm run languages` in controls/. 'source' is the language strings are written in first; 'default' is the fallback for readers whose language is not offered. Sorted by nativeName, accents ignored. 'culture' drives plural rules and number formats; the Dataverse language id (LCID) of each RESX file comes from it (controls/scripts/dataverse-languages.json).",
+  "source": "en",
+  "default": "en",
+  "locales": [
+    { "code": "en", "englishName": "English", "nativeName": "English", "culture": "en-GB" },
+    { "code": "nl", "englishName": "Dutch", "nativeName": "Nederlands", "culture": "nl-NL" }
+  ],
+  "namespaces": [
+    { "id": "ui", "description": "Every string in the controls, including accessible names, as RESX files per control and language." }
+  ]
+}

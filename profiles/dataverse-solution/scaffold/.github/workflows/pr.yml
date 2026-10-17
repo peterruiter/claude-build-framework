@@ -1,0 +1,113 @@
+# Checks for every pull request and every push to main. Needs no secrets and no environment:
+# the contract tests, the offline scripts and pack-from-source run on a plain runner and must be
+# green. The solution checker job runs only once the repository variables for a federated
+# credential exist (see README); until then it is skipped, not failed.
+#
+# Actions are pinned to full commit SHAs with the release in a comment; the Power Platform CLI
+# is pinned by version.
+name: PR
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PAC_VERSION: 2.11.2
+
+jobs:
+  contracts:
+    name: Contracts and offline scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # Schema, roles, privacy register, environments and deployment settings against each other
+      # and against the unpacked solutions; parses every script; label coverage; privacy register.
+      - name: Contract tests
+        run: npm test
+      - name: Privacy register
+        shell: pwsh
+        run: ./build/Export-PrivacyRegister.ps1 -Out out/privacy-register.md
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: privacy-register
+          path: out/privacy-register.md
+          retention-days: 14
+
+  pack:
+    name: Pack from source (round trip)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install the Power Platform CLI (pinned)
+        run: dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version "$PAC_VERSION"
+      - name: Pack every solution; the source must round-trip unchanged
+        shell: pwsh
+        run: ./build/Build-Solution.ps1 -RoundTrip -BuildNumber ${{ github.run_number }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: solutions
+          path: |
+            out/*.zip
+            out/build.json
+          retention-days: 14
+
+  checker:
+    name: Solution checker
+    needs: pack
+    # Repository variables, not secrets: a federated credential has no secret. Until they are
+    # set this job is skipped.
+    if: vars.DATAVERSE_CHECKER_CLIENT_ID != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: solutions
+          path: out
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install the Power Platform CLI (pinned)
+        run: dotnet tool install --global Microsoft.PowerApps.CLI.Tool --version "$PAC_VERSION"
+      - name: Sign in with the federated credential (no secret)
+        env:
+          TENANT_ID: ${{ vars.DATAVERSE_TENANT_ID }}
+          CLIENT_ID: ${{ vars.DATAVERSE_CHECKER_CLIENT_ID }}
+          DEV_URL: ${{ vars.DATAVERSE_DEV_URL }}
+        run: pac auth create --name checker --githubFederated --tenant "$TENANT_ID" --applicationId "$CLIENT_ID" --environment "$DEV_URL"
+      # --geo decides where the checker service processes the solution: keep it in the
+      # project's data residency region (Europe by default).
+      - name: Run the solution checker
+        env:
+          GEO: ${{ vars.DATAVERSE_CHECKER_GEO || 'Europe' }}
+        run: pac solution check --path "out/*.zip" --geo "$GEO" --outputDirectory out/checker
+      - name: Fail on critical or high findings
+        shell: pwsh
+        run: ./build/Test-CheckerResults.ps1 -Path out/checker -FailOn High
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: checker-results
+          path: out/checker
+          retention-days: 30

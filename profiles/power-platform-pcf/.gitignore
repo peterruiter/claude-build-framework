@@ -1,0 +1,8 @@
+# Build and test output when the scaffold is tried in place: never committed.
+node_modules/
+out/
+bin/
+obj/
+generated/
+*.binlog
+coverage/

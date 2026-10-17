@@ -1,0 +1,6 @@
+# Output from validating the scaffold in place (npm test, Build-Solution.ps1): never committed.
+scaffold/out/
+scaffold/release/
+scaffold/node_modules/
+scaffold/environments.local.json
+*.zip

@@ -1,0 +1,21 @@
+# Dependencies and build output
+node_modules/
+out/
+bin/
+obj/
+generated/
+*.binlog
+coverage/
+
+# Local settings and secrets: never committed
+.env
+.env.*
+*.local.json
+*.pcfproj.user
+*.cdsproj.user
+
+# Editors and OS
+.vs/
+.idea/
+.DS_Store
+Thumbs.db

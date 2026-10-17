@@ -1,0 +1,58 @@
+{
+  "name": "contoso-controls",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Power Apps component framework controls (code components) for Contoso. One npm workspace per control project; one lock file and one node_modules for all.",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "workspaces": [
+    "SampleControl",
+    "SampleGrid"
+  ],
+  "config": {
+    "bundleBudgetKb": 300
+  },
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:release": "npm run build --workspaces -- --buildMode production",
+    "clean": "npm run clean --workspaces",
+    "refreshTypes": "npm run refreshTypes --workspaces",
+    "languages": "node scripts/sync-languages.mjs",
+    "check": "node scripts/check-controls.mjs",
+    "check:release": "node scripts/check-controls.mjs --strict",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tests/tsconfig.json",
+    "test": "vitest run",
+    "size": "node scripts/check-bundle-size.mjs",
+    "version:bump": "node scripts/bump-version.mjs",
+    "version:check": "node scripts/check-version-bump.mjs",
+    "gate": "npm run check && npm run refreshTypes && npm run lint && npm run typecheck && npm test && npm run build:release && npm run size"
+  },
+  "dependencies": {
+    "@fluentui/react-components": "9.68.0",
+    "react": "16.14.0",
+    "react-dom": "16.14.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@microsoft/eslint-plugin-power-apps": "0.2.51",
+    "@testing-library/react": "12.1.5",
+    "@types/node": "22.20.5",
+    "@types/powerapps-component-framework": "1.3.18",
+    "@types/react": "16.14.70",
+    "@types/react-dom": "16.9.25",
+    "eslint": "9.39.5",
+    "eslint-plugin-promise": "7.3.0",
+    "eslint-plugin-react": "7.37.5",
+    "globals": "15.15.0",
+    "jsdom": "26.1.0",
+    "pcf-scripts": "1.51.1",
+    "pcf-start": "1.51.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.44.0",
+    "vite": "7.3.7",
+    "vitest": "4.1.12"
+  }
+}

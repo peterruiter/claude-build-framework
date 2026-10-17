@@ -1,0 +1,15 @@
+<environmentvariabledefinition schemaname="contoso_PortalBaseUrl">
+  <description default="Public address of the portal; links in notifications start with it.">
+    <label description="Public address of the portal; links in notifications start with it." languagecode="1033" />
+    <label description="Openbaar adres van het portaal; links in meldingen beginnen ermee." languagecode="1043" />
+  </description>
+  <displayname default="Portal base URL">
+    <label description="Portal base URL" languagecode="1033" />
+    <label description="Basisadres portaal" languagecode="1043" />
+  </displayname>
+  <introducedversion>1.0.0.0</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>1</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>
