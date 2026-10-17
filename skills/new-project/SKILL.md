@@ -34,6 +34,22 @@ Ask with the AskUserQuestion tool if available, otherwise as a numbered list:
 
 Do not continue until these are answered. Record the answers.
 
+## 2b. Check the tools before anything is scaffolded
+
+Run `node "${CLAUDE_PLUGIN_ROOT}/scripts/check-prereqs.mjs" <profile>` (no argument for
+stack-neutral). It checks the framework's own tools (git, GitHub CLI, Node.js, npm) plus the
+profile's, against minimum versions, and prints the exact install command for this OS for anything
+missing or too old.
+
+- A required tool missing or too old: stop, show the owner the install commands from the output
+  (as a short list, in their order), and ask them to install, open a new terminal and say when
+  done; then run the check again. Do not install system tools yourself unless the owner asks you to.
+- Optional tools missing: mention them once, with what they're for and the install command, then
+  continue.
+- If Node.js itself is missing the script can't run: give the Node.js install command for the OS
+  (Windows `winget install --id OpenJS.NodeJS.LTS -e`, macOS `brew install node@22`, Linux see
+  https://nodejs.org/en/download/package-manager) and wait.
+
 ## 3. Scaffold
 
 Copy from `${CLAUDE_PLUGIN_ROOT}/templates/project/` into the project root:

@@ -45,6 +45,7 @@ watches CI until it is green. Then tell it what to build and run `/build-framewo
 | `plan-wave` | Turns wishes into 3–6 parallel agent briefs with reserved slots and file ownership; starts them on your go |
 | `agent-brief` | Writes one brief from the template |
 | `quality-gate` | Runs every check with numbers (tests, builds, vocabulary, contracts, a11y, privacy, CI) |
+| `check-tools` | Checks every tool the framework and a profile need, with install commands for what's missing |
 | `release` | The release flow with owner approvals, clean worktree, production migrations, smoke test, What's new tags (manual only) |
 | `whats-new` | Adds, checks and tags What's new entries in every configured language |
 | `translate` | Strings in every configured language with CLDR plural forms and the glossary; adds a language |

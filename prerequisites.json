@@ -1,0 +1,69 @@
+{
+  "profile": "framework",
+  "tools": [
+    {
+      "id": "git",
+      "name": "Git",
+      "command": "git",
+      "args": ["--version"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "2.40.0",
+      "required": true,
+      "why": "every project lives in a git repository",
+      "install": {
+        "windows": "winget install --id Git.Git -e",
+        "macos": "brew install git",
+        "linux": "sudo apt-get install git   (or your distribution's package manager)"
+      },
+      "docs": "https://git-scm.com/downloads"
+    },
+    {
+      "id": "gh",
+      "name": "GitHub CLI",
+      "command": "gh",
+      "args": ["--version"],
+      "pattern": "gh version (\\d+\\.\\d+\\.\\d+)",
+      "min": "2.40.0",
+      "required": true,
+      "why": "creates the repository, sets its description and watches CI runs; also lets Claude Code fetch this private plugin (gh auth login, then gh auth setup-git)",
+      "install": {
+        "windows": "winget install --id GitHub.cli -e",
+        "macos": "brew install gh",
+        "linux": "see https://github.com/cli/cli/blob/trunk/docs/install_linux.md"
+      },
+      "docs": "https://cli.github.com"
+    },
+    {
+      "id": "node",
+      "name": "Node.js",
+      "command": "node",
+      "args": ["--version"],
+      "pattern": "v(\\d+\\.\\d+\\.\\d+)",
+      "min": "22.18.0",
+      "required": true,
+      "why": "runs the framework's checkers, contract tests and templates",
+      "install": {
+        "windows": "winget install --id OpenJS.NodeJS.LTS -e",
+        "macos": "brew install node@22",
+        "linux": "see https://nodejs.org/en/download/package-manager"
+      },
+      "docs": "https://nodejs.org"
+    },
+    {
+      "id": "npm",
+      "name": "npm",
+      "command": "npm",
+      "args": ["--version"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "10.0.0",
+      "required": true,
+      "why": "installs the web and tool dependencies",
+      "install": {
+        "windows": "comes with Node.js; update with: npm install -g npm@latest",
+        "macos": "comes with Node.js; update with: npm install -g npm@latest",
+        "linux": "comes with Node.js; update with: npm install -g npm@latest"
+      },
+      "docs": "https://docs.npmjs.com"
+    }
+  ]
+}

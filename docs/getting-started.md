@@ -28,6 +28,12 @@ Per profile, for example [`profiles/dotnet-react-azure/`](../profiles/dotnet-rea
 Optional: Playwright and axe-core for screenshots and accessibility runs (installed per project,
 pinned; the a11y template says how), k6 for load tests.
 
+You don't have to check these by hand: `/build-framework:check-tools <profile>` (or, without
+Claude, `node scripts/check-prereqs.mjs <profile>` in a clone of this repo) checks every tool the
+framework and the profile need against its minimum version, and prints the exact install command
+for your OS for anything missing. `new-project` and `quality-gate` run it first and stop when a
+required tool is missing. Each profile's list is its `prerequisites.json`.
+
 ## 2. Get access to the private repository
 
 1. The repository owner invites you as a **collaborator** on GitHub

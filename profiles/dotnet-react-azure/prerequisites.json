@@ -1,0 +1,98 @@
+{
+  "profile": "dotnet-react-azure",
+  "tools": [
+    {
+      "id": "dotnet",
+      "name": ".NET SDK 9",
+      "command": "dotnet",
+      "args": ["--list-sdks"],
+      "pattern": "(9\\.0\\.\\d+)",
+      "min": "9.0.200",
+      "required": true,
+      "why": "builds and tests the API (9.0.200 is the first band that reads .slnx)",
+      "install": {
+        "windows": "winget install --id Microsoft.DotNet.SDK.9 -e",
+        "macos": "brew install --cask dotnet-sdk",
+        "linux": "see https://learn.microsoft.com/dotnet/core/install/linux"
+      },
+      "docs": "https://dotnet.microsoft.com/download/dotnet/9.0"
+    },
+    {
+      "id": "pwsh",
+      "name": "PowerShell 7",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-Command", "$PSVersionTable.PSVersion.ToString()"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "min": "7.4.0",
+      "required": true,
+      "why": "runs the build, release and deploy scripts",
+      "install": {
+        "windows": "winget install --id Microsoft.PowerShell -e",
+        "macos": "brew install --cask powershell",
+        "linux": "see https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-linux"
+      },
+      "docs": "https://learn.microsoft.com/powershell/scripting/install/installing-powershell"
+    },
+    {
+      "id": "sqllocaldb",
+      "name": "SQL Server LocalDB (Windows) or a SQL Server reachable through TEST_SQL_CONNECTION",
+      "command": "sqllocaldb",
+      "args": ["versions"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "required": false,
+      "why": "database tests and local runs; on macOS/Linux use a SQL Server container and set TEST_SQL_CONNECTION instead",
+      "install": {
+        "windows": "winget install --id Microsoft.SQLServer.2022.Express -e   (choose LocalDB in the installer), or install LocalDB from https://learn.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb",
+        "macos": "docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=<strong password> -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest   then set TEST_SQL_CONNECTION",
+        "linux": "docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=<strong password> -p 1433:1433 -d mcr.microsoft.com/mssql/server:2022-latest   then set TEST_SQL_CONNECTION"
+      },
+      "docs": "https://learn.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb"
+    },
+    {
+      "id": "az",
+      "name": "Azure CLI (with Bicep)",
+      "command": "az",
+      "args": ["--version"],
+      "pattern": "azure-cli\\s+(\\d+\\.\\d+\\.\\d+)",
+      "min": "2.60.0",
+      "required": false,
+      "why": "deploys infrastructure and images, runs migrations as you; not needed until the first deployment",
+      "install": {
+        "windows": "winget install --id Microsoft.AzureCLI -e   then: az bicep install",
+        "macos": "brew install azure-cli   then: az bicep install",
+        "linux": "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash   then: az bicep install"
+      },
+      "docs": "https://learn.microsoft.com/cli/azure/install-azure-cli"
+    },
+    {
+      "id": "sqlcmd",
+      "name": "sqlcmd (go-sqlcmd)",
+      "command": "sqlcmd",
+      "args": ["--version"],
+      "pattern": "(\\d+\\.\\d+\\.\\d+)",
+      "required": false,
+      "why": "grants the app's identity access to the database (Grant-DatabaseAccess.ps1)",
+      "install": {
+        "windows": "winget install --id sqlcmd -e",
+        "macos": "brew install sqlcmd",
+        "linux": "see https://learn.microsoft.com/sql/tools/sqlcmd/go-sqlcmd-utility"
+      },
+      "docs": "https://learn.microsoft.com/sql/tools/sqlcmd/go-sqlcmd-utility"
+    },
+    {
+      "id": "k6",
+      "name": "k6",
+      "command": "k6",
+      "args": ["version"],
+      "pattern": "v(\\d+\\.\\d+\\.\\d+)",
+      "required": false,
+      "why": "load tests (operations readiness)",
+      "install": {
+        "windows": "winget install --id GrafanaLabs.k6 -e",
+        "macos": "brew install k6",
+        "linux": "see https://grafana.com/docs/k6/latest/set-up/install-k6/"
+      },
+      "docs": "https://grafana.com/docs/k6/latest/set-up/install-k6/"
+    }
+  ]
+}

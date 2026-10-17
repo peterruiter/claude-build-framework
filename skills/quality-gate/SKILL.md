@@ -14,6 +14,9 @@ Reference: `${CLAUDE_PLUGIN_ROOT}/docs/quality-gate.md`.
   README in `${CLAUDE_PLUGIN_ROOT}/profiles/<profile>/` for the exact build/test commands and the
   pinned toolchain.
 - For a release (`--release`), run everything in the clean release worktree, not the shared tree.
+- Check the tools first: `node "${CLAUDE_PLUGIN_ROOT}/scripts/check-prereqs.mjs" <profile>`. A
+  required tool missing or too old fails the gate before any step runs; report the install
+  commands it prints.
 
 ## 1. Run, in order, and record numbers
 
